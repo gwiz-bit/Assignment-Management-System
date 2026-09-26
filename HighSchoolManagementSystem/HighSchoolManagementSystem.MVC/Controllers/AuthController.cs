@@ -73,9 +73,7 @@ public class AuthController : Controller
         return View();
     }
 
-    // =========================================================================
-    // PRIVATE HELPERS (Tách riêng logic hạ tầng Cookie và điều hướng)
-    // =========================================================================
+    // PRIVATE HELPERS
 
     private async Task SignInUserAsync(User user, string roleName, bool rememberMe)
     {

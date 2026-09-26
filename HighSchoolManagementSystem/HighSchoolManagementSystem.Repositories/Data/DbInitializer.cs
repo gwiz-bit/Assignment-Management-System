@@ -7,10 +7,8 @@ public static class DbInitializer
 {
     public static async Task SeedAsync(AppDbContext context)
     {
-        // 1. Áp dụng migration tự động nếu có
         await context.Database.MigrateAsync();
 
-        // 2. Khởi tạo 5 Roles chuẩn theo yêu cầu nghiệp vụ
         var roles = new List<Role>
         {
             new Role { RoleName = "Principal", Description = "Hiệu trưởng - Giám sát, thống kê và báo cáo toàn trường" },
@@ -29,15 +27,12 @@ public static class DbInitializer
         }
         await context.SaveChangesAsync();
 
-        // Lấy lại các roles đã lưu để lấy RoleId
         var principalRole = await context.Roles.FirstAsync(r => r.RoleName == "Principal");
         var staffRole = await context.Roles.FirstAsync(r => r.RoleName == "Staff");
         var teacherRole = await context.Roles.FirstAsync(r => r.RoleName == "Teacher");
         var studentRole = await context.Roles.FirstAsync(r => r.RoleName == "Student");
         var parentRole = await context.Roles.FirstAsync(r => r.RoleName == "Parent");
 
-        // 3. Khởi tạo 5 tài khoản mẫu
-        // Mật khẩu được mã hóa an toàn bằng BCrypt
         if (!await context.Users.AnyAsync(u => u.Username == "principal"))
         {
             var principalUser = new User

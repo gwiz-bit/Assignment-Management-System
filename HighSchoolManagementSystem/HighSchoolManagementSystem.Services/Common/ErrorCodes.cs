@@ -72,4 +72,20 @@ public static class ErrorCodes
     public const string AttendanceAlreadyTaken = "ATT_001"; // Tiết học này đã được điểm danh trước đó
     public const string LeaveRequestReviewed   = "ATT_002"; // Đơn nghỉ phép đã được duyệt, không thể thay đổi
     public const string LeaveRequestNotFound   = "ATT_003"; // Không tìm thấy đơn xin nghỉ phép
+
+    // =========================================================================
+    // 8. NGƯỜI DÙNG & HỒ SƠ (USR_*)
+    // =========================================================================
+    public const string UserNotFound           = "USR_001"; // Không tìm thấy người dùng
+    public const string UserPhoneInvalid       = "USR_002"; // Số điện thoại không hợp lệ
+    public const string UserDobInvalid         = "USR_003"; // Ngày sinh không hợp lệ hoặc lớn hơn hiện tại
+    public const string UserProfileUpdateFail  = "USR_004"; // Cập nhật hồ sơ cá nhân thất bại
+
+    // =========================================================================
+    // 9. QUẢN LÝ TỆP TIN & TẢI LÊN (FILE_*)
+    // =========================================================================
+    public const string FileEmpty              = "FILE_001"; // Tệp tải lên rỗng
+    public const string FileTooLarge           = "FILE_002"; // Dung lượng tệp vượt quá giới hạn (tối đa 2MB)
+    public const string FileInvalidExtension   = "FILE_003"; // Định dạng tệp không được hỗ trợ (chỉ chấp nhận .jpg, .jpeg, .png, .webp)
+    public const string FileSaveFailed         = "FILE_004"; // Lỗi khi lưu tệp tin lên hệ thống
 }
