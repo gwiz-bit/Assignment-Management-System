@@ -8,4 +8,5 @@ public interface IUserService
 {
     Task<ServiceResult<User>> GetUserProfileAsync(int userId);
     Task<ServiceResult<User>> UpdateProfileAsync(int userId, UpdateProfileDto dto);
+    Task<ServiceResult<bool>> ChangePasswordAsync(int userId, ChangePasswordDto dto);
 }

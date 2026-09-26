@@ -157,6 +157,35 @@ public static class DbInitializer
             await context.Students.AddAsync(studentProfile);
         }
 
+        if (!await context.Users.AnyAsync(u => u.Email == "phuongw98yb@gmail.com" || u.Username == "phuongw98yb"))
+        {
+            var customUser = new User
+            {
+                Username = "phuongw98yb",
+                Email = "phuongw98yb@gmail.com",
+                FullName = "Đỗ Thế Phương",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("Phuong@123", 11),
+                PhoneNumber = "0987654321",
+                Gender = "Nam",
+                IsActive = true,
+                CreateAt = DateTime.UtcNow,
+                RoleId = teacherRole.RoleId
+            };
+            await context.Users.AddAsync(customUser);
+            await context.SaveChangesAsync();
+
+            var teacherCustom = new Teacher
+            {
+                UserId = customUser.Id,
+                TeacherCode = "GV999",
+                Specialization = "Tin Học",
+                Qualification = "Kỹ sư Công nghệ thông tin",
+                HireDate = DateTime.UtcNow,
+                Status = "Active"
+            };
+            await context.Teachers.AddAsync(teacherCustom);
+        }
+
         await context.SaveChangesAsync();
     }
 }

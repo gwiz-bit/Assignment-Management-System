@@ -155,6 +155,52 @@ public class ProfileController : Controller
     }
 
     // =========================================================================
+    // ĐỔI MẬT KHẨU (CHANGE PASSWORD)
+    // =========================================================================
+
+    [HttpGet]
+    public IActionResult ChangePassword()
+    {
+        if (!TryGetCurrentUserId(out _))
+        {
+            return RedirectToAction("Login", "Auth");
+        }
+
+        return View(new ChangePasswordViewModel());
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+    {
+        if (!TryGetCurrentUserId(out int userId))
+        {
+            return RedirectToAction("Login", "Auth");
+        }
+
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        var dto = new ChangePasswordDto
+        {
+            CurrentPassword = model.CurrentPassword,
+            NewPassword = model.NewPassword
+        };
+
+        var result = await _userService.ChangePasswordAsync(userId, dto);
+        if (!result.Success)
+        {
+            ModelState.AddModelError(string.Empty, result.Message ?? "Đổi mật khẩu thất bại.");
+            return View(model);
+        }
+
+        TempData["SuccessMessage"] = "Đổi mật khẩu thành công! Hãy ghi nhớ mật khẩu mới của bạn.";
+        return RedirectToAction("Index");
+    }
+
+    // =========================================================================
     // PRIVATE HELPERS
     // =========================================================================
 

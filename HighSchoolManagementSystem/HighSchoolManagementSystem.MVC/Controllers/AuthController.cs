@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using HighSchoolManagementSystem.Models.Entities;
 using HighSchoolManagementSystem.MVC.Models.ViewModels;
+using HighSchoolManagementSystem.MVC.Models.ViewModels.Auth;
 using HighSchoolManagementSystem.Services.Interfaces;
 
 namespace HighSchoolManagementSystem.MVC.Controllers;
@@ -71,6 +72,103 @@ public class AuthController : Controller
     public IActionResult AccessDenied()
     {
         return View();
+    }
+
+    // =========================================================================
+    // QUÊN & ĐẶT LẠI MẬT KHẨU (FORGOT & RESET PASSWORD)
+    // =========================================================================
+
+    [HttpGet]
+    public IActionResult ForgotPassword()
+    {
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            var role = User.FindFirstValue(ClaimTypes.Role);
+            return RedirectToDashboardByRole(role);
+        }
+
+        return View(new ForgotPasswordViewModel());
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        var resetLinkBaseUrl = Url.Action("ResetPassword", "Auth", null, Request.Scheme) 
+            ?? $"{Request.Scheme}://{Request.Host}/Auth/ResetPassword";
+
+        var result = await _authService.SendResetPasswordEmailAsync(model.Email, resetLinkBaseUrl);
+
+        if (!result.Success)
+        {
+            if (result.ErrorCode == "MAIL_002")
+            {
+                ViewBag.WarningMessage = "Hệ thống email chưa được cấu hình tài khoản gửi trong appsettings.json. Đường link đặt lại mật khẩu đã được in ra Console để hỗ trợ kiểm thử.";
+            }
+            else
+            {
+                ModelState.AddModelError(string.Empty, result.Message ?? "Không thể gửi email đặt lại mật khẩu. Vui lòng thử lại sau.");
+                return View(model);
+            }
+        }
+
+        ViewBag.SuccessMessage = "Nếu địa chỉ email tồn tại trong hệ thống, hướng dẫn đặt lại mật khẩu đã được gửi đến hòm thư của bạn. Vui lòng kiểm tra hộp thư đến (hoặc hòm thư rác/spam).";
+        ViewBag.SubmittedEmail = model.Email;
+        return View(model);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ResetPassword(string? email, string? token)
+    {
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            var role = User.FindFirstValue(ClaimTypes.Role);
+            return RedirectToDashboardByRole(role);
+        }
+
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(token))
+        {
+            TempData["ErrorMessage"] = "Liên kết đặt lại mật khẩu không hợp lệ hoặc thiếu thông tin xác thực.";
+            return RedirectToAction("Login");
+        }
+
+        var validateResult = await _authService.ValidatePasswordResetTokenAsync(email, token);
+        if (!validateResult.Success)
+        {
+            TempData["ErrorMessage"] = validateResult.Message ?? "Liên kết đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.";
+            return RedirectToAction("Login");
+        }
+
+        return View(new ResetPasswordViewModel
+        {
+            Email = email,
+            Token = token
+        });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        var result = await _authService.ResetPasswordAsync(model.Email, model.Token, model.NewPassword);
+        if (!result.Success)
+        {
+            ModelState.AddModelError(string.Empty, result.Message ?? "Đặt lại mật khẩu thất bại.");
+            return View(model);
+        }
+
+        TempData["SuccessMessage"] = "Đặt lại mật khẩu thành công! Vui lòng đăng nhập bằng mật khẩu mới.";
+        return RedirectToAction("Login");
     }
 
     // PRIVATE HELPERS

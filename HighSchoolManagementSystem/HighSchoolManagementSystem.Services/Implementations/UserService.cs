@@ -4,16 +4,19 @@ using HighSchoolManagementSystem.Repositories.Interfaces;
 using HighSchoolManagementSystem.Services.Common;
 using HighSchoolManagementSystem.Services.DTOs;
 using HighSchoolManagementSystem.Services.Interfaces;
+using HighSchoolManagementSystem.Services.Security;
 
 namespace HighSchoolManagementSystem.Services.Implementations;
 
 public class UserService : IUserService
 {
     private readonly IUserRepository _userRepository;
+    private readonly IPasswordHasher _passwordHasher;
 
-    public UserService(IUserRepository userRepository)
+    public UserService(IUserRepository userRepository, IPasswordHasher passwordHasher)
     {
         _userRepository = userRepository;
+        _passwordHasher = passwordHasher;
     }
 
     public async Task<ServiceResult<User>> GetUserProfileAsync(int userId)
@@ -124,6 +127,60 @@ public class UserService : IUserService
         catch (Exception ex)
         {
             return ServiceResult<User>.Fail(ErrorCodes.UserProfileUpdateFail, $"Lỗi cập nhật dữ liệu: {ex.Message}");
+        }
+    }
+
+    public async Task<ServiceResult<bool>> ChangePasswordAsync(int userId, ChangePasswordDto dto)
+    {
+        if (userId <= 0)
+        {
+            return ServiceResult<bool>.Fail(ErrorCodes.UserNotFound, "Định danh người dùng không hợp lệ.");
+        }
+
+        if (dto == null || string.IsNullOrWhiteSpace(dto.CurrentPassword) || string.IsNullOrWhiteSpace(dto.NewPassword))
+        {
+            return ServiceResult<bool>.Fail(ErrorCodes.ValidationFailed, "Vui lòng nhập đầy đủ mật khẩu hiện tại và mật khẩu mới.");
+        }
+
+        if (dto.NewPassword.Length < 6)
+        {
+            return ServiceResult<bool>.Fail(ErrorCodes.AuthPasswordTooWeak, "Mật khẩu mới phải có ít nhất 6 ký tự.");
+        }
+
+        var user = await _userRepository.GetByIdAsync(userId);
+        if (user == null)
+        {
+            return ServiceResult<bool>.Fail(ErrorCodes.UserNotFound, "Không tìm thấy thông tin tài khoản người dùng.");
+        }
+
+        if (!user.IsActive)
+        {
+            return ServiceResult<bool>.Fail(ErrorCodes.AuthAccountLocked, "Tài khoản của bạn đã bị khóa hoặc tạm dừng hoạt động.");
+        }
+
+        // 1. Kiểm tra mật khẩu hiện tại có đúng không
+        bool isCurrentPasswordValid = _passwordHasher.VerifyPassword(dto.CurrentPassword, user.PasswordHash);
+        if (!isCurrentPasswordValid)
+        {
+            return ServiceResult<bool>.Fail(ErrorCodes.AuthInvalidCredentials, "Mật khẩu hiện tại không chính xác.");
+        }
+
+        // 2. Mật khẩu mới không được trùng mật khẩu cũ
+        if (_passwordHasher.VerifyPassword(dto.NewPassword, user.PasswordHash))
+        {
+            return ServiceResult<bool>.Fail(ErrorCodes.ValidationFailed, "Mật khẩu mới không được trùng với mật khẩu hiện tại.");
+        }
+
+        user.PasswordHash = _passwordHasher.HashPassword(dto.NewPassword);
+
+        try
+        {
+            await _userRepository.UpdateAsync(user);
+            return ServiceResult<bool>.Ok(true, "Đổi mật khẩu thành công.");
+        }
+        catch (Exception ex)
+        {
+            return ServiceResult<bool>.Fail(ErrorCodes.DatabaseError, $"Lỗi lưu mật khẩu mới: {ex.Message}");
         }
     }
 }

@@ -88,4 +88,12 @@ public static class ErrorCodes
     public const string FileTooLarge           = "FILE_002"; // Dung lượng tệp vượt quá giới hạn (tối đa 2MB)
     public const string FileInvalidExtension   = "FILE_003"; // Định dạng tệp không được hỗ trợ (chỉ chấp nhận .jpg, .jpeg, .png, .webp)
     public const string FileSaveFailed         = "FILE_004"; // Lỗi khi lưu tệp tin lên hệ thống
+
+    // =========================================================================
+    // 10. ĐẶT LẠI MẬT KHẨU & EMAIL (MAIL_*)
+    // =========================================================================
+    public const string AuthResetTokenInvalid  = "AUTH_010"; // Mã đặt lại mật khẩu không hợp lệ hoặc đã qua sử dụng
+    public const string AuthResetTokenExpired  = "AUTH_011"; // Mã đặt lại mật khẩu đã hết hạn
+    public const string EmailSendFailed        = "MAIL_001"; // Gửi email thất bại
+    public const string EmailNotConfigured     = "MAIL_002"; // Hệ thống email chưa được cấu hình tài khoản gửi
 }

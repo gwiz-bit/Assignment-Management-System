@@ -25,6 +25,14 @@ public class UserRepository : IUserRepository
             .FirstOrDefaultAsync(u => u.Username.ToLower() == normalized || u.Email.ToLower() == normalized);
     }
 
+    public async Task<User?> GetByEmailAsync(string email)
+    {
+        var normalized = email.Trim().ToLower();
+        return await _context.Users
+            .Include(u => u.Role)
+            .FirstOrDefaultAsync(u => u.Email.ToLower() == normalized);
+    }
+
     public async Task<User?> GetByIdAsync(int id)
     {
         return await _context.Users
