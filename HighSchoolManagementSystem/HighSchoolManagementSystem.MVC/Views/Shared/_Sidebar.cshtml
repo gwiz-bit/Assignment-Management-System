@@ -47,9 +47,10 @@
                     </a>
                 </li>
                 <li class="sidebar-menu-item">
-                    <a href="javascript:void(0)" class="sidebar-link">
+                    <a asp-controller="TeacherManagement" asp-action="Index" 
+                       class="sidebar-link @(currentController == "TeacherManagement" ? "active" : "")">
                         <i class="bi bi-people"></i>
-                        <span>Thống kê nhân sự</span>
+                        <span>Hồ sơ giáo viên</span>
                     </a>
                 </li>
             </ul>
@@ -91,6 +92,20 @@
 
             <div class="sidebar-section-title">QUẢN LÝ ĐÀO TẠO</div>
             <ul class="sidebar-menu-list">
+                <li class="sidebar-menu-item">
+                    <a asp-controller="TeacherManagement" asp-action="Index" 
+                       class="sidebar-link @(currentController == "TeacherManagement" ? "active" : "")">
+                        <i class="bi bi-people-fill"></i>
+                        <span>Hồ sơ giáo viên</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a asp-controller="Subject" asp-action="Index" 
+                       class="sidebar-link @(currentController == "Subject" ? "active" : "")">
+                        <i class="bi bi-journal-bookmark-fill"></i>
+                        <span>Danh mục môn học</span>
+                    </a>
+                </li>
                 <li class="sidebar-menu-item">
                     <a href="javascript:void(0)" class="sidebar-link">
                         <i class="bi bi-person-vcard"></i>

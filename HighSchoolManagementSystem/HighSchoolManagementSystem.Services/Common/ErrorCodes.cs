@@ -96,4 +96,14 @@ public static class ErrorCodes
     public const string AuthResetTokenExpired  = "AUTH_011"; // Mã đặt lại mật khẩu đã hết hạn
     public const string EmailSendFailed        = "MAIL_001"; // Gửi email thất bại
     public const string EmailNotConfigured     = "MAIL_002"; // Hệ thống email chưa được cấu hình tài khoản gửi
+
+    public const string SubjectNotFound        = "SUB_001";
+    public const string SubjectCodeDuplicate   = "SUB_002";
+    public const string SubjectCodeInvalid     = "SUB_003";
+    public const string SubjectNameRequired    = "SUB_004";
+    public const string SubjectHasAssignments  = "SUB_005";
+
+    public const string TeacherEmailDuplicate  = "TEA_004";
+    public const string TeacherUsernameDuplicate = "TEA_005";
+    public const string TeacherHasAssignments  = "TEA_006";
 }

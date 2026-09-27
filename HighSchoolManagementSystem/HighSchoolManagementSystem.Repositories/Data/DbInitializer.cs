@@ -186,6 +186,166 @@ public static class DbInitializer
             await context.Teachers.AddAsync(teacherCustom);
         }
 
+        var defaultSubjects = new List<Subject>
+        {
+            new Subject { SubjectCode = "MATH10", SubjectName = "Toán Học 10", EvaluationType = "Score", Description = "Môn Toán lớp 10 theo chương trình GDPT mới", IsActive = true },
+            new Subject { SubjectCode = "PHYS10", SubjectName = "Vật Lý 10", EvaluationType = "Score", Description = "Môn Vật lý cơ bản lớp 10", IsActive = true },
+            new Subject { SubjectCode = "CHEM10", SubjectName = "Hóa Học 10", EvaluationType = "Score", Description = "Môn Hóa học cơ bản lớp 10", IsActive = true },
+            new Subject { SubjectCode = "BIO10", SubjectName = "Sinh Học 10", EvaluationType = "Score", Description = "Môn Sinh học đại cương lớp 10", IsActive = true },
+            new Subject { SubjectCode = "LIT10", SubjectName = "Ngữ Văn 10", EvaluationType = "Score", Description = "Môn Ngữ văn lớp 10", IsActive = true },
+            new Subject { SubjectCode = "HIST10", SubjectName = "Lịch Sử 10", EvaluationType = "Score", Description = "Môn Lịch sử Việt Nam và Thế giới lớp 10", IsActive = true },
+            new Subject { SubjectCode = "GEOG10", SubjectName = "Địa Lý 10", EvaluationType = "Score", Description = "Môn Địa lý tự nhiên và kinh tế lớp 10", IsActive = true },
+            new Subject { SubjectCode = "ENG10", SubjectName = "Tiếng Anh 10", EvaluationType = "Score", Description = "Môn Ngoại ngữ 1 - Tiếng Anh lớp 10", IsActive = true },
+            new Subject { SubjectCode = "TIN10", SubjectName = "Tin Học 10", EvaluationType = "Score", Description = "Môn Tin học ứng dụng & thuật toán cơ bản lớp 10", IsActive = true },
+            new Subject { SubjectCode = "GDTC10", SubjectName = "Giáo Dục Thể Chất 10", EvaluationType = "PassFail", Description = "Rèn luyện thể lực và thể thao học đường lớp 10", IsActive = true },
+            new Subject { SubjectCode = "GDQP10", SubjectName = "Giáo Dục Quốc Phòng - An Ninh 10", EvaluationType = "PassFail", Description = "Giáo dục quốc phòng và an ninh lớp 10", IsActive = true },
+            new Subject { SubjectCode = "HDTN10", SubjectName = "Hoạt Động Trải Nghiệm - Hướng Nghiệp 10", EvaluationType = "PassFail", Description = "Hoạt động trải nghiệm, hướng nghiệp lớp 10", IsActive = false }
+        };
+
+        foreach (var sub in defaultSubjects)
+        {
+            if (!await context.Subjects.AnyAsync(s => s.SubjectCode == sub.SubjectCode))
+            {
+                await context.Subjects.AddAsync(sub);
+            }
+        }
+        await context.SaveChangesAsync();
+
+        AcademicYear? academicYear = await context.AcademicYears.FirstOrDefaultAsync(y => y.YearCode == "2026-2027");
+        if (academicYear == null)
+        {
+            academicYear = new AcademicYear
+            {
+                YearCode = "2026-2027",
+                StartDate = new DateTime(2026, 9, 1),
+                EndDate = new DateTime(2027, 5, 31)
+            };
+            await context.AcademicYears.AddAsync(academicYear);
+            await context.SaveChangesAsync();
+        }
+
+        Semester? semester = await context.Semesters.FirstOrDefaultAsync(s => s.SemesterCode == "HK1-2026");
+        if (semester == null)
+        {
+            semester = new Semester
+            {
+                SemesterCode = "HK1-2026",
+                SemesterName = "Học kỳ 1",
+                StartDate = new DateTime(2026, 9, 1),
+                EndDate = new DateTime(2027, 1, 15),
+                AcademicYearId = academicYear.Id
+            };
+            await context.Semesters.AddAsync(semester);
+            await context.SaveChangesAsync();
+        }
+
+        var grade10 = await context.GradeLevels.FirstOrDefaultAsync(g => g.LevelCode == "K10");
+        if (grade10 == null)
+        {
+            grade10 = new GradeLevel { LevelCode = "K10", LevelName = "Khối 10" };
+            await context.GradeLevels.AddAsync(grade10);
+        }
+
+        var grade11 = await context.GradeLevels.FirstOrDefaultAsync(g => g.LevelCode == "K11");
+        if (grade11 == null)
+        {
+            grade11 = new GradeLevel { LevelCode = "K11", LevelName = "Khối 11" };
+            await context.GradeLevels.AddAsync(grade11);
+        }
+
+        var grade12 = await context.GradeLevels.FirstOrDefaultAsync(g => g.LevelCode == "K12");
+        if (grade12 == null)
+        {
+            grade12 = new GradeLevel { LevelCode = "K12", LevelName = "Khối 12" };
+            await context.GradeLevels.AddAsync(grade12);
+        }
+        await context.SaveChangesAsync();
+
+        var teacherGv001 = await context.Teachers.FirstOrDefaultAsync(t => t.TeacherCode == "GV001");
+        var teacherGv999 = await context.Teachers.FirstOrDefaultAsync(t => t.TeacherCode == "GV999");
+
+        var class10A1 = await context.Classes.FirstOrDefaultAsync(c => c.ClassName == "10A1");
+        if (class10A1 == null)
+        {
+            class10A1 = new Class
+            {
+                ClassName = "10A1",
+                AcademicYearId = academicYear.Id,
+                GradeLevelId = grade10.Id,
+                HomeroomTeacherId = teacherGv001?.Id
+            };
+            await context.Classes.AddAsync(class10A1);
+        }
+
+        var class10A2 = await context.Classes.FirstOrDefaultAsync(c => c.ClassName == "10A2");
+        if (class10A2 == null)
+        {
+            class10A2 = new Class
+            {
+                ClassName = "10A2",
+                AcademicYearId = academicYear.Id,
+                GradeLevelId = grade10.Id,
+                HomeroomTeacherId = teacherGv999?.Id
+            };
+            await context.Classes.AddAsync(class10A2);
+        }
+        await context.SaveChangesAsync();
+
+        var math10 = await context.Subjects.FirstOrDefaultAsync(s => s.SubjectCode == "MATH10");
+        var tin10 = await context.Subjects.FirstOrDefaultAsync(s => s.SubjectCode == "TIN10");
+
+        if (teacherGv001 != null && math10 != null && class10A1 != null && semester != null)
+        {
+            if (!await context.TeachingAssignments.AnyAsync(ta => ta.TeacherId == teacherGv001.Id && ta.SubjectId == math10.Id && ta.ClassId == class10A1.Id))
+            {
+                await context.TeachingAssignments.AddAsync(new TeachingAssignment
+                {
+                    TeacherId = teacherGv001.Id,
+                    SubjectId = math10.Id,
+                    ClassId = class10A1.Id,
+                    SemesterId = semester.Id,
+                    Status = "Active"
+                });
+            }
+            if (class10A2 != null && !await context.TeachingAssignments.AnyAsync(ta => ta.TeacherId == teacherGv001.Id && ta.SubjectId == math10.Id && ta.ClassId == class10A2.Id))
+            {
+                await context.TeachingAssignments.AddAsync(new TeachingAssignment
+                {
+                    TeacherId = teacherGv001.Id,
+                    SubjectId = math10.Id,
+                    ClassId = class10A2.Id,
+                    SemesterId = semester.Id,
+                    Status = "Active"
+                });
+            }
+        }
+
+        if (teacherGv999 != null && tin10 != null && class10A1 != null && semester != null)
+        {
+            if (!await context.TeachingAssignments.AnyAsync(ta => ta.TeacherId == teacherGv999.Id && ta.SubjectId == tin10.Id && ta.ClassId == class10A1.Id))
+            {
+                await context.TeachingAssignments.AddAsync(new TeachingAssignment
+                {
+                    TeacherId = teacherGv999.Id,
+                    SubjectId = tin10.Id,
+                    ClassId = class10A1.Id,
+                    SemesterId = semester.Id,
+                    Status = "Active"
+                });
+            }
+            if (class10A2 != null && !await context.TeachingAssignments.AnyAsync(ta => ta.TeacherId == teacherGv999.Id && ta.SubjectId == tin10.Id && ta.ClassId == class10A2.Id))
+            {
+                await context.TeachingAssignments.AddAsync(new TeachingAssignment
+                {
+                    TeacherId = teacherGv999.Id,
+                    SubjectId = tin10.Id,
+                    ClassId = class10A2.Id,
+                    SemesterId = semester.Id,
+                    Status = "Active"
+                });
+            }
+        }
+
         await context.SaveChangesAsync();
     }
 }
