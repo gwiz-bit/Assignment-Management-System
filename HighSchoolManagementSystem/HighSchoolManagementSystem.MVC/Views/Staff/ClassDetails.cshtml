@@ -1,0 +1,183 @@
+@model HighSchoolManagementSystem.MVC.Models.ViewModels.ClassDetailsViewModel
+@{
+    ViewData["Title"] = $"Chi tiết lớp {Model.ClassName}";
+}
+
+<div class="greeting-banner">
+    <div class="greeting-text-wrap">
+        <span class="greeting-kicker">
+            <i class="bi bi-circle-fill" style="font-size: 7px;"></i> QUẢN LÝ ĐÀO TẠO
+        </span>
+        <h1 class="greeting-title">Lớp @Model.ClassName</h1>
+        <p class="greeting-subtitle">
+            @Model.GradeLevelName · Năm học @Model.AcademicYearCode
+        </p>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <a asp-action="Classes" asp-route-academicYearId="@Model.AcademicYearId" class="btn btn-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i>Danh sách lớp
+        </a>
+    </div>
+</div>
+
+<div class="card-table-wrap mb-3">
+    <div class="card-table-header">
+        <div>
+            <h2 class="table-card-title">Thông tin lớp học</h2>
+            <p class="table-card-subtitle">Thông tin chung, giáo viên chủ nhiệm và sĩ số hiện tại.</p>
+        </div>
+    </div>
+    <div class="p-4">
+        <div class="row g-3">
+            <div class="col-12 col-md-3">
+                <div class="form-label text-muted mb-1">Tên lớp</div>
+                <div><strong>@Model.ClassName</strong></div>
+            </div>
+            <div class="col-12 col-md-3">
+                <div class="form-label text-muted mb-1">Khối</div>
+                <div>@Model.GradeLevelName <span class="text-muted">(@Model.GradeLevelCode)</span></div>
+            </div>
+            <div class="col-12 col-md-3">
+                <div class="form-label text-muted mb-1">Năm học</div>
+                <div>@Model.AcademicYearCode</div>
+            </div>
+            <div class="col-12 col-md-3">
+                <div class="form-label text-muted mb-1">Sĩ số</div>
+                <div><strong>@Model.StudentCount</strong> học sinh</div>
+            </div>
+            <div class="col-12 col-md-6">
+                <div class="form-label text-muted mb-1">Giáo viên chủ nhiệm</div>
+                <div>
+                    @if (!string.IsNullOrWhiteSpace(Model.HomeroomTeacherName))
+                    {
+                        <strong>@Model.HomeroomTeacherName</strong>
+                        @if (!string.IsNullOrWhiteSpace(Model.HomeroomTeacherCode))
+                        {
+                            <span class="text-muted">(@Model.HomeroomTeacherCode)</span>
+                        }
+                    }
+                    else
+                    {
+                        <span class="text-muted">Chưa phân công</span>
+                    }
+                </div>
+            </div>
+            <div class="col-12 col-md-6">
+                <div class="form-label text-muted mb-1">Phân công giảng dạy</div>
+                <div><strong>@Model.TeacherAssignmentCount</strong> phân công</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card-table-wrap mb-3">
+    <div class="card-table-header">
+        <div>
+            <h2 class="table-card-title">Giáo viên bộ môn</h2>
+            <p class="table-card-subtitle">Danh sách phân công giảng dạy thuộc lớp này.</p>
+        </div>
+        <span class="table-counter-badge">@Model.Teachers.Count giáo viên/phân công</span>
+    </div>
+
+    @if (Model.Teachers.Count == 0)
+    {
+        <div class="p-4 text-center text-muted">
+            <i class="bi bi-person-workspace" style="font-size: 2rem;"></i>
+            <p class="mt-2 mb-0">Chưa có phân công giảng dạy cho lớp này.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table-edu mb-0">
+                <thead>
+                    <tr>
+                        <th style="width: 70px;">#</th>
+                        <th>Mã GV</th>
+                        <th>Họ tên</th>
+                        <th>Môn học</th>
+                        <th>Học kỳ</th>
+                        <th class="text-center">Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        var teacherIndex = 1;
+                    }
+                    @foreach (var item in Model.Teachers)
+                    {
+                        <tr>
+                            <td>@teacherIndex</td>
+                            <td><strong>@item.TeacherCode</strong></td>
+                            <td>@item.TeacherName</td>
+                            <td>@item.SubjectName <span class="text-muted">(@item.SubjectCode)</span></td>
+                            <td>@item.SemesterName</td>
+                            <td class="text-center">
+                                <span class="badge-status @(item.Status == "Active" || item.Status == "Assigned" ? "badge-status-success" : "badge-status-warning")">
+                                    @item.Status
+                                </span>
+                            </td>
+                        </tr>
+                        teacherIndex++;
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<div class="card-table-wrap">
+    <div class="card-table-header">
+        <div>
+            <h2 class="table-card-title">Học sinh trong lớp</h2>
+            <p class="table-card-subtitle">Học sinh đang theo học (Enrolled) tại lớp này.</p>
+        </div>
+        <span class="table-counter-badge">@Model.Students.Count học sinh</span>
+    </div>
+
+    @if (Model.Students.Count == 0)
+    {
+        <div class="p-4 text-center text-muted">
+            <i class="bi bi-people" style="font-size: 2rem;"></i>
+            <p class="mt-2 mb-0">Chưa có học sinh nào trong lớp.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table-edu mb-0">
+                <thead>
+                    <tr>
+                        <th style="width: 70px;">#</th>
+                        <th>Mã HS</th>
+                        <th>Họ tên</th>
+                        <th>Giới tính</th>
+                        <th>Số điện thoại</th>
+                        <th>Ngày vào lớp</th>
+                        <th class="text-center">Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        var studentIndex = 1;
+                    }
+                    @foreach (var item in Model.Students)
+                    {
+                        <tr>
+                            <td>@studentIndex</td>
+                            <td><strong>@item.StudentCode</strong></td>
+                            <td>@item.StudentName</td>
+                            <td>@(string.IsNullOrWhiteSpace(item.Gender) ? "—" : item.Gender)</td>
+                            <td>@(string.IsNullOrWhiteSpace(item.PhoneNumber) ? "—" : item.PhoneNumber)</td>
+                            <td>@item.JoinedAt.ToString("dd/MM/yyyy")</td>
+                            <td class="text-center">
+                                <span class="badge-status badge-status-success">@item.EnrollmentStatus</span>
+                            </td>
+                        </tr>
+                        studentIndex++;
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

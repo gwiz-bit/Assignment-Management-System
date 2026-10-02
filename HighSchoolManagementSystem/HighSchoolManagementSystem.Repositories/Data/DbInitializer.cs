@@ -372,6 +372,23 @@ public static class DbInitializer
 
         await context.SaveChangesAsync();
 
+        // Xếp học sinh mẫu vào lớp 10A1
+        var studentHs001 = await context.Students.FirstOrDefaultAsync(s => s.StudentCode == "HS001");
+        if (studentHs001 != null && class10A1 != null)
+        {
+            if (!await context.StudentClasses.AnyAsync(sc => sc.StudentId == studentHs001.Id && sc.ClassId == class10A1.Id))
+            {
+                await context.StudentClasses.AddAsync(new StudentClass
+                {
+                    StudentId = studentHs001.Id,
+                    ClassId = class10A1.Id,
+                    JoinedAt = DateTime.UtcNow,
+                    Status = "Enrolled"
+                });
+                await context.SaveChangesAsync();
+            }
+        }
+
         // 4. Seed năm học mẫu (để Staff xem danh sách)
         await SeedAcademicYearsAsync(context);
     }

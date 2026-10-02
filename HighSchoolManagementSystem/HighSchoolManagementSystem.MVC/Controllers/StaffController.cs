@@ -490,6 +490,65 @@ public class StaffController : Controller
         return View(page);
     }
 
+    [HttpGet]
+    public async Task<IActionResult> ClassDetails(int id)
+    {
+        var result = await _classService.GetByIdWithDetailsAsync(id);
+        if (!result.Success || result.Data == null)
+        {
+            TempData["ErrorMessage"] = result.Message ?? "Không tìm thấy lớp học.";
+            return RedirectToAction(nameof(Classes));
+        }
+
+        var c = result.Data;
+        var enrolledStudents = c.StudentClasses
+            .Where(sc => sc.Status == "Enrolled" && sc.LeftAt == null)
+            .OrderBy(sc => sc.Student.StudentCode)
+            .ToList();
+
+        var teachers = c.TeachingAssignments
+            .OrderBy(ta => ta.Subject.SubjectName)
+            .ThenBy(ta => ta.Semester.StartDate)
+            .Select(ta => new ClassTeacherItemViewModel
+            {
+                TeacherCode = ta.Teacher.TeacherCode,
+                TeacherName = ta.Teacher.User.FullName,
+                SubjectCode = ta.Subject.SubjectCode,
+                SubjectName = ta.Subject.SubjectName,
+                SemesterName = ta.Semester.SemesterName,
+                Status = ta.Status
+            })
+            .ToList();
+
+        var model = new ClassDetailsViewModel
+        {
+            Id = c.Id,
+            ClassName = c.ClassName,
+            AcademicYearId = c.AcademicYearId,
+            AcademicYearCode = c.AcademicYear.YearCode,
+            GradeLevelName = c.GradeLevel.LevelName,
+            GradeLevelCode = c.GradeLevel.LevelCode,
+            HomeroomTeacherName = c.HomeroomTeacher?.User?.FullName,
+            HomeroomTeacherCode = c.HomeroomTeacher?.TeacherCode,
+            StudentCount = enrolledStudents.Count,
+            TeacherAssignmentCount = teachers.Count,
+            Teachers = teachers,
+            Students = enrolledStudents
+                .Select(sc => new ClassStudentItemViewModel
+                {
+                    StudentCode = sc.Student.StudentCode,
+                    StudentName = sc.Student.User.FullName,
+                    Gender = sc.Student.User.Gender,
+                    PhoneNumber = sc.Student.User.PhoneNumber,
+                    JoinedAt = sc.JoinedAt,
+                    EnrollmentStatus = sc.Status
+                })
+                .ToList()
+        };
+
+        return View(model);
+    }
+
     private async Task PopulateAcademicYearInfoAsync(CreateSemesterViewModel model)
     {
         var yearResult = await _academicYearService.GetByIdAsync(model.AcademicYearId);

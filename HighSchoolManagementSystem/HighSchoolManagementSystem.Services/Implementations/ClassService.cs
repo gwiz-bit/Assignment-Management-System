@@ -57,4 +57,26 @@ public class ClassService : IClassService
                 "Không thể tải danh sách lớp học. Vui lòng thử lại sau.");
         }
     }
+
+    public async Task<ServiceResult<Class>> GetByIdWithDetailsAsync(int id)
+    {
+        try
+        {
+            var classEntity = await _classRepository.GetByIdWithDetailsAsync(id);
+            if (classEntity == null)
+            {
+                return ServiceResult<Class>.Fail(
+                    ErrorCodes.ClassNotFound,
+                    "Không tìm thấy lớp học.");
+            }
+
+            return ServiceResult<Class>.Ok(classEntity);
+        }
+        catch
+        {
+            return ServiceResult<Class>.Fail(
+                ErrorCodes.DatabaseError,
+                "Không thể tải thông tin lớp học. Vui lòng thử lại sau.");
+        }
+    }
 }

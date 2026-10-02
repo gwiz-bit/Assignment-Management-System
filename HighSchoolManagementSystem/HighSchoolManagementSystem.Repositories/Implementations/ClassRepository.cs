@@ -40,4 +40,25 @@ public class ClassRepository : IClassRepository
             .ThenBy(c => c.ClassName)
             .ToListAsync();
     }
+
+    public async Task<Class?> GetByIdWithDetailsAsync(int id)
+    {
+        return await _context.Classes
+            .AsNoTracking()
+            .Include(c => c.AcademicYear)
+            .Include(c => c.GradeLevel)
+            .Include(c => c.HomeroomTeacher)!
+                .ThenInclude(t => t!.User)
+            .Include(c => c.TeachingAssignments)
+                .ThenInclude(ta => ta.Teacher)
+                    .ThenInclude(t => t.User)
+            .Include(c => c.TeachingAssignments)
+                .ThenInclude(ta => ta.Subject)
+            .Include(c => c.TeachingAssignments)
+                .ThenInclude(ta => ta.Semester)
+            .Include(c => c.StudentClasses)
+                .ThenInclude(sc => sc.Student)
+                    .ThenInclude(s => s.User)
+            .FirstOrDefaultAsync(c => c.Id == id);
+    }
 }
