@@ -1,0 +1,213 @@
+@model HighSchoolManagementSystem.MVC.Models.ViewModels.UserManagement.UserListViewModel
+@{
+    ViewData["Title"] = "Quản Lý Tài Khoản";
+}
+
+<div class="greeting-banner mb-4">
+    <div class="greeting-text-wrap">
+        <span class="greeting-kicker">
+            <i class="bi bi-person-gear me-1"></i> QUẢN TRỊ HỆ THỐNG • TÀI KHOẢN
+        </span>
+        <h1 class="greeting-title">Danh Sách Tài Khoản</h1>
+        <p class="greeting-subtitle">
+            Quản lý thông tin, vai trò, trạng thái hoạt động và mật khẩu của người dùng trong hệ thống.
+        </p>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <a asp-action="Create" class="btn btn-primary px-3 py-2 shadow-sm">
+            <i class="bi bi-plus-circle-fill"></i>
+            <span>Thêm Tài Khoản Mới</span>
+        </a>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show mb-4 d-flex align-items-center gap-2 shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill fs-5"></i>
+        <div>@TempData["SuccessMessage"]</div>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show mb-4 d-flex align-items-center gap-2 shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+        <div>@TempData["ErrorMessage"]</div>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="edu-card p-3 d-flex align-items-center justify-content-between">
+            <div><span class="text-muted d-block small fw-semibold">TỔNG TÀI KHOẢN</span><span class="fs-4 fw-bold text-dark">@Model.TotalCount</span></div>
+            <div class="p-2 rounded-3 bg-light text-primary fs-3"><i class="bi bi-people-fill"></i></div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="edu-card p-3 d-flex align-items-center justify-content-between">
+            <div><span class="text-muted d-block small fw-semibold">ĐANG HOẠT ĐỘNG</span><span class="fs-4 fw-bold text-success">@Model.ActiveCount</span></div>
+            <div class="p-2 rounded-3 bg-light text-success fs-3"><i class="bi bi-person-check-fill"></i></div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="edu-card p-3 d-flex align-items-center justify-content-between">
+            <div><span class="text-muted d-block small fw-semibold">VÔ HIỆU HÓA</span><span class="fs-4 fw-bold text-secondary">@Model.InactiveCount</span></div>
+            <div class="p-2 rounded-3 bg-light text-secondary fs-3"><i class="bi bi-person-x-fill"></i></div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="edu-card p-3 d-flex align-items-center justify-content-between">
+            <div><span class="text-muted d-block small fw-semibold">KẾT QUẢ LỌC</span><span class="fs-4 fw-bold text-primary">@Model.Users.Count</span></div>
+            <div class="p-2 rounded-3 bg-light text-info fs-3"><i class="bi bi-funnel-fill"></i></div>
+        </div>
+    </div>
+</div>
+
+<div class="edu-card mb-4">
+    <form method="get" asp-action="Index" class="row g-3 align-items-end">
+        <div class="col-12 col-md-5">
+            <label class="form-label">Tìm kiếm tài khoản</label>
+            <div class="input-group">
+                <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                <input type="text" name="search" value="@Model.Search" class="form-control border-start-0" placeholder="Nhập username, họ tên hoặc email..." />
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <label class="form-label">Vai trò</label>
+            <select name="roleId" class="form-select">
+                <option value="">-- Tất cả vai trò --</option>
+                @foreach (var role in Model.Roles)
+                {
+                    <option value="@role.Id" selected="@(Model.RoleId == role.Id)">@role.Name</option>
+                }
+            </select>
+        </div>
+        <div class="col-6 col-md-2">
+            <label class="form-label">Trạng thái</label>
+            <select name="status" class="form-select">
+                <option value="">-- Tất cả --</option>
+                <option value="Active" selected="@(Model.Status == "Active")">Đang hoạt động</option>
+                <option value="Inactive" selected="@(Model.Status == "Inactive")">Vô hiệu hóa</option>
+            </select>
+        </div>
+        <div class="col-12 col-md-2 d-flex gap-2">
+            <button type="submit" class="btn btn-primary flex-grow-1"><i class="bi bi-funnel-fill"></i> Lọc</button>
+            <a asp-action="Index" class="btn btn-secondary" title="Đặt lại bộ lọc"><i class="bi bi-arrow-counterclockwise"></i></a>
+        </div>
+    </form>
+</div>
+
+<div class="edu-card p-0 overflow-hidden">
+    <div class="edu-card-header px-4 pt-3 pb-2 border-bottom d-flex align-items-center justify-content-between mb-0">
+        <h2 class="edu-card-title"><i class="bi bi-table me-2 text-primary"></i>Danh Sách Tài Khoản (@Model.Users.Count kết quả)</h2>
+    </div>
+    @if (Model.Users.Count == 0)
+    {
+        <div class="p-5 text-center">
+            <div class="text-muted mb-3" style="font-size: 3rem;"><i class="bi bi-inbox"></i></div>
+            <h5 class="fw-bold text-secondary">Không tìm thấy tài khoản nào</h5>
+            <p class="text-muted small">Hãy thử thay đổi từ khóa hoặc điều kiện lọc.</p>
+            <a asp-action="Index" class="btn btn-outline-primary btn-sm mt-2">Xem tất cả tài khoản</a>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table-edu m-0">
+                <thead>
+                    <tr>
+                        <th style="width: 50px;" class="text-center">#</th>
+                        <th>Tài khoản</th>
+                        <th>Họ và Tên</th>
+                        <th>Liên hệ</th>
+                        <th style="width: 130px;" class="text-center">Vai trò</th>
+                        <th style="width: 150px;" class="text-center">Trạng thái</th>
+                        <th style="width: 190px;" class="text-end pe-4">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{ int stt = 1; }
+                    @foreach (var item in Model.Users)
+                    {
+                        <tr>
+                            <td class="text-center text-muted small">@stt</td>
+                            <td><span class="badge bg-light text-primary border px-2 py-1 font-monospace fw-bold">@item.Username</span></td>
+                            <td><div class="fw-bold text-dark">@item.FullName</div><div class="text-muted small">Tạo ngày @item.CreateAt.ToLocalTime().ToString("dd/MM/yyyy")</div></td>
+                            <td><div class="small text-truncate" style="max-width: 220px;"><i class="bi bi-envelope me-1 text-muted"></i>@item.Email</div></td>
+                            <td class="text-center"><span class="badge bg-light text-dark border px-2 py-1">@item.RoleName</span></td>
+                            <td class="text-center">
+                                @if (item.IsActive)
+                                {
+                                    <span class="badge-status badge-status-success"><i class="bi bi-check-circle-fill"></i> Hoạt động</span>
+                                }
+                                else
+                                {
+                                    <span class="badge-status badge-status-danger"><i class="bi bi-dash-circle-fill"></i> Vô hiệu hóa</span>
+                                }
+                            </td>
+                            <td class="text-end pe-4">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-secondary px-2" title="Xem chi tiết"><i class="bi bi-eye-fill"></i></a>
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-secondary px-2" title="Chỉnh sửa tài khoản"><i class="bi bi-pencil-square"></i></a>
+                                    <a asp-action="ResetPassword" asp-route-id="@item.Id" class="btn btn-secondary px-2" title="Đặt lại mật khẩu"><i class="bi bi-key-fill"></i></a>
+                                    <button type="button" class="btn @(item.IsActive ? "btn-outline-danger" : "btn-outline-success") px-2" title="@(item.IsActive ? "Vô hiệu hóa tài khoản" : "Kích hoạt tài khoản")" data-bs-toggle="modal" data-bs-target="#toggleStatusModal" data-user-id="@item.Id" data-user-name="@item.FullName" data-username="@item.Username" data-is-active="@item.IsActive.ToString().ToLower()">
+                                        <i class="bi @(item.IsActive ? "bi-toggle-on" : "bi-toggle-off")"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        stt++;
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<div class="modal fade" id="toggleStatusModal" tabindex="-1" aria-labelledby="toggleStatusModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title fw-bold" id="toggleStatusModalLabel"><i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>Xác nhận thay đổi trạng thái</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="mb-3" id="toggleModalPrompt">Bạn có chắc chắn muốn thay đổi trạng thái tài khoản này không?</p>
+                <div class="p-3 bg-light rounded-3 border"><div class="fw-bold text-dark" id="modalUserName">Người dùng</div><div class="text-muted small font-monospace" id="modalUsername">username</div></div>
+                <div class="alert alert-warning mt-3 mb-0 small" id="toggleModalNote"><i class="bi bi-info-circle-fill me-1"></i>Tài khoản bị vô hiệu hóa sẽ không thể đăng nhập hệ thống.</div>
+            </div>
+            <div class="modal-footer border-top bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy Bỏ</button>
+                <form id="toggleStatusForm" method="post" asp-action="ToggleStatus">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" id="modalUserIdInput" />
+                    <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                    <button type="submit" class="btn btn-primary" id="modalSubmitBtn">Xác Nhận</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const modal = document.getElementById('toggleStatusModal');
+            if (!modal) return;
+            modal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const isActive = button.getAttribute('data-is-active') === 'true';
+                document.getElementById('modalUserIdInput').value = button.getAttribute('data-user-id');
+                document.getElementById('modalUserName').textContent = button.getAttribute('data-user-name');
+                document.getElementById('modalUsername').textContent = '@@' + button.getAttribute('data-username');
+                document.getElementById('toggleModalPrompt').innerHTML = isActive
+                    ? 'Bạn có chắc chắn muốn <strong>VÔ HIỆU HÓA</strong> tài khoản này?'
+                    : 'Bạn có chắc chắn muốn <strong>KÍCH HOẠT</strong> tài khoản này trở lại?';
+                document.getElementById('modalSubmitBtn').className = isActive ? 'btn btn-danger' : 'btn btn-success';
+                document.getElementById('modalSubmitBtn').textContent = isActive ? 'Vô Hiệu Hóa Tài Khoản' : 'Kích Hoạt Tài Khoản';
+            });
+        });
+    </script>
+}
