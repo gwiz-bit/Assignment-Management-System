@@ -35,9 +35,24 @@
     <div class="card-table-header">
         <div>
             <h2 class="table-card-title">Tất cả năm học</h2>
-            <p class="table-card-subtitle">Sắp xếp theo ngày bắt đầu giảm dần (năm mới nhất trước).</p>
+            <p class="table-card-subtitle">Năm hiện hành được ưu tiên hiển thị trước. Chỉ có một năm học hiện hành tại một thời điểm.</p>
         </div>
         <div class="d-flex align-items-center gap-2">
+            @{
+                var currentYear = Model.FirstOrDefault(x => x.IsCurrent);
+            }
+            @if (currentYear != null)
+            {
+                <span class="table-counter-badge" style="background: var(--status-success-bg); color: var(--status-success-text); border-color: var(--status-success-border);">
+                    Hiện hành: @currentYear.YearCode
+                </span>
+            }
+            else
+            {
+                <span class="table-counter-badge" style="background: var(--status-warning-bg); color: var(--status-warning-text); border-color: var(--status-warning-border);">
+                    Chưa chọn năm hiện hành
+                </span>
+            }
             <span class="table-counter-badge">Tổng: @Model.Count năm học</span>
             <a asp-action="CreateAcademicYear" class="btn btn-primary btn-sm">
                 <i class="bi bi-plus-lg me-1"></i>Tạo năm học
@@ -68,7 +83,7 @@
                         <th class="text-center">Số học kỳ</th>
                         <th class="text-center">Số lớp</th>
                         <th class="text-center">Trạng thái</th>
-                        <th class="text-center" style="width: 110px;">Thao tác</th>
+                        <th class="text-center" style="width: 220px;">Thao tác</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -79,7 +94,13 @@
                     {
                         <tr>
                             <td>@index</td>
-                            <td><strong>@item.YearCode</strong></td>
+                            <td>
+                                <strong>@item.YearCode</strong>
+                                @if (item.IsCurrent)
+                                {
+                                    <span class="badge-status badge-status-success ms-1">Hiện hành</span>
+                                }
+                            </td>
                             <td>@item.StartDate.ToString("dd/MM/yyyy")</td>
                             <td>@item.EndDate.ToString("dd/MM/yyyy")</td>
                             <td class="text-center">@item.SemesterCount</td>
@@ -88,11 +109,25 @@
                                 <span class="badge-status @item.StatusCssClass">@item.Status</span>
                             </td>
                             <td class="text-center">
-                                <a asp-action="EditAcademicYear" asp-route-id="@item.Id"
-                                   class="btn btn-secondary btn-sm px-2 py-1" style="font-size: 12px;"
-                                   title="Cập nhật">
-                                    <i class="bi bi-pencil-square me-1"></i>Sửa
-                                </a>
+                                <div class="d-inline-flex gap-1 flex-wrap justify-content-center">
+                                    <a asp-action="EditAcademicYear" asp-route-id="@item.Id"
+                                       class="btn btn-secondary btn-sm px-2 py-1" style="font-size: 12px;"
+                                       title="Cập nhật">
+                                        <i class="bi bi-pencil-square me-1"></i>Sửa
+                                    </a>
+                                    @if (!item.IsCurrent)
+                                    {
+                                        <form asp-action="SetCurrentAcademicYear" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@item.Id" />
+                                            <button type="submit" class="btn btn-primary btn-sm px-2 py-1" style="font-size: 12px;"
+                                                    title="Đặt làm năm học hiện hành"
+                                                    onclick="return confirm('Đặt năm học @item.YearCode làm năm hiện hành?');">
+                                                <i class="bi bi-check2-circle me-1"></i>Chọn
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
                             </td>
                         </tr>
                         index++;

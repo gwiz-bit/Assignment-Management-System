@@ -7,6 +7,8 @@ public interface IAcademicYearRepository
     Task<IReadOnlyList<AcademicYear>> GetAllAsync();
     Task<AcademicYear?> GetByIdAsync(int id);
     Task<AcademicYear?> GetTrackedByIdAsync(int id);
+    Task<AcademicYear?> GetCurrentAsync();
+    Task ClearCurrentFlagsAsync();
     Task<bool> ExistsByYearCodeAsync(string yearCode, int? excludeId = null);
     Task AddAsync(AcademicYear academicYear);
     Task SaveChangesAsync();

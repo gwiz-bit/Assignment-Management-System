@@ -188,7 +188,8 @@ public static class DbInitializer
             {
                 YearCode = "2026-2027",
                 StartDate = new DateTime(2026, 9, 5),
-                EndDate = new DateTime(2027, 5, 31)
+                EndDate = new DateTime(2027, 5, 31),
+                IsCurrent = true
             }
         };
 
@@ -201,6 +202,18 @@ public static class DbInitializer
         }
 
         await context.SaveChangesAsync();
+
+        // Đảm bảo luôn có đúng 1 năm hiện hành (ưu tiên 2026-2027 nếu chưa chọn)
+        if (!await context.AcademicYears.AnyAsync(y => y.IsCurrent))
+        {
+            var preferred = await context.AcademicYears.FirstOrDefaultAsync(y => y.YearCode == "2026-2027")
+                            ?? await context.AcademicYears.OrderByDescending(y => y.StartDate).FirstOrDefaultAsync();
+            if (preferred != null)
+            {
+                preferred.IsCurrent = true;
+                await context.SaveChangesAsync();
+            }
+        }
 
         var year2025 = await context.AcademicYears.FirstAsync(y => y.YearCode == "2025-2026");
         var year2026 = await context.AcademicYears.FirstAsync(y => y.YearCode == "2026-2027");

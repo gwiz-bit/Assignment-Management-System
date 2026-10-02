@@ -79,6 +79,12 @@ public class AppDbContext : DbContext
             .HasIndex(y => y.YearCode)
             .IsUnique();
 
+        // Chỉ cho phép tối đa 1 năm học hiện hành (IsCurrent = true)
+        modelBuilder.Entity<AcademicYear>()
+            .HasIndex(y => y.IsCurrent)
+            .IsUnique()
+            .HasFilter("[is_current] = 1");
+
         modelBuilder.Entity<Semester>()
             .HasIndex(s => s.SemesterCode)
             .IsUnique();

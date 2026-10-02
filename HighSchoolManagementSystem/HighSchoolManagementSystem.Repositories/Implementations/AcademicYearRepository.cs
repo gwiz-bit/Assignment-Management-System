@@ -20,7 +20,8 @@ public class AcademicYearRepository : IAcademicYearRepository
             .AsNoTracking()
             .Include(y => y.Semesters)
             .Include(y => y.Classes)
-            .OrderByDescending(y => y.StartDate)
+            .OrderByDescending(y => y.IsCurrent)
+            .ThenByDescending(y => y.StartDate)
             .ToListAsync();
     }
 
@@ -37,6 +38,20 @@ public class AcademicYearRepository : IAcademicYearRepository
     {
         return await _context.AcademicYears
             .FirstOrDefaultAsync(y => y.Id == id);
+    }
+
+    public async Task<AcademicYear?> GetCurrentAsync()
+    {
+        return await _context.AcademicYears
+            .AsNoTracking()
+            .FirstOrDefaultAsync(y => y.IsCurrent);
+    }
+
+    public async Task ClearCurrentFlagsAsync()
+    {
+        await _context.AcademicYears
+            .Where(y => y.IsCurrent)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(y => y.IsCurrent, false));
     }
 
     public async Task<bool> ExistsByYearCodeAsync(string yearCode, int? excludeId = null)

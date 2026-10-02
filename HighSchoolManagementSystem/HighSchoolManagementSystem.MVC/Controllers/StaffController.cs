@@ -43,6 +43,7 @@ public class StaffController : Controller
                     EndDate = y.EndDate,
                     SemesterCount = y.Semesters.Count,
                     ClassCount = y.Classes.Count,
+                    IsCurrent = y.IsCurrent,
                     Status = status,
                     StatusCssClass = css
                 };
@@ -146,6 +147,23 @@ public class StaffController : Controller
         }
 
         TempData["SuccessMessage"] = $"Đã cập nhật năm học \"{result.Data!.YearCode}\" thành công.";
+        return RedirectToAction(nameof(AcademicYears));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> SetCurrentAcademicYear(int id)
+    {
+        var result = await _academicYearService.SetCurrentAsync(id);
+        if (!result.Success)
+        {
+            TempData["ErrorMessage"] = result.Message ?? "Không thể đặt năm học hiện hành.";
+        }
+        else
+        {
+            TempData["SuccessMessage"] = result.Message;
+        }
+
         return RedirectToAction(nameof(AcademicYears));
     }
 

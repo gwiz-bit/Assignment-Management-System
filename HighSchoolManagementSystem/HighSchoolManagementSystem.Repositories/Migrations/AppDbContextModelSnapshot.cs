@@ -35,6 +35,10 @@ namespace HighSchoolManagementSystem.Repositories.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnName("end_date");
 
+                    b.Property<bool>("IsCurrent")
+                        .HasColumnType("bit")
+                        .HasColumnName("is_current");
+
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2")
                         .HasColumnName("start_date");
@@ -46,6 +50,10 @@ namespace HighSchoolManagementSystem.Repositories.Migrations
                         .HasColumnName("year_code");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("IsCurrent")
+                        .IsUnique()
+                        .HasFilter("[is_current] = 1");
 
                     b.HasIndex("YearCode")
                         .IsUnique();

@@ -51,6 +51,28 @@ public class AcademicYearService : IAcademicYearService
         }
     }
 
+    public async Task<ServiceResult<AcademicYear>> GetCurrentAsync()
+    {
+        try
+        {
+            var year = await _academicYearRepository.GetCurrentAsync();
+            if (year == null)
+            {
+                return ServiceResult<AcademicYear>.Fail(
+                    ErrorCodes.ResourceNotFound,
+                    "Chưa chọn năm học hiện hành.");
+            }
+
+            return ServiceResult<AcademicYear>.Ok(year);
+        }
+        catch
+        {
+            return ServiceResult<AcademicYear>.Fail(
+                ErrorCodes.DatabaseError,
+                "Không thể tải năm học hiện hành. Vui lòng thử lại sau.");
+        }
+    }
+
     public async Task<ServiceResult<AcademicYear>> CreateAsync(string yearCode, DateTime startDate, DateTime endDate)
     {
         var validationError = ValidateInput(yearCode, startDate, endDate);
@@ -74,7 +96,8 @@ public class AcademicYearService : IAcademicYearService
             {
                 YearCode = yearCode,
                 StartDate = startDate.Date,
-                EndDate = endDate.Date
+                EndDate = endDate.Date,
+                IsCurrent = false
             };
 
             await _academicYearRepository.AddAsync(academicYear);
@@ -130,6 +153,40 @@ public class AcademicYearService : IAcademicYearService
             return ServiceResult<AcademicYear>.Fail(
                 ErrorCodes.DatabaseError,
                 "Không thể cập nhật năm học. Vui lòng thử lại sau.");
+        }
+    }
+
+    public async Task<ServiceResult<AcademicYear>> SetCurrentAsync(int id)
+    {
+        try
+        {
+            var academicYear = await _academicYearRepository.GetTrackedByIdAsync(id);
+            if (academicYear == null)
+            {
+                return ServiceResult<AcademicYear>.Fail(
+                    ErrorCodes.ResourceNotFound,
+                    "Không tìm thấy năm học cần đặt làm hiện hành.");
+            }
+
+            if (academicYear.IsCurrent)
+            {
+                return ServiceResult<AcademicYear>.Ok(academicYear, $"Năm học \"{academicYear.YearCode}\" đã là năm hiện hành.");
+            }
+
+            await _academicYearRepository.ClearCurrentFlagsAsync();
+
+            academicYear.IsCurrent = true;
+            await _academicYearRepository.SaveChangesAsync();
+
+            return ServiceResult<AcademicYear>.Ok(
+                academicYear,
+                $"Đã chọn \"{academicYear.YearCode}\" làm năm học hiện hành.");
+        }
+        catch
+        {
+            return ServiceResult<AcademicYear>.Fail(
+                ErrorCodes.DatabaseError,
+                "Không thể đặt năm học hiện hành. Vui lòng thử lại sau.");
         }
     }
 
