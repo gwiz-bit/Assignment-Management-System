@@ -1,6 +1,7 @@
 @model HighSchoolManagementSystem.MVC.Models.ViewModels.SemesterListPageViewModel
 @{
     ViewData["Title"] = $"Học kỳ - {Model.AcademicYearCode}";
+    var activeSemester = Model.Semesters.FirstOrDefault(s => s.IsActive);
 }
 
 <div class="greeting-banner">
@@ -40,9 +41,21 @@
     <div class="card-table-header">
         <div>
             <h2 class="table-card-title">Danh sách học kỳ</h2>
-            <p class="table-card-subtitle">Thời gian học kỳ phải nằm trong khoảng của năm học.</p>
+            <p class="table-card-subtitle">Chỉ một học kỳ đang mở trên toàn hệ thống tại một thời điểm.</p>
         </div>
         <div class="d-flex align-items-center gap-2">
+            @if (activeSemester != null)
+            {
+                <span class="table-counter-badge" style="background: var(--status-success-bg); color: var(--status-success-text); border-color: var(--status-success-border);">
+                    Đang mở: @activeSemester.SemesterCode
+                </span>
+            }
+            else
+            {
+                <span class="table-counter-badge" style="background: var(--status-warning-bg); color: var(--status-warning-text); border-color: var(--status-warning-border);">
+                    Chưa có học kỳ đang mở trong năm này
+                </span>
+            }
             <span class="table-counter-badge">Tổng: @Model.Semesters.Count học kỳ</span>
             <a asp-action="AcademicYears" class="btn btn-secondary btn-sm">
                 <i class="bi bi-arrow-left me-1"></i>Năm học
@@ -74,8 +87,9 @@
                         <th>Tên học kỳ</th>
                         <th>Ngày bắt đầu</th>
                         <th>Ngày kết thúc</th>
+                        <th class="text-center">Thời gian</th>
                         <th class="text-center">Trạng thái</th>
-                        <th class="text-center" style="width: 110px;">Thao tác</th>
+                        <th class="text-center" style="width: 240px;">Thao tác</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -91,14 +105,52 @@
                             <td>@item.StartDate.ToString("dd/MM/yyyy")</td>
                             <td>@item.EndDate.ToString("dd/MM/yyyy")</td>
                             <td class="text-center">
-                                <span class="badge-status @item.StatusCssClass">@item.Status</span>
+                                <span class="badge-status @item.PeriodStatusCssClass">@item.PeriodStatus</span>
                             </td>
                             <td class="text-center">
-                                <a asp-action="EditSemester" asp-route-id="@item.Id"
-                                   class="btn btn-secondary btn-sm px-2 py-1" style="font-size: 12px;"
-                                   title="Cập nhật">
-                                    <i class="bi bi-pencil-square me-1"></i>Sửa
-                                </a>
+                                @if (item.IsActive)
+                                {
+                                    <span class="badge-status badge-status-success">Đang mở</span>
+                                }
+                                else
+                                {
+                                    <span class="badge-status badge-status-danger">Đã đóng</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                <div class="d-inline-flex gap-1 flex-wrap justify-content-center">
+                                    <a asp-action="EditSemester" asp-route-id="@item.Id"
+                                       class="btn btn-secondary btn-sm px-2 py-1" style="font-size: 12px;"
+                                       title="Cập nhật">
+                                        <i class="bi bi-pencil-square me-1"></i>Sửa
+                                    </a>
+                                    @if (item.IsActive)
+                                    {
+                                        <form asp-action="CloseSemester" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@item.Id" />
+                                            <input type="hidden" name="academicYearId" value="@Model.AcademicYearId" />
+                                            <button type="submit" class="btn btn-secondary btn-sm px-2 py-1" style="font-size: 12px;"
+                                                    title="Đóng học kỳ"
+                                                    onclick="return confirm('Đóng học kỳ @item.SemesterCode?');">
+                                                <i class="bi bi-lock me-1"></i>Đóng
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <form asp-action="ActivateSemester" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@item.Id" />
+                                            <input type="hidden" name="academicYearId" value="@Model.AcademicYearId" />
+                                            <button type="submit" class="btn btn-primary btn-sm px-2 py-1" style="font-size: 12px;"
+                                                    title="Kích hoạt học kỳ"
+                                                    onclick="return confirm('Kích hoạt học kỳ @item.SemesterCode?\nHọc kỳ đang mở khác (nếu có) sẽ bị đóng.');">
+                                                <i class="bi bi-unlock me-1"></i>Kích hoạt
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
                             </td>
                         </tr>
                         index++;

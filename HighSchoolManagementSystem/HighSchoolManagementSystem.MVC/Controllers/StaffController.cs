@@ -202,7 +202,7 @@ public class StaffController : Controller
             Semesters = semesterResult.Data!
                 .Select(s =>
                 {
-                    var (status, css) = ResolveStatus(s.StartDate, s.EndDate, today);
+                    var (periodStatus, periodCss) = ResolveStatus(s.StartDate, s.EndDate, today);
                     return new SemesterListItemViewModel
                     {
                         Id = s.Id,
@@ -210,14 +210,49 @@ public class StaffController : Controller
                         SemesterName = s.SemesterName,
                         StartDate = s.StartDate,
                         EndDate = s.EndDate,
-                        Status = status,
-                        StatusCssClass = css
+                        IsActive = s.IsActive,
+                        PeriodStatus = periodStatus,
+                        PeriodStatusCssClass = periodCss
                     };
                 })
                 .ToList()
         };
 
         return View(page);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ActivateSemester(int id, int academicYearId)
+    {
+        var result = await _semesterService.ActivateAsync(id);
+        if (!result.Success)
+        {
+            TempData["ErrorMessage"] = result.Message ?? "Không thể kích hoạt học kỳ.";
+        }
+        else
+        {
+            TempData["SuccessMessage"] = result.Message;
+        }
+
+        return RedirectToAction(nameof(Semesters), new { academicYearId });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CloseSemester(int id, int academicYearId)
+    {
+        var result = await _semesterService.CloseAsync(id);
+        if (!result.Success)
+        {
+            TempData["ErrorMessage"] = result.Message ?? "Không thể đóng học kỳ.";
+        }
+        else
+        {
+            TempData["SuccessMessage"] = result.Message;
+        }
+
+        return RedirectToAction(nameof(Semesters), new { academicYearId });
     }
 
     [HttpGet]

@@ -7,8 +7,9 @@ public class SemesterListItemViewModel
     public string SemesterName { get; set; } = null!;
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
-    public string Status { get; set; } = null!;
-    public string StatusCssClass { get; set; } = null!;
+    public bool IsActive { get; set; }
+    public string PeriodStatus { get; set; } = null!;
+    public string PeriodStatusCssClass { get; set; } = null!;
 }
 
 public class SemesterListPageViewModel

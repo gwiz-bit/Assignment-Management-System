@@ -226,7 +226,8 @@ public static class DbInitializer
                 SemesterName = "Học kỳ 1",
                 StartDate = new DateTime(2025, 9, 5),
                 EndDate = new DateTime(2026, 1, 15),
-                AcademicYearId = year2025.Id
+                AcademicYearId = year2025.Id,
+                IsActive = false
             },
             new Semester
             {
@@ -234,7 +235,8 @@ public static class DbInitializer
                 SemesterName = "Học kỳ 2",
                 StartDate = new DateTime(2026, 1, 20),
                 EndDate = new DateTime(2026, 5, 31),
-                AcademicYearId = year2025.Id
+                AcademicYearId = year2025.Id,
+                IsActive = false
             },
             new Semester
             {
@@ -242,7 +244,8 @@ public static class DbInitializer
                 SemesterName = "Học kỳ 1",
                 StartDate = new DateTime(2026, 9, 5),
                 EndDate = new DateTime(2027, 1, 15),
-                AcademicYearId = year2026.Id
+                AcademicYearId = year2026.Id,
+                IsActive = true
             }
         };
 
@@ -255,5 +258,17 @@ public static class DbInitializer
         }
 
         await context.SaveChangesAsync();
+
+        // Đảm bảo có đúng 1 học kỳ đang mở (ưu tiên HK1-2627)
+        if (!await context.Semesters.AnyAsync(s => s.IsActive))
+        {
+            var preferred = await context.Semesters.FirstOrDefaultAsync(s => s.SemesterCode == "HK1-2627")
+                            ?? await context.Semesters.OrderByDescending(s => s.StartDate).FirstOrDefaultAsync();
+            if (preferred != null)
+            {
+                preferred.IsActive = true;
+                await context.SaveChangesAsync();
+            }
+        }
     }
 }

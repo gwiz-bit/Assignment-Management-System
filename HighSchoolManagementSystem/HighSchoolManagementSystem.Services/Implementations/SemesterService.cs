@@ -102,7 +102,8 @@ public class SemesterService : ISemesterService
                 SemesterCode = semesterCode,
                 SemesterName = semesterName,
                 StartDate = startDate.Date,
-                EndDate = endDate.Date
+                EndDate = endDate.Date,
+                IsActive = false
             };
 
             await _semesterRepository.AddAsync(semester);
@@ -173,6 +174,76 @@ public class SemesterService : ISemesterService
             return ServiceResult<Semester>.Fail(
                 ErrorCodes.DatabaseError,
                 "Không thể cập nhật học kỳ. Vui lòng thử lại sau.");
+        }
+    }
+
+    public async Task<ServiceResult<Semester>> ActivateAsync(int id)
+    {
+        try
+        {
+            var semester = await _semesterRepository.GetTrackedByIdAsync(id);
+            if (semester == null)
+            {
+                return ServiceResult<Semester>.Fail(
+                    ErrorCodes.SemesterNotFound,
+                    "Không tìm thấy học kỳ cần kích hoạt.");
+            }
+
+            if (semester.IsActive)
+            {
+                return ServiceResult<Semester>.Ok(
+                    semester,
+                    $"Học kỳ \"{semester.SemesterName}\" đang ở trạng thái mở.");
+            }
+
+            await _semesterRepository.ClearActiveFlagsAsync();
+
+            semester.IsActive = true;
+            await _semesterRepository.SaveChangesAsync();
+
+            return ServiceResult<Semester>.Ok(
+                semester,
+                $"Đã kích hoạt học kỳ \"{semester.SemesterName}\".");
+        }
+        catch
+        {
+            return ServiceResult<Semester>.Fail(
+                ErrorCodes.DatabaseError,
+                "Không thể kích hoạt học kỳ. Vui lòng thử lại sau.");
+        }
+    }
+
+    public async Task<ServiceResult<Semester>> CloseAsync(int id)
+    {
+        try
+        {
+            var semester = await _semesterRepository.GetTrackedByIdAsync(id);
+            if (semester == null)
+            {
+                return ServiceResult<Semester>.Fail(
+                    ErrorCodes.SemesterNotFound,
+                    "Không tìm thấy học kỳ cần đóng.");
+            }
+
+            if (!semester.IsActive)
+            {
+                return ServiceResult<Semester>.Ok(
+                    semester,
+                    $"Học kỳ \"{semester.SemesterName}\" đã ở trạng thái đóng.");
+            }
+
+            semester.IsActive = false;
+            await _semesterRepository.SaveChangesAsync();
+
+            return ServiceResult<Semester>.Ok(
+                semester,
+                $"Đã đóng học kỳ \"{semester.SemesterName}\".");
+        }
+        catch
+        {
+            return ServiceResult<Semester>.Fail(
+                ErrorCodes.DatabaseError,
+                "Không thể đóng học kỳ. Vui lòng thử lại sau.");
         }
     }
 

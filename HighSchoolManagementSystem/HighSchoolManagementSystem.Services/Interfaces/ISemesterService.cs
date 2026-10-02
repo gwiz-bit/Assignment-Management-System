@@ -19,4 +19,6 @@ public interface ISemesterService
         string semesterName,
         DateTime startDate,
         DateTime endDate);
+    Task<ServiceResult<Semester>> ActivateAsync(int id);
+    Task<ServiceResult<Semester>> CloseAsync(int id);
 }

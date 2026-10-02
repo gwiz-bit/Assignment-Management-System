@@ -89,6 +89,12 @@ public class AppDbContext : DbContext
             .HasIndex(s => s.SemesterCode)
             .IsUnique();
 
+        // Chỉ cho phép tối đa 1 học kỳ đang mở (IsActive = true)
+        modelBuilder.Entity<Semester>()
+            .HasIndex(s => s.IsActive)
+            .IsUnique()
+            .HasFilter("[is_active] = 1");
+
         modelBuilder.Entity<GradeLevel>()
             .HasIndex(g => g.LevelCode)
             .IsUnique();

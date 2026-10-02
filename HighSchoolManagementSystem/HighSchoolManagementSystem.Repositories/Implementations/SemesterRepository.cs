@@ -20,7 +20,8 @@ public class SemesterRepository : ISemesterRepository
             .AsNoTracking()
             .Include(s => s.AcademicYear)
             .Where(s => s.AcademicYearId == academicYearId)
-            .OrderBy(s => s.StartDate)
+            .OrderByDescending(s => s.IsActive)
+            .ThenBy(s => s.StartDate)
             .ToListAsync();
     }
 
@@ -36,6 +37,13 @@ public class SemesterRepository : ISemesterRepository
     {
         return await _context.Semesters
             .FirstOrDefaultAsync(s => s.Id == id);
+    }
+
+    public async Task ClearActiveFlagsAsync()
+    {
+        await _context.Semesters
+            .Where(s => s.IsActive)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(s => s.IsActive, false));
     }
 
     public async Task<bool> ExistsBySemesterCodeAsync(string semesterCode, int? excludeId = null)
