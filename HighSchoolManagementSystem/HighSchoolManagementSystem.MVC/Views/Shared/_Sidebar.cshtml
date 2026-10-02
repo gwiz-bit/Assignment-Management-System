@@ -120,7 +120,8 @@
                     </a>
                 </li>
                 <li class="sidebar-menu-item">
-                    <a href="javascript:void(0)" class="sidebar-link">
+                    <a asp-controller="Staff" asp-action="Classes"
+                       class="sidebar-link @(currentController == "Staff" && (currentAction == "Classes" || currentAction == "ClassDetails" || currentAction == "CreateClass" || currentAction == "EditClass" || currentAction == "ClassStudents") ? "active" : "")">
                         <i class="bi bi-collection"></i>
                         <span>Danh sách lớp học</span>
                     </a>
@@ -183,7 +184,8 @@
             <div class="sidebar-section-title">LỚP CHỦ NHIỆM</div>
             <ul class="sidebar-menu-list">
                 <li class="sidebar-menu-item">
-                    <a href="javascript:void(0)" class="sidebar-link">
+                    <a asp-controller="Teacher" asp-action="MyClasses"
+                       class="sidebar-link @(currentController == "Teacher" && (currentAction == "MyClasses" || currentAction == "ClassStudents") ? "active" : "")">
                         <i class="bi bi-people"></i>
                         <span>Danh sách học sinh</span>
                     </a>

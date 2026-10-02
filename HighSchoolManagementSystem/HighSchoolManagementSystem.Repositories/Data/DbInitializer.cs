@@ -289,6 +289,30 @@ public static class DbInitializer
             };
             await context.Classes.AddAsync(class10A2);
         }
+
+        var class11A1 = await context.Classes.FirstOrDefaultAsync(c => c.ClassName == "11A1" && c.AcademicYearId == academicYear.Id);
+        if (class11A1 == null)
+        {
+            await context.Classes.AddAsync(new Class
+            {
+                ClassName = "11A1",
+                AcademicYearId = academicYear.Id,
+                GradeLevelId = grade11.Id,
+                HomeroomTeacherId = teacherGv001?.Id
+            });
+        }
+
+        var class12A1 = await context.Classes.FirstOrDefaultAsync(c => c.ClassName == "12A1" && c.AcademicYearId == academicYear.Id);
+        if (class12A1 == null)
+        {
+            await context.Classes.AddAsync(new Class
+            {
+                ClassName = "12A1",
+                AcademicYearId = academicYear.Id,
+                GradeLevelId = grade12.Id,
+                HomeroomTeacherId = teacherGv999?.Id
+            });
+        }
         await context.SaveChangesAsync();
 
         var math10 = await context.Subjects.FirstOrDefaultAsync(s => s.SubjectCode == "MATH10");
@@ -347,6 +371,23 @@ public static class DbInitializer
         }
 
         await context.SaveChangesAsync();
+
+        // Xếp học sinh mẫu vào lớp 10A1
+        var studentHs001 = await context.Students.FirstOrDefaultAsync(s => s.StudentCode == "HS001");
+        if (studentHs001 != null && class10A1 != null)
+        {
+            if (!await context.StudentClasses.AnyAsync(sc => sc.StudentId == studentHs001.Id && sc.ClassId == class10A1.Id))
+            {
+                await context.StudentClasses.AddAsync(new StudentClass
+                {
+                    StudentId = studentHs001.Id,
+                    ClassId = class10A1.Id,
+                    JoinedAt = DateTime.UtcNow,
+                    Status = "Enrolled"
+                });
+                await context.SaveChangesAsync();
+            }
+        }
 
         // 4. Seed năm học mẫu (để Staff xem danh sách)
         await SeedAcademicYearsAsync(context);

@@ -54,6 +54,14 @@ public class TeacherRepository : ITeacherRepository
             .FirstOrDefaultAsync(t => t.Id == id);
     }
 
+    public async Task<Teacher?> GetByUserIdAsync(int userId)
+    {
+        return await _context.Teachers
+            .Include(t => t.User)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(t => t.UserId == userId);
+    }
+
     public async Task<Teacher?> GetByIdWithDetailsAsync(int id)
     {
         return await _context.Teachers

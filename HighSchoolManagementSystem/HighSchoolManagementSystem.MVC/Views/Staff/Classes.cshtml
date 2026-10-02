@@ -1,0 +1,151 @@
+@model HighSchoolManagementSystem.MVC.Models.ViewModels.ClassListPageViewModel
+@{
+    ViewData["Title"] = "Danh sách lớp học";
+}
+
+<div class="greeting-banner">
+    <div class="greeting-text-wrap">
+        <span class="greeting-kicker">
+            <i class="bi bi-circle-fill" style="font-size: 7px;"></i> QUẢN LÝ ĐÀO TẠO
+        </span>
+        <h1 class="greeting-title">Danh sách lớp học</h1>
+        <p class="greeting-subtitle">
+            Tra cứu lớp theo năm học và khối. Mặc định hiển thị lớp của năm học hiện hành.
+        </p>
+    </div>
+</div>
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger d-flex align-items-center mb-3" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <div>@TempData["ErrorMessage"]</div>
+    </div>
+}
+
+<div class="card-table-wrap mb-3">
+    <div class="card-table-header">
+        <div>
+            <h2 class="table-card-title">Bộ lọc</h2>
+            <p class="table-card-subtitle">Chọn năm học và/hoặc khối để xem danh sách lớp tương ứng.</p>
+        </div>
+    </div>
+    <div class="p-4">
+        <form asp-action="Classes" method="get" class="row g-3 align-items-end">
+            <div class="col-12 col-md-4">
+                <label class="form-label" for="academicYearId">Năm học</label>
+                <select name="academicYearId" id="academicYearId" class="form-select" asp-items="Model.AcademicYears">
+                    <option value="">-- Tất cả năm học --</option>
+                </select>
+            </div>
+            <div class="col-12 col-md-4">
+                <label class="form-label" for="gradeLevelId">Khối</label>
+                <select name="gradeLevelId" id="gradeLevelId" class="form-select" asp-items="Model.GradeLevels">
+                    <option value="">-- Tất cả khối --</option>
+                </select>
+            </div>
+            <div class="col-12 col-md-4 d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-funnel me-1"></i>Lọc
+                </button>
+                <a asp-action="Classes" class="btn btn-secondary">Xóa lọc</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card-table-wrap">
+    <div class="card-table-header">
+        <div>
+            <h2 class="table-card-title">Kết quả</h2>
+            <p class="table-card-subtitle">Sắp xếp theo khối rồi theo tên lớp.</p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <span class="table-counter-badge">Tổng: @Model.Classes.Count lớp</span>
+            <a asp-action="CreateClass"
+               asp-route-academicYearId="@Model.SelectedAcademicYearId"
+               class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-lg me-1"></i>Tạo lớp học
+            </a>
+        </div>
+    </div>
+
+    @if (Model.Classes.Count == 0)
+    {
+        <div class="p-4 text-center text-muted">
+            <i class="bi bi-collection" style="font-size: 2rem;"></i>
+            <p class="mt-2 mb-3">Không có lớp học nào khớp với bộ lọc hiện tại.</p>
+            <a asp-action="CreateClass"
+               asp-route-academicYearId="@Model.SelectedAcademicYearId"
+               class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-lg me-1"></i>Tạo lớp học mới
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table-edu mb-0">
+                <thead>
+                    <tr>
+                        <th style="width: 70px;">#</th>
+                        <th>Tên lớp</th>
+                        <th>Khối</th>
+                        <th>Năm học</th>
+                        <th>GVCN</th>
+                        <th class="text-center">Sĩ số</th>
+                        <th class="text-center" style="width: 180px;">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        var index = 1;
+                    }
+                    @foreach (var item in Model.Classes)
+                    {
+                        <tr>
+                            <td>@index</td>
+                            <td>
+                                <a asp-action="ClassDetails" asp-route-id="@item.Id" class="text-decoration-none">
+                                    <strong>@item.ClassName</strong>
+                                </a>
+                            </td>
+                            <td>@item.GradeLevelName</td>
+                            <td>@item.AcademicYearCode</td>
+                            <td>
+                                @if (!string.IsNullOrWhiteSpace(item.HomeroomTeacherName))
+                                {
+                                    <span>@item.HomeroomTeacherName</span>
+                                    @if (!string.IsNullOrWhiteSpace(item.HomeroomTeacherCode))
+                                    {
+                                        <span class="text-muted">(@item.HomeroomTeacherCode)</span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Chưa phân công</span>
+                                }
+                            </td>
+                            <td class="text-center">@item.StudentCount</td>
+                            <td class="text-center">
+                                <div class="d-inline-flex gap-1 flex-wrap justify-content-center">
+                                    <a asp-action="ClassDetails" asp-route-id="@item.Id"
+                                       class="btn btn-secondary btn-sm px-2 py-1" style="font-size: 12px;"
+                                       title="Xem chi tiết">
+                                        <i class="bi bi-eye me-1"></i>Chi tiết
+                                    </a>
+                                    <a asp-action="EditClass" asp-route-id="@item.Id"
+                                       class="btn btn-secondary btn-sm px-2 py-1" style="font-size: 12px;"
+                                       title="Cập nhật">
+                                        <i class="bi bi-pencil-square me-1"></i>Sửa
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        index++;
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
