@@ -19,6 +19,194 @@ public class UserService : IUserService
         _passwordHasher = passwordHasher;
     }
 
+    public async Task<ServiceResult<List<User>>> GetUsersAsync(string? search = null, int? roleId = null, bool? isActive = null)
+    {
+        return ServiceResult<List<User>>.Ok(await _userRepository.GetAllAsync(search, roleId, isActive));
+    }
+
+    public async Task<ServiceResult<List<Role>>> GetRolesAsync()
+    {
+        return ServiceResult<List<Role>>.Ok(await _userRepository.GetRolesAsync());
+    }
+
+    public async Task<ServiceResult<User>> GetUserByIdAsync(int userId)
+    {
+        if (userId <= 0)
+        {
+            return ServiceResult<User>.Fail(ErrorCodes.UserNotFound, "Định danh người dùng không hợp lệ.");
+        }
+
+        var user = await _userRepository.GetByIdAsync(userId);
+        return user == null
+            ? ServiceResult<User>.Fail(ErrorCodes.UserNotFound, "Không tìm thấy người dùng.")
+            : ServiceResult<User>.Ok(user);
+    }
+
+    public async Task<ServiceResult<User>> CreateUserAsync(CreateUserDto dto)
+    {
+        if (dto == null)
+        {
+            return ServiceResult<User>.Fail(ErrorCodes.ValidationFailed, "Dữ liệu người dùng không hợp lệ.");
+        }
+
+        var username = dto.Username.Trim().ToLower();
+        var email = dto.Email.Trim().ToLower();
+        var validation = ValidateUserFields(dto.FullName, dto.PhoneNumber, dto.Gender, dto.DateOfBirth);
+        if (validation != null)
+        {
+            return ServiceResult<User>.Fail(ErrorCodes.ValidationFailed, validation);
+        }
+
+        if (await _userRepository.ExistsByUsernameAsync(username))
+        {
+            return ServiceResult<User>.Fail(ErrorCodes.AuthUsernameDuplicate, "Tên đăng nhập đã được sử dụng.");
+        }
+
+        if (await _userRepository.ExistsByEmailAsync(email))
+        {
+            return ServiceResult<User>.Fail(ErrorCodes.UserEmailDuplicate, "Email đã được sử dụng.");
+        }
+
+        var role = await _userRepository.GetRoleByIdAsync(dto.RoleId);
+        if (role == null)
+        {
+            return ServiceResult<User>.Fail(ErrorCodes.UserRoleInvalid, "Vai trò người dùng không tồn tại.");
+        }
+
+        var user = new User
+        {
+            Username = username,
+            Email = email,
+            FullName = dto.FullName.Trim(),
+            PasswordHash = _passwordHasher.HashPassword(dto.Password),
+            PhoneNumber = NormalizePhone(dto.PhoneNumber),
+            Gender = NormalizeGender(dto.Gender),
+            DateOfBirth = dto.DateOfBirth?.Date,
+            RoleId = role.RoleId,
+            IsActive = dto.IsActive,
+            CreateAt = DateTime.UtcNow
+        };
+
+        await _userRepository.AddAsync(user);
+        await _userRepository.SaveChangesAsync();
+        user.Role = role;
+        return ServiceResult<User>.Ok(user, "Tạo tài khoản thành công.");
+    }
+
+    public async Task<ServiceResult<User>> UpdateUserAccountAsync(int userId, UpdateUserAccountDto dto)
+    {
+        if (dto == null)
+        {
+            return ServiceResult<User>.Fail(ErrorCodes.ValidationFailed, "Dữ liệu người dùng không hợp lệ.");
+        }
+
+        var user = await _userRepository.GetByIdAsync(userId);
+        if (user == null)
+        {
+            return ServiceResult<User>.Fail(ErrorCodes.UserNotFound, "Không tìm thấy người dùng.");
+        }
+
+        var validation = ValidateUserFields(dto.FullName, dto.PhoneNumber, dto.Gender, dto.DateOfBirth);
+        if (validation != null)
+        {
+            return ServiceResult<User>.Fail(ErrorCodes.ValidationFailed, validation);
+        }
+
+        var email = dto.Email.Trim().ToLower();
+        if (await _userRepository.ExistsByEmailAsync(email, userId))
+        {
+            return ServiceResult<User>.Fail(ErrorCodes.UserEmailDuplicate, "Email đã được sử dụng.");
+        }
+
+        var role = await _userRepository.GetRoleByIdAsync(dto.RoleId);
+        if (role == null)
+        {
+            return ServiceResult<User>.Fail(ErrorCodes.UserRoleInvalid, "Vai trò người dùng không tồn tại.");
+        }
+
+        user.Email = email;
+        user.FullName = dto.FullName.Trim();
+        user.PhoneNumber = NormalizePhone(dto.PhoneNumber);
+        user.Gender = NormalizeGender(dto.Gender);
+        user.DateOfBirth = dto.DateOfBirth?.Date;
+        user.RoleId = role.RoleId;
+
+        await _userRepository.UpdateAsync(user);
+        user.Role = role;
+        return ServiceResult<User>.Ok(user, "Cập nhật tài khoản thành công.");
+    }
+
+    public async Task<ServiceResult<bool>> SetUserActiveAsync(int userId, bool isActive)
+    {
+        var user = await _userRepository.GetByIdAsync(userId);
+        if (user == null)
+        {
+            return ServiceResult<bool>.Fail(ErrorCodes.UserNotFound, "Không tìm thấy người dùng.");
+        }
+
+        user.IsActive = isActive;
+        await _userRepository.UpdateAsync(user);
+        return ServiceResult<bool>.Ok(true, isActive ? "Đã kích hoạt tài khoản." : "Đã vô hiệu hóa tài khoản.");
+    }
+
+    public async Task<ServiceResult<bool>> ResetUserPasswordAsync(int userId, ResetUserPasswordDto dto)
+    {
+        if (dto == null || string.IsNullOrWhiteSpace(dto.NewPassword) || dto.NewPassword.Length < 6)
+        {
+            return ServiceResult<bool>.Fail(ErrorCodes.AuthPasswordTooWeak, "Mật khẩu mới phải có ít nhất 6 ký tự.");
+        }
+
+        var user = await _userRepository.GetByIdAsync(userId);
+        if (user == null)
+        {
+            return ServiceResult<bool>.Fail(ErrorCodes.UserNotFound, "Không tìm thấy người dùng.");
+        }
+
+        user.PasswordHash = _passwordHasher.HashPassword(dto.NewPassword);
+        await _userRepository.UpdateAsync(user);
+        return ServiceResult<bool>.Ok(true, "Đã đặt lại mật khẩu cho tài khoản.");
+    }
+
+    private static string? ValidateUserFields(string? fullName, string? phoneNumber, string? gender, DateTime? dateOfBirth)
+    {
+        if (string.IsNullOrWhiteSpace(fullName))
+        {
+            return "Họ và tên không được để trống.";
+        }
+
+        var cleanPhone = NormalizePhone(phoneNumber);
+        if (!string.IsNullOrWhiteSpace(cleanPhone) && !Regex.IsMatch(cleanPhone, @"^0[1-9]\d{8}$"))
+        {
+            return "Số điện thoại không hợp lệ (phải gồm 10 chữ số và bắt đầu bằng số 0).";
+        }
+
+        if (!string.IsNullOrWhiteSpace(gender)
+            && !new[] { "Nam", "Nữ", "Khác" }.Any(x => string.Equals(x, gender.Trim(), StringComparison.OrdinalIgnoreCase)))
+        {
+            return "Giới tính không hợp lệ.";
+        }
+
+        if (dateOfBirth.HasValue && (dateOfBirth.Value.Date >= DateTime.UtcNow.Date || dateOfBirth.Value.Year < 1920))
+        {
+            return "Ngày sinh không hợp lệ.";
+        }
+
+        return null;
+    }
+
+    private static string? NormalizePhone(string? phoneNumber)
+    {
+        return string.IsNullOrWhiteSpace(phoneNumber)
+            ? null
+            : phoneNumber.Trim().Replace(" ", "").Replace(".", "").Replace("-", "");
+    }
+
+    private static string? NormalizeGender(string? gender)
+    {
+        if (string.IsNullOrWhiteSpace(gender)) return null;
+        return new[] { "Nam", "Nữ", "Khác" }.First(x => string.Equals(x, gender.Trim(), StringComparison.OrdinalIgnoreCase));
+    }
+
     public async Task<ServiceResult<User>> GetUserProfileAsync(int userId)
     {
         if (userId <= 0)

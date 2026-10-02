@@ -14,6 +14,37 @@ public class UserRepository : IUserRepository
         _context = context;
     }
 
+    public async Task<List<User>> GetAllAsync(string? search = null, int? roleId = null, bool? isActive = null)
+    {
+        var query = _context.Users
+            .AsNoTracking()
+            .Include(u => u.Role)
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var normalizedSearch = search.Trim().ToLower();
+            query = query.Where(u => u.Username.ToLower().Contains(normalizedSearch)
+                || u.Email.ToLower().Contains(normalizedSearch)
+                || u.FullName.ToLower().Contains(normalizedSearch));
+        }
+
+        if (roleId.HasValue)
+        {
+            query = query.Where(u => u.RoleId == roleId.Value);
+        }
+
+        if (isActive.HasValue)
+        {
+            query = query.Where(u => u.IsActive == isActive.Value);
+        }
+
+        return await query
+            .OrderBy(u => u.FullName)
+            .ThenBy(u => u.Username)
+            .ToListAsync();
+    }
+
     public async Task<User?> GetByUsernameOrEmailAsync(string usernameOrEmail)
     {
         var normalized = usernameOrEmail.Trim().ToLower();
@@ -65,16 +96,30 @@ public class UserRepository : IUserRepository
             .FirstOrDefaultAsync(u => u.Id == id);
     }
 
+    public async Task<Role?> GetRoleByIdAsync(int roleId)
+    {
+        return await _context.Roles.FirstOrDefaultAsync(r => r.RoleId == roleId);
+    }
+
+    public async Task<List<Role>> GetRolesAsync()
+    {
+        return await _context.Roles
+            .AsNoTracking()
+            .OrderBy(r => r.RoleName)
+            .ToListAsync();
+    }
+
     public async Task<bool> ExistsByUsernameAsync(string username)
     {
         var normalized = username.Trim().ToLower();
         return await _context.Users.AnyAsync(u => u.Username.ToLower() == normalized);
     }
 
-    public async Task<bool> ExistsByEmailAsync(string email)
+    public async Task<bool> ExistsByEmailAsync(string email, int? excludedUserId = null)
     {
         var normalized = email.Trim().ToLower();
-        return await _context.Users.AnyAsync(u => u.Email.ToLower() == normalized);
+        return await _context.Users.AnyAsync(u => u.Email.ToLower() == normalized
+            && (!excludedUserId.HasValue || u.Id != excludedUserId.Value));
     }
 
     public async Task AddAsync(User user)

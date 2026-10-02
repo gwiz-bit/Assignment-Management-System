@@ -80,6 +80,8 @@ public static class ErrorCodes
     public const string UserPhoneInvalid       = "USR_002"; // Số điện thoại không hợp lệ
     public const string UserDobInvalid         = "USR_003"; // Ngày sinh không hợp lệ hoặc lớn hơn hiện tại
     public const string UserProfileUpdateFail  = "USR_004"; // Cập nhật hồ sơ cá nhân thất bại
+    public const string UserEmailDuplicate     = "USR_005"; // Email đã được sử dụng
+    public const string UserRoleInvalid        = "USR_006"; // Vai trò không tồn tại
 
     // =========================================================================
     // 9. QUẢN LÝ TỆP TIN & TẢI LÊN (FILE_*)

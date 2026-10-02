@@ -64,7 +64,8 @@
                     </a>
                 </li>
                 <li class="sidebar-menu-item">
-                    <a href="javascript:void(0)" class="sidebar-link">
+                    <a asp-controller="UserManagement" asp-action="Index"
+                       class="sidebar-link @(currentController == "UserManagement" ? "active" : "")">
                         <i class="bi bi-person-gear"></i>
                         <span>Danh sách tài khoản</span>
                     </a>
@@ -142,6 +143,13 @@
 
             <div class="sidebar-section-title">HÀNH CHÍNH & TIẾP NHẬN</div>
             <ul class="sidebar-menu-list">
+                <li class="sidebar-menu-item">
+                    <a asp-controller="UserManagement" asp-action="Index"
+                       class="sidebar-link @(currentController == "UserManagement" ? "active" : "")">
+                        <i class="bi bi-person-gear"></i>
+                        <span>Quản lý tài khoản</span>
+                    </a>
+                </li>
                 <li class="sidebar-menu-item">
                     <a href="javascript:void(0)" class="sidebar-link">
                         <i class="bi bi-file-earmark-check"></i>
