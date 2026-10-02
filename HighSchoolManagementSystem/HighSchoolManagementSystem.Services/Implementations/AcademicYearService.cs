@@ -29,29 +29,37 @@ public class AcademicYearService : IAcademicYearService
         }
     }
 
-    public async Task<ServiceResult<AcademicYear>> CreateAsync(string yearCode, DateTime startDate, DateTime endDate)
+    public async Task<ServiceResult<AcademicYear>> GetByIdAsync(int id)
     {
-        if (string.IsNullOrWhiteSpace(yearCode))
+        try
+        {
+            var year = await _academicYearRepository.GetByIdAsync(id);
+            if (year == null)
+            {
+                return ServiceResult<AcademicYear>.Fail(
+                    ErrorCodes.ResourceNotFound,
+                    "Không tìm thấy năm học.");
+            }
+
+            return ServiceResult<AcademicYear>.Ok(year);
+        }
+        catch
         {
             return ServiceResult<AcademicYear>.Fail(
-                ErrorCodes.ValidationFailed,
-                "Vui lòng nhập mã năm học.");
+                ErrorCodes.DatabaseError,
+                "Không thể tải thông tin năm học. Vui lòng thử lại sau.");
+        }
+    }
+
+    public async Task<ServiceResult<AcademicYear>> CreateAsync(string yearCode, DateTime startDate, DateTime endDate)
+    {
+        var validationError = ValidateInput(yearCode, startDate, endDate);
+        if (validationError != null)
+        {
+            return validationError;
         }
 
         yearCode = yearCode.Trim();
-        if (yearCode.Length > 20)
-        {
-            return ServiceResult<AcademicYear>.Fail(
-                ErrorCodes.ValidationFailed,
-                "Mã năm học không được vượt quá 20 ký tự.");
-        }
-
-        if (startDate.Date >= endDate.Date)
-        {
-            return ServiceResult<AcademicYear>.Fail(
-                ErrorCodes.ValidationFailed,
-                "Ngày kết thúc phải sau ngày bắt đầu.");
-        }
 
         try
         {
@@ -80,5 +88,74 @@ public class AcademicYearService : IAcademicYearService
                 ErrorCodes.DatabaseError,
                 "Không thể tạo năm học. Vui lòng thử lại sau.");
         }
+    }
+
+    public async Task<ServiceResult<AcademicYear>> UpdateAsync(int id, string yearCode, DateTime startDate, DateTime endDate)
+    {
+        var validationError = ValidateInput(yearCode, startDate, endDate);
+        if (validationError != null)
+        {
+            return validationError;
+        }
+
+        yearCode = yearCode.Trim();
+
+        try
+        {
+            var academicYear = await _academicYearRepository.GetTrackedByIdAsync(id);
+            if (academicYear == null)
+            {
+                return ServiceResult<AcademicYear>.Fail(
+                    ErrorCodes.ResourceNotFound,
+                    "Không tìm thấy năm học cần cập nhật.");
+            }
+
+            if (await _academicYearRepository.ExistsByYearCodeAsync(yearCode, excludeId: id))
+            {
+                return ServiceResult<AcademicYear>.Fail(
+                    ErrorCodes.ResourceAlreadyExists,
+                    $"Mã năm học \"{yearCode}\" đã tồn tại trong hệ thống.");
+            }
+
+            academicYear.YearCode = yearCode;
+            academicYear.StartDate = startDate.Date;
+            academicYear.EndDate = endDate.Date;
+
+            await _academicYearRepository.SaveChangesAsync();
+
+            return ServiceResult<AcademicYear>.Ok(academicYear, "Cập nhật năm học thành công.");
+        }
+        catch
+        {
+            return ServiceResult<AcademicYear>.Fail(
+                ErrorCodes.DatabaseError,
+                "Không thể cập nhật năm học. Vui lòng thử lại sau.");
+        }
+    }
+
+    private static ServiceResult<AcademicYear>? ValidateInput(string yearCode, DateTime startDate, DateTime endDate)
+    {
+        if (string.IsNullOrWhiteSpace(yearCode))
+        {
+            return ServiceResult<AcademicYear>.Fail(
+                ErrorCodes.ValidationFailed,
+                "Vui lòng nhập mã năm học.");
+        }
+
+        if (yearCode.Trim().Length > 20)
+        {
+            return ServiceResult<AcademicYear>.Fail(
+                ErrorCodes.ValidationFailed,
+                "Mã năm học không được vượt quá 20 ký tự.");
+        }
+
+        if (startDate.Date >= endDate.Date)
+        {
+            return ServiceResult<AcademicYear>.Fail(
+                ErrorCodes.ValidationFailed,
+                "Ngày kết thúc phải sau ngày bắt đầu.");
+        }
+
+        return null;
     }
 }

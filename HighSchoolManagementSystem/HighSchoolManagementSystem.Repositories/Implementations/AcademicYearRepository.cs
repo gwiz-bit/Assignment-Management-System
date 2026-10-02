@@ -33,11 +33,24 @@ public class AcademicYearRepository : IAcademicYearRepository
             .FirstOrDefaultAsync(y => y.Id == id);
     }
 
-    public async Task<bool> ExistsByYearCodeAsync(string yearCode)
+    public async Task<AcademicYear?> GetTrackedByIdAsync(int id)
+    {
+        return await _context.AcademicYears
+            .FirstOrDefaultAsync(y => y.Id == id);
+    }
+
+    public async Task<bool> ExistsByYearCodeAsync(string yearCode, int? excludeId = null)
     {
         var normalized = yearCode.Trim().ToLower();
-        return await _context.AcademicYears
-            .AnyAsync(y => y.YearCode.ToLower() == normalized);
+        var query = _context.AcademicYears
+            .Where(y => y.YearCode.ToLower() == normalized);
+
+        if (excludeId.HasValue)
+        {
+            query = query.Where(y => y.Id != excludeId.Value);
+        }
+
+        return await query.AnyAsync();
     }
 
     public async Task AddAsync(AcademicYear academicYear)

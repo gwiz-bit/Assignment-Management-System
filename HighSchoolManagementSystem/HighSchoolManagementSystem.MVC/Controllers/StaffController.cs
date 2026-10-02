@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using HighSchoolManagementSystem.MVC.Models.ViewModels;
+using HighSchoolManagementSystem.Services.Common;
 using HighSchoolManagementSystem.Services.Interfaces;
 
 namespace HighSchoolManagementSystem.MVC.Controllers;
@@ -92,6 +93,59 @@ public class StaffController : Controller
         }
 
         TempData["SuccessMessage"] = $"Đã tạo năm học \"{result.Data!.YearCode}\" thành công.";
+        return RedirectToAction(nameof(AcademicYears));
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> EditAcademicYear(int id)
+    {
+        var result = await _academicYearService.GetByIdAsync(id);
+        if (!result.Success || result.Data == null)
+        {
+            TempData["ErrorMessage"] = result.Message ?? "Không tìm thấy năm học.";
+            return RedirectToAction(nameof(AcademicYears));
+        }
+
+        var model = new EditAcademicYearViewModel
+        {
+            Id = result.Data.Id,
+            YearCode = result.Data.YearCode,
+            StartDate = result.Data.StartDate,
+            EndDate = result.Data.EndDate
+        };
+
+        return View(model);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditAcademicYear(EditAcademicYearViewModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        if (model.StartDate.Date >= model.EndDate.Date)
+        {
+            ModelState.AddModelError(nameof(model.EndDate), "Ngày kết thúc phải sau ngày bắt đầu.");
+            return View(model);
+        }
+
+        var result = await _academicYearService.UpdateAsync(model.Id, model.YearCode, model.StartDate, model.EndDate);
+        if (!result.Success)
+        {
+            if (result.ErrorCode == ErrorCodes.ResourceNotFound)
+            {
+                TempData["ErrorMessage"] = result.Message;
+                return RedirectToAction(nameof(AcademicYears));
+            }
+
+            ModelState.AddModelError(string.Empty, result.Message ?? "Không thể cập nhật năm học.");
+            return View(model);
+        }
+
+        TempData["SuccessMessage"] = $"Đã cập nhật năm học \"{result.Data!.YearCode}\" thành công.";
         return RedirectToAction(nameof(AcademicYears));
     }
 

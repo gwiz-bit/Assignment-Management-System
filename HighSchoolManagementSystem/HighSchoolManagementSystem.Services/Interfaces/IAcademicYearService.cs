@@ -6,5 +6,7 @@ namespace HighSchoolManagementSystem.Services.Interfaces;
 public interface IAcademicYearService
 {
     Task<ServiceResult<IReadOnlyList<AcademicYear>>> GetAllAsync();
+    Task<ServiceResult<AcademicYear>> GetByIdAsync(int id);
     Task<ServiceResult<AcademicYear>> CreateAsync(string yearCode, DateTime startDate, DateTime endDate);
+    Task<ServiceResult<AcademicYear>> UpdateAsync(int id, string yearCode, DateTime startDate, DateTime endDate);
 }
