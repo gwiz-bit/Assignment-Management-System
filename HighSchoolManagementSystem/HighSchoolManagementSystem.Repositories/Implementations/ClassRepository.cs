@@ -1,0 +1,43 @@
+using Microsoft.EntityFrameworkCore;
+using HighSchoolManagementSystem.Models.Entities;
+using HighSchoolManagementSystem.Repositories.Data;
+using HighSchoolManagementSystem.Repositories.Interfaces;
+
+namespace HighSchoolManagementSystem.Repositories.Implementations;
+
+public class ClassRepository : IClassRepository
+{
+    private readonly AppDbContext _context;
+
+    public ClassRepository(AppDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task<IReadOnlyList<Class>> GetByFiltersAsync(int? academicYearId, int? gradeLevelId)
+    {
+        var query = _context.Classes
+            .AsNoTracking()
+            .Include(c => c.AcademicYear)
+            .Include(c => c.GradeLevel)
+            .Include(c => c.HomeroomTeacher)!
+                .ThenInclude(t => t!.User)
+            .Include(c => c.StudentClasses)
+            .AsQueryable();
+
+        if (academicYearId.HasValue)
+        {
+            query = query.Where(c => c.AcademicYearId == academicYearId.Value);
+        }
+
+        if (gradeLevelId.HasValue)
+        {
+            query = query.Where(c => c.GradeLevelId == gradeLevelId.Value);
+        }
+
+        return await query
+            .OrderBy(c => c.GradeLevel.LevelCode)
+            .ThenBy(c => c.ClassName)
+            .ToListAsync();
+    }
+}

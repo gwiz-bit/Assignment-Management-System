@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using HighSchoolManagementSystem.MVC.Models.ViewModels;
 using HighSchoolManagementSystem.Services.Common;
 using HighSchoolManagementSystem.Services.Interfaces;
@@ -11,13 +12,19 @@ public class StaffController : Controller
 {
     private readonly IAcademicYearService _academicYearService;
     private readonly ISemesterService _semesterService;
+    private readonly IClassService _classService;
+    private readonly IGradeLevelService _gradeLevelService;
 
     public StaffController(
         IAcademicYearService academicYearService,
-        ISemesterService semesterService)
+        ISemesterService semesterService,
+        IClassService classService,
+        IGradeLevelService gradeLevelService)
     {
         _academicYearService = academicYearService;
         _semesterService = semesterService;
+        _classService = classService;
+        _gradeLevelService = gradeLevelService;
     }
 
     public IActionResult Dashboard()
@@ -413,6 +420,74 @@ public class StaffController : Controller
 
         TempData["SuccessMessage"] = $"Đã cập nhật học kỳ \"{result.Data!.SemesterName}\" thành công.";
         return RedirectToAction(nameof(Semesters), new { academicYearId = model.AcademicYearId });
+    }
+
+    // =========================================================================
+    // LỚP HỌC
+    // =========================================================================
+
+    [HttpGet]
+    public async Task<IActionResult> Classes(int? academicYearId, int? gradeLevelId)
+    {
+        var yearsResult = await _academicYearService.GetAllAsync();
+        var gradesResult = await _gradeLevelService.GetAllAsync();
+
+        if (!yearsResult.Success || !gradesResult.Success)
+        {
+            TempData["ErrorMessage"] = yearsResult.Message ?? gradesResult.Message ?? "Không thể tải bộ lọc lớp học.";
+            return View(new ClassListPageViewModel());
+        }
+
+        // Lần đầu vào trang (không có query): mặc định năm học hiện hành.
+        // Nếu user chọn "-- Tất cả năm học --" thì query có academicYearId rỗng → không gán mặc định.
+        if (!Request.Query.ContainsKey("academicYearId") && !academicYearId.HasValue)
+        {
+            var currentYear = yearsResult.Data!.FirstOrDefault(y => y.IsCurrent);
+            academicYearId = currentYear?.Id;
+        }
+
+        var classesResult = await _classService.GetByFiltersAsync(academicYearId, gradeLevelId);
+        if (!classesResult.Success)
+        {
+            TempData["ErrorMessage"] = classesResult.Message;
+        }
+
+        var page = new ClassListPageViewModel
+        {
+            SelectedAcademicYearId = academicYearId,
+            SelectedGradeLevelId = gradeLevelId,
+            AcademicYears = yearsResult.Data!
+                .Select(y => new SelectListItem
+                {
+                    Value = y.Id.ToString(),
+                    Text = y.IsCurrent ? $"{y.YearCode} (Hiện hành)" : y.YearCode,
+                    Selected = academicYearId == y.Id
+                }),
+            GradeLevels = gradesResult.Data!
+                .Select(g => new SelectListItem
+                {
+                    Value = g.Id.ToString(),
+                    Text = g.LevelName,
+                    Selected = gradeLevelId == g.Id
+                }),
+            Classes = classesResult.Success && classesResult.Data != null
+                ? classesResult.Data
+                    .Select(c => new ClassListItemViewModel
+                    {
+                        Id = c.Id,
+                        ClassName = c.ClassName,
+                        AcademicYearCode = c.AcademicYear.YearCode,
+                        GradeLevelName = c.GradeLevel.LevelName,
+                        GradeLevelCode = c.GradeLevel.LevelCode,
+                        HomeroomTeacherName = c.HomeroomTeacher?.User?.FullName,
+                        HomeroomTeacherCode = c.HomeroomTeacher?.TeacherCode,
+                        StudentCount = c.StudentClasses.Count(sc => sc.Status == "Enrolled" && sc.LeftAt == null)
+                    })
+                    .ToList()
+                : Array.Empty<ClassListItemViewModel>()
+        };
+
+        return View(page);
     }
 
     private async Task PopulateAcademicYearInfoAsync(CreateSemesterViewModel model)

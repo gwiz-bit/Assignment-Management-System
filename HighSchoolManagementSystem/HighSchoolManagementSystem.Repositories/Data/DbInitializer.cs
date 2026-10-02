@@ -289,6 +289,30 @@ public static class DbInitializer
             };
             await context.Classes.AddAsync(class10A2);
         }
+
+        var class11A1 = await context.Classes.FirstOrDefaultAsync(c => c.ClassName == "11A1" && c.AcademicYearId == academicYear.Id);
+        if (class11A1 == null)
+        {
+            await context.Classes.AddAsync(new Class
+            {
+                ClassName = "11A1",
+                AcademicYearId = academicYear.Id,
+                GradeLevelId = grade11.Id,
+                HomeroomTeacherId = teacherGv001?.Id
+            });
+        }
+
+        var class12A1 = await context.Classes.FirstOrDefaultAsync(c => c.ClassName == "12A1" && c.AcademicYearId == academicYear.Id);
+        if (class12A1 == null)
+        {
+            await context.Classes.AddAsync(new Class
+            {
+                ClassName = "12A1",
+                AcademicYearId = academicYear.Id,
+                GradeLevelId = grade12.Id,
+                HomeroomTeacherId = teacherGv999?.Id
+            });
+        }
         await context.SaveChangesAsync();
 
         var math10 = await context.Subjects.FirstOrDefaultAsync(s => s.SubjectCode == "MATH10");

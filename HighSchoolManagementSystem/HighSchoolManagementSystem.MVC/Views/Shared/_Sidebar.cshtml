@@ -120,7 +120,8 @@
                     </a>
                 </li>
                 <li class="sidebar-menu-item">
-                    <a href="javascript:void(0)" class="sidebar-link">
+                    <a asp-controller="Staff" asp-action="Classes"
+                       class="sidebar-link @(currentController == "Staff" && currentAction == "Classes" ? "active" : "")">
                         <i class="bi bi-collection"></i>
                         <span>Danh sách lớp học</span>
                     </a>
