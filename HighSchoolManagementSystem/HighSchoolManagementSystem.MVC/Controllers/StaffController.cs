@@ -14,17 +14,20 @@ public class StaffController : Controller
     private readonly ISemesterService _semesterService;
     private readonly IClassService _classService;
     private readonly IGradeLevelService _gradeLevelService;
+    private readonly ITeacherService _teacherService;
 
     public StaffController(
         IAcademicYearService academicYearService,
         ISemesterService semesterService,
         IClassService classService,
-        IGradeLevelService gradeLevelService)
+        IGradeLevelService gradeLevelService,
+        ITeacherService teacherService)
     {
         _academicYearService = academicYearService;
         _semesterService = semesterService;
         _classService = classService;
         _gradeLevelService = gradeLevelService;
+        _teacherService = teacherService;
     }
 
     public IActionResult Dashboard()
@@ -547,6 +550,88 @@ public class StaffController : Controller
         };
 
         return View(model);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> CreateClass(int? academicYearId)
+    {
+        var model = new CreateClassViewModel();
+        if (academicYearId.HasValue)
+        {
+            model.AcademicYearId = academicYearId.Value;
+        }
+        else
+        {
+            var current = await _academicYearService.GetCurrentAsync();
+            if (current.Success && current.Data != null)
+            {
+                model.AcademicYearId = current.Data.Id;
+            }
+        }
+
+        await PopulateCreateClassDropdownsAsync(model);
+        return View(model);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CreateClass(CreateClassViewModel model)
+    {
+        await PopulateCreateClassDropdownsAsync(model);
+
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        var result = await _classService.CreateAsync(
+            model.ClassName,
+            model.AcademicYearId,
+            model.GradeLevelId,
+            model.HomeroomTeacherId);
+
+        if (!result.Success)
+        {
+            ModelState.AddModelError(string.Empty, result.Message ?? "Không thể tạo lớp học.");
+            return View(model);
+        }
+
+        TempData["SuccessMessage"] = $"Đã tạo lớp \"{result.Data!.ClassName}\" thành công.";
+        return RedirectToAction(nameof(ClassDetails), new { id = result.Data.Id });
+    }
+
+    private async Task PopulateCreateClassDropdownsAsync(CreateClassViewModel model)
+    {
+        var yearsResult = await _academicYearService.GetAllAsync();
+        var gradesResult = await _gradeLevelService.GetAllAsync();
+        var teachersResult = await _teacherService.GetAllTeachersAsync(status: "Active");
+
+        model.AcademicYears = yearsResult.Success && yearsResult.Data != null
+            ? yearsResult.Data.Select(y => new SelectListItem
+            {
+                Value = y.Id.ToString(),
+                Text = y.IsCurrent ? $"{y.YearCode} (Hiện hành)" : y.YearCode,
+                Selected = y.Id == model.AcademicYearId
+            })
+            : Enumerable.Empty<SelectListItem>();
+
+        model.GradeLevels = gradesResult.Success && gradesResult.Data != null
+            ? gradesResult.Data.Select(g => new SelectListItem
+            {
+                Value = g.Id.ToString(),
+                Text = g.LevelName,
+                Selected = g.Id == model.GradeLevelId
+            })
+            : Enumerable.Empty<SelectListItem>();
+
+        model.Teachers = teachersResult.Success && teachersResult.Data != null
+            ? teachersResult.Data.Select(t => new SelectListItem
+            {
+                Value = t.Id.ToString(),
+                Text = $"{t.TeacherCode} - {t.User.FullName}",
+                Selected = model.HomeroomTeacherId == t.Id
+            })
+            : Enumerable.Empty<SelectListItem>();
     }
 
     private async Task PopulateAcademicYearInfoAsync(CreateSemesterViewModel model)

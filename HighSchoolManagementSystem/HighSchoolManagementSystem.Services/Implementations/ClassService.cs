@@ -10,15 +10,18 @@ public class ClassService : IClassService
     private readonly IClassRepository _classRepository;
     private readonly IAcademicYearRepository _academicYearRepository;
     private readonly IGradeLevelRepository _gradeLevelRepository;
+    private readonly ITeacherRepository _teacherRepository;
 
     public ClassService(
         IClassRepository classRepository,
         IAcademicYearRepository academicYearRepository,
-        IGradeLevelRepository gradeLevelRepository)
+        IGradeLevelRepository gradeLevelRepository,
+        ITeacherRepository teacherRepository)
     {
         _classRepository = classRepository;
         _academicYearRepository = academicYearRepository;
         _gradeLevelRepository = gradeLevelRepository;
+        _teacherRepository = teacherRepository;
     }
 
     public async Task<ServiceResult<IReadOnlyList<Class>>> GetByFiltersAsync(int? academicYearId, int? gradeLevelId)
@@ -77,6 +80,84 @@ public class ClassService : IClassService
             return ServiceResult<Class>.Fail(
                 ErrorCodes.DatabaseError,
                 "Không thể tải thông tin lớp học. Vui lòng thử lại sau.");
+        }
+    }
+
+    public async Task<ServiceResult<Class>> CreateAsync(
+        string className,
+        int academicYearId,
+        int gradeLevelId,
+        int? homeroomTeacherId)
+    {
+        if (string.IsNullOrWhiteSpace(className))
+        {
+            return ServiceResult<Class>.Fail(
+                ErrorCodes.ValidationFailed,
+                "Vui lòng nhập tên lớp.");
+        }
+
+        className = className.Trim();
+        if (className.Length > 50)
+        {
+            return ServiceResult<Class>.Fail(
+                ErrorCodes.ValidationFailed,
+                "Tên lớp không được vượt quá 50 ký tự.");
+        }
+
+        try
+        {
+            var year = await _academicYearRepository.GetByIdAsync(academicYearId);
+            if (year == null)
+            {
+                return ServiceResult<Class>.Fail(
+                    ErrorCodes.ResourceNotFound,
+                    "Không tìm thấy năm học để tạo lớp.");
+            }
+
+            var grade = await _gradeLevelRepository.GetByIdAsync(gradeLevelId);
+            if (grade == null)
+            {
+                return ServiceResult<Class>.Fail(
+                    ErrorCodes.ResourceNotFound,
+                    "Không tìm thấy khối lớp đã chọn.");
+            }
+
+            if (homeroomTeacherId.HasValue)
+            {
+                var teacher = await _teacherRepository.GetByIdAsync(homeroomTeacherId.Value);
+                if (teacher == null)
+                {
+                    return ServiceResult<Class>.Fail(
+                        ErrorCodes.TeacherNotFound,
+                        "Không tìm thấy giáo viên chủ nhiệm đã chọn.");
+                }
+            }
+
+            if (await _classRepository.ExistsByNameInYearAsync(className, academicYearId))
+            {
+                return ServiceResult<Class>.Fail(
+                    ErrorCodes.ResourceAlreadyExists,
+                    $"Lớp \"{className}\" đã tồn tại trong năm học {year.YearCode}.");
+            }
+
+            var classEntity = new Class
+            {
+                ClassName = className,
+                AcademicYearId = academicYearId,
+                GradeLevelId = gradeLevelId,
+                HomeroomTeacherId = homeroomTeacherId
+            };
+
+            await _classRepository.AddAsync(classEntity);
+            await _classRepository.SaveChangesAsync();
+
+            return ServiceResult<Class>.Ok(classEntity, "Tạo lớp học thành công.");
+        }
+        catch
+        {
+            return ServiceResult<Class>.Fail(
+                ErrorCodes.DatabaseError,
+                "Không thể tạo lớp học. Vui lòng thử lại sau.");
         }
     }
 }

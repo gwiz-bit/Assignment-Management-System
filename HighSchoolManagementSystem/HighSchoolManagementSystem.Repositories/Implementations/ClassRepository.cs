@@ -61,4 +61,28 @@ public class ClassRepository : IClassRepository
                     .ThenInclude(s => s.User)
             .FirstOrDefaultAsync(c => c.Id == id);
     }
+
+    public async Task<bool> ExistsByNameInYearAsync(string className, int academicYearId, int? excludeId = null)
+    {
+        var normalized = className.Trim().ToLower();
+        var query = _context.Classes
+            .Where(c => c.AcademicYearId == academicYearId && c.ClassName.ToLower() == normalized);
+
+        if (excludeId.HasValue)
+        {
+            query = query.Where(c => c.Id != excludeId.Value);
+        }
+
+        return await query.AnyAsync();
+    }
+
+    public async Task AddAsync(Class classEntity)
+    {
+        await _context.Classes.AddAsync(classEntity);
+    }
+
+    public async Task SaveChangesAsync()
+    {
+        await _context.SaveChangesAsync();
+    }
 }
