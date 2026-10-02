@@ -23,20 +23,36 @@
     </div>
 }
 
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success d-flex align-items-center mb-3" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        <div>@TempData["SuccessMessage"]</div>
+    </div>
+}
+
 <div class="card-table-wrap">
     <div class="card-table-header">
         <div>
             <h2 class="table-card-title">Tất cả năm học</h2>
             <p class="table-card-subtitle">Sắp xếp theo ngày bắt đầu giảm dần (năm mới nhất trước).</p>
         </div>
-        <span class="table-counter-badge">Tổng: @Model.Count năm học</span>
+        <div class="d-flex align-items-center gap-2">
+            <span class="table-counter-badge">Tổng: @Model.Count năm học</span>
+            <a asp-action="CreateAcademicYear" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-lg me-1"></i>Tạo năm học
+            </a>
+        </div>
     </div>
 
     @if (Model.Count == 0)
     {
         <div class="p-4 text-center text-muted">
             <i class="bi bi-calendar-x" style="font-size: 2rem;"></i>
-            <p class="mt-2 mb-0">Chưa có năm học nào trong hệ thống.</p>
+            <p class="mt-2 mb-3">Chưa có năm học nào trong hệ thống.</p>
+            <a asp-action="CreateAcademicYear" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-lg me-1"></i>Tạo năm học đầu tiên
+            </a>
         </div>
     }
     else

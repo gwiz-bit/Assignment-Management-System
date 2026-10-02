@@ -32,4 +32,21 @@ public class AcademicYearRepository : IAcademicYearRepository
             .Include(y => y.Classes)
             .FirstOrDefaultAsync(y => y.Id == id);
     }
+
+    public async Task<bool> ExistsByYearCodeAsync(string yearCode)
+    {
+        var normalized = yearCode.Trim().ToLower();
+        return await _context.AcademicYears
+            .AnyAsync(y => y.YearCode.ToLower() == normalized);
+    }
+
+    public async Task AddAsync(AcademicYear academicYear)
+    {
+        await _context.AcademicYears.AddAsync(academicYear);
+    }
+
+    public async Task SaveChangesAsync()
+    {
+        await _context.SaveChangesAsync();
+    }
 }
