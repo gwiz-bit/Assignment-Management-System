@@ -21,6 +21,22 @@
             </p>
         </div>
 
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success py-2 px-3 mb-3 d-flex align-items-center gap-2" style="font-size: 13.5px; border-radius: 6px; border: 1px solid var(--status-success-border); background-color: var(--status-success-bg); color: var(--status-success-text);" role="alert">
+                <i class="bi bi-check-circle-fill flex-shrink-0"></i>
+                <div>@TempData["SuccessMessage"]</div>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger py-2 px-3 mb-3 d-flex align-items-center gap-2" style="font-size: 13.5px; border-radius: 6px; border: 1px solid var(--status-danger-border); background-color: var(--status-danger-bg); color: var(--status-danger-text);" role="alert">
+                <i class="bi bi-exclamation-triangle-fill flex-shrink-0"></i>
+                <div>@TempData["ErrorMessage"]</div>
+            </div>
+        }
+
         @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty]?.Errors.Count > 0)
         {
             <div class="alert alert-danger py-2 px-3 mb-3 d-flex align-items-center gap-2" style="font-size: 13.5px; border-radius: 6px; border: 1px solid var(--status-danger-border); background-color: var(--status-danger-bg); color: var(--status-danger-text);" role="alert">
@@ -65,6 +81,9 @@
                     <input asp-for="RememberMe" class="form-check-input" style="border-radius: 4px;" />
                     <label asp-for="RememberMe" class="form-check-label text-muted">Ghi nhớ đăng nhập</label>
                 </div>
+                <a asp-action="ForgotPassword" class="text-decoration-none fw-semibold" style="color: var(--tufts-blue-800); font-size: 13px;">
+                    Quên mật khẩu?
+                </a>
             </div>
 
             <button type="submit" class="btn btn-primary w-100 py-2" style="font-size: 14.5px; font-weight: 600;">

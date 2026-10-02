@@ -23,9 +23,15 @@ public class Subject
     [Required]
     [MaxLength(30)]
     [Column("evaluation_type")]
-    public string EvaluationType { get; set; } = "Score"; // Score / PassFail
+    public string EvaluationType { get; set; } = "Score";
 
-    // Navigation properties
+    [Column("is_active")]
+    public bool IsActive { get; set; } = true;
+
+    [MaxLength(500)]
+    [Column("description")]
+    public string? Description { get; set; }
+
     public virtual ICollection<TeachingAssignment> TeachingAssignments { get; set; } = new List<TeachingAssignment>();
     public virtual ICollection<SemesterSubjectResult> SemesterSubjectResults { get; set; } = new List<SemesterSubjectResult>();
 }

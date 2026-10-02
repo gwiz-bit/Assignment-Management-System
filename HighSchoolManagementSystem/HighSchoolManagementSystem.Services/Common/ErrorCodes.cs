@@ -72,4 +72,38 @@ public static class ErrorCodes
     public const string AttendanceAlreadyTaken = "ATT_001"; // Tiết học này đã được điểm danh trước đó
     public const string LeaveRequestReviewed   = "ATT_002"; // Đơn nghỉ phép đã được duyệt, không thể thay đổi
     public const string LeaveRequestNotFound   = "ATT_003"; // Không tìm thấy đơn xin nghỉ phép
+
+    // =========================================================================
+    // 8. NGƯỜI DÙNG & HỒ SƠ (USR_*)
+    // =========================================================================
+    public const string UserNotFound           = "USR_001"; // Không tìm thấy người dùng
+    public const string UserPhoneInvalid       = "USR_002"; // Số điện thoại không hợp lệ
+    public const string UserDobInvalid         = "USR_003"; // Ngày sinh không hợp lệ hoặc lớn hơn hiện tại
+    public const string UserProfileUpdateFail  = "USR_004"; // Cập nhật hồ sơ cá nhân thất bại
+
+    // =========================================================================
+    // 9. QUẢN LÝ TỆP TIN & TẢI LÊN (FILE_*)
+    // =========================================================================
+    public const string FileEmpty              = "FILE_001"; // Tệp tải lên rỗng
+    public const string FileTooLarge           = "FILE_002"; // Dung lượng tệp vượt quá giới hạn (tối đa 2MB)
+    public const string FileInvalidExtension   = "FILE_003"; // Định dạng tệp không được hỗ trợ (chỉ chấp nhận .jpg, .jpeg, .png, .webp)
+    public const string FileSaveFailed         = "FILE_004"; // Lỗi khi lưu tệp tin lên hệ thống
+
+    // =========================================================================
+    // 10. ĐẶT LẠI MẬT KHẨU & EMAIL (MAIL_*)
+    // =========================================================================
+    public const string AuthResetTokenInvalid  = "AUTH_010"; // Mã đặt lại mật khẩu không hợp lệ hoặc đã qua sử dụng
+    public const string AuthResetTokenExpired  = "AUTH_011"; // Mã đặt lại mật khẩu đã hết hạn
+    public const string EmailSendFailed        = "MAIL_001"; // Gửi email thất bại
+    public const string EmailNotConfigured     = "MAIL_002"; // Hệ thống email chưa được cấu hình tài khoản gửi
+
+    public const string SubjectNotFound        = "SUB_001";
+    public const string SubjectCodeDuplicate   = "SUB_002";
+    public const string SubjectCodeInvalid     = "SUB_003";
+    public const string SubjectNameRequired    = "SUB_004";
+    public const string SubjectHasAssignments  = "SUB_005";
+
+    public const string TeacherEmailDuplicate  = "TEA_004";
+    public const string TeacherUsernameDuplicate = "TEA_005";
+    public const string TeacherHasAssignments  = "TEA_006";
 }

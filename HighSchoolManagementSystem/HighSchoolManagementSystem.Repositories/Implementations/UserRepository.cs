@@ -25,6 +25,14 @@ public class UserRepository : IUserRepository
             .FirstOrDefaultAsync(u => u.Username.ToLower() == normalized || u.Email.ToLower() == normalized);
     }
 
+    public async Task<User?> GetByEmailAsync(string email)
+    {
+        var normalized = email.Trim().ToLower();
+        return await _context.Users
+            .Include(u => u.Role)
+            .FirstOrDefaultAsync(u => u.Email.ToLower() == normalized);
+    }
+
     public async Task<User?> GetByIdAsync(int id)
     {
         return await _context.Users
@@ -32,6 +40,28 @@ public class UserRepository : IUserRepository
             .Include(u => u.Teacher)
             .Include(u => u.Student)
             .Include(u => u.Parent)
+            .FirstOrDefaultAsync(u => u.Id == id);
+    }
+
+    public async Task<User?> GetUserFullProfileByIdAsync(int id)
+    {
+        return await _context.Users
+            .Include(u => u.Role)
+            .Include(u => u.Teacher)
+                .ThenInclude(t => t!.HomeroomClasses)
+            .Include(u => u.Student)
+                .ThenInclude(s => s!.Parent)
+                    .ThenInclude(p => p!.User)
+            .Include(u => u.Student)
+                .ThenInclude(s => s!.StudentClasses)
+                    .ThenInclude(sc => sc.Class)
+            .Include(u => u.Parent)
+                .ThenInclude(p => p!.Students)
+                    .ThenInclude(s => s.User)
+            .Include(u => u.Parent)
+                .ThenInclude(p => p!.Students)
+                    .ThenInclude(s => s.StudentClasses)
+                        .ThenInclude(sc => sc.Class)
             .FirstOrDefaultAsync(u => u.Id == id);
     }
 
@@ -50,6 +80,12 @@ public class UserRepository : IUserRepository
     public async Task AddAsync(User user)
     {
         await _context.Users.AddAsync(user);
+    }
+
+    public async Task UpdateAsync(User user)
+    {
+        _context.Users.Update(user);
+        await _context.SaveChangesAsync();
     }
 
     public async Task SaveChangesAsync()

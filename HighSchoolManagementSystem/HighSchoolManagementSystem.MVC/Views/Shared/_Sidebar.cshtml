@@ -47,9 +47,10 @@
                     </a>
                 </li>
                 <li class="sidebar-menu-item">
-                    <a href="javascript:void(0)" class="sidebar-link">
+                    <a asp-controller="TeacherManagement" asp-action="Index" 
+                       class="sidebar-link @(currentController == "TeacherManagement" ? "active" : "")">
                         <i class="bi bi-people"></i>
-                        <span>Thống kê nhân sự</span>
+                        <span>Hồ sơ giáo viên</span>
                     </a>
                 </li>
             </ul>
@@ -93,9 +94,23 @@
             <ul class="sidebar-menu-list">
                 <li class="sidebar-menu-item">
                     <a asp-controller="Staff" asp-action="AcademicYears"
-                       class="sidebar-link @(currentController == "Staff" && currentAction == "AcademicYears" ? "active" : "")">
+                       class="sidebar-link @(currentController == "Staff" && (currentAction == "AcademicYears" || currentAction == "CreateAcademicYear" || currentAction == "EditAcademicYear" || currentAction == "Semesters" || currentAction == "CreateSemester" || currentAction == "EditSemester") ? "active" : "")">
                         <i class="bi bi-calendar-event"></i>
                         <span>Danh sách năm học</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a asp-controller="TeacherManagement" asp-action="Index"
+                       class="sidebar-link @(currentController == "TeacherManagement" ? "active" : "")">
+                        <i class="bi bi-people-fill"></i>
+                        <span>Hồ sơ giáo viên</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a asp-controller="Subject" asp-action="Index"
+                       class="sidebar-link @(currentController == "Subject" ? "active" : "")">
+                        <i class="bi bi-journal-bookmark-fill"></i>
+                        <span>Danh mục môn học</span>
                     </a>
                 </li>
                 <li class="sidebar-menu-item">
@@ -323,6 +338,27 @@
                     <a asp-controller="Home" asp-action="Index" class="sidebar-link active">
                         <i class="bi bi-house"></i>
                         <span>Trang chủ cổng</span>
+                    </a>
+                </li>
+            </ul>
+        }
+
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <div class="sidebar-section-title">TÀI KHOẢN</div>
+            <ul class="sidebar-menu-list">
+                <li class="sidebar-menu-item">
+                    <a asp-controller="Profile" asp-action="Index" 
+                       class="sidebar-link @(currentController == "Profile" && currentAction == "Index" ? "active" : "")">
+                        <i class="bi bi-person-circle"></i>
+                        <span>Hồ sơ cá nhân</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a asp-controller="Profile" asp-action="ChangePassword" 
+                       class="sidebar-link @(currentController == "Profile" && currentAction == "ChangePassword" ? "active" : "")">
+                        <i class="bi bi-key-fill"></i>
+                        <span>Đổi mật khẩu</span>
                     </a>
                 </li>
             </ul>
