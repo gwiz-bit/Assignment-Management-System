@@ -18,4 +18,6 @@ public interface IClassService
         int academicYearId,
         int gradeLevelId,
         int? homeroomTeacherId);
+    Task<ServiceResult<IReadOnlyList<Class>>> GetAccessibleClassesForTeacherAsync(int teacherId);
+    Task<ServiceResult<Class>> GetClassStudentsForViewerAsync(int classId, int? teacherId = null);
 }

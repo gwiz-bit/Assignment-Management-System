@@ -243,4 +243,61 @@ public class ClassService : IClassService
                 "Không thể cập nhật lớp học. Vui lòng thử lại sau.");
         }
     }
+
+    public async Task<ServiceResult<IReadOnlyList<Class>>> GetAccessibleClassesForTeacherAsync(int teacherId)
+    {
+        try
+        {
+            var teacher = await _teacherRepository.GetByIdAsync(teacherId);
+            if (teacher == null)
+            {
+                return ServiceResult<IReadOnlyList<Class>>.Fail(
+                    ErrorCodes.TeacherNotFound,
+                    "Không tìm thấy hồ sơ giáo viên.");
+            }
+
+            var classes = await _classRepository.GetAccessibleByTeacherIdAsync(teacherId);
+            return ServiceResult<IReadOnlyList<Class>>.Ok(classes);
+        }
+        catch
+        {
+            return ServiceResult<IReadOnlyList<Class>>.Fail(
+                ErrorCodes.DatabaseError,
+                "Không thể tải danh sách lớp của giáo viên.");
+        }
+    }
+
+    public async Task<ServiceResult<Class>> GetClassStudentsForViewerAsync(int classId, int? teacherId = null)
+    {
+        try
+        {
+            var classEntity = await _classRepository.GetByIdWithDetailsAsync(classId);
+            if (classEntity == null)
+            {
+                return ServiceResult<Class>.Fail(
+                    ErrorCodes.ClassNotFound,
+                    "Không tìm thấy lớp học.");
+            }
+
+            // teacherId == null → Staff/Principal (toàn quyền xem)
+            if (teacherId.HasValue)
+            {
+                var authorized = await _classRepository.IsTeacherAuthorizedAsync(teacherId.Value, classId);
+                if (!authorized)
+                {
+                    return ServiceResult<Class>.Fail(
+                        ErrorCodes.AuthForbidden,
+                        "Bạn không được phân công hoặc chủ nhiệm lớp này.");
+                }
+            }
+
+            return ServiceResult<Class>.Ok(classEntity);
+        }
+        catch
+        {
+            return ServiceResult<Class>.Fail(
+                ErrorCodes.DatabaseError,
+                "Không thể tải danh sách học sinh của lớp.");
+        }
+    }
 }

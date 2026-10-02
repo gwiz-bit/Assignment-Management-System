@@ -553,6 +553,44 @@ public class StaffController : Controller
     }
 
     [HttpGet]
+    public async Task<IActionResult> ClassStudents(int id)
+    {
+        var result = await _classService.GetClassStudentsForViewerAsync(id);
+        if (!result.Success || result.Data == null)
+        {
+            TempData["ErrorMessage"] = result.Message ?? "Không tìm thấy lớp học.";
+            return RedirectToAction(nameof(Classes));
+        }
+
+        var c = result.Data;
+        var model = new ClassStudentsPageViewModel
+        {
+            ClassId = c.Id,
+            ClassName = c.ClassName,
+            AcademicYearId = c.AcademicYearId,
+            AcademicYearCode = c.AcademicYear.YearCode,
+            GradeLevelName = c.GradeLevel.LevelName,
+            HomeroomTeacherName = c.HomeroomTeacher?.User?.FullName,
+            AccessContext = "Staff",
+            Students = c.StudentClasses
+                .Where(sc => sc.Status == "Enrolled" && sc.LeftAt == null)
+                .OrderBy(sc => sc.Student.StudentCode)
+                .Select(sc => new ClassStudentItemViewModel
+                {
+                    StudentCode = sc.Student.StudentCode,
+                    StudentName = sc.Student.User.FullName,
+                    Gender = sc.Student.User.Gender,
+                    PhoneNumber = sc.Student.User.PhoneNumber,
+                    JoinedAt = sc.JoinedAt,
+                    EnrollmentStatus = sc.Status
+                })
+                .ToList()
+        };
+
+        return View("~/Views/Shared/ClassStudents.cshtml", model);
+    }
+
+    [HttpGet]
     public async Task<IActionResult> CreateClass(int? academicYearId)
     {
         var model = new CreateClassViewModel();

@@ -1,0 +1,99 @@
+@model HighSchoolManagementSystem.MVC.Models.ViewModels.ClassStudentsPageViewModel
+@{
+    ViewData["Title"] = $"Học sinh lớp {Model.ClassName}";
+}
+
+<div class="greeting-banner">
+    <div class="greeting-text-wrap">
+        <span class="greeting-kicker">
+            <i class="bi bi-circle-fill" style="font-size: 7px;"></i>
+            @(Model.AccessContext == "Teacher" ? "LỚP CHỦ NHIỆM / GIẢNG DẠY" : "QUẢN LÝ ĐÀO TẠO")
+        </span>
+        <h1 class="greeting-title">Học sinh lớp @Model.ClassName</h1>
+        <p class="greeting-subtitle">
+            @Model.GradeLevelName · Năm học @Model.AcademicYearCode
+            @if (!string.IsNullOrWhiteSpace(Model.HomeroomTeacherName))
+            {
+                <span>· GVCN: @Model.HomeroomTeacherName</span>
+            }
+        </p>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        @if (Model.AccessContext == "Teacher")
+        {
+            <a asp-controller="Teacher" asp-action="MyClasses" class="btn btn-secondary btn-sm">
+                <i class="bi bi-arrow-left me-1"></i>Lớp của tôi
+            </a>
+        }
+        else
+        {
+            <a asp-controller="Staff" asp-action="ClassDetails" asp-route-id="@Model.ClassId" class="btn btn-secondary btn-sm">
+                <i class="bi bi-arrow-left me-1"></i>Chi tiết lớp
+            </a>
+        }
+    </div>
+</div>
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger d-flex align-items-center mb-3" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <div>@TempData["ErrorMessage"]</div>
+    </div>
+}
+
+<div class="card-table-wrap">
+    <div class="card-table-header">
+        <div>
+            <h2 class="table-card-title">Danh sách học sinh</h2>
+            <p class="table-card-subtitle">Chỉ hiển thị học sinh đang theo học (Enrolled) tại lớp.</p>
+        </div>
+        <span class="table-counter-badge">@Model.Students.Count học sinh</span>
+    </div>
+
+    @if (Model.Students.Count == 0)
+    {
+        <div class="p-4 text-center text-muted">
+            <i class="bi bi-people" style="font-size: 2rem;"></i>
+            <p class="mt-2 mb-0">Chưa có học sinh nào trong lớp.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table-edu mb-0">
+                <thead>
+                    <tr>
+                        <th style="width: 70px;">#</th>
+                        <th>Mã HS</th>
+                        <th>Họ tên</th>
+                        <th>Giới tính</th>
+                        <th>Số điện thoại</th>
+                        <th>Ngày vào lớp</th>
+                        <th class="text-center">Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        var index = 1;
+                    }
+                    @foreach (var item in Model.Students)
+                    {
+                        <tr>
+                            <td>@index</td>
+                            <td><strong>@item.StudentCode</strong></td>
+                            <td>@item.StudentName</td>
+                            <td>@(string.IsNullOrWhiteSpace(item.Gender) ? "—" : item.Gender)</td>
+                            <td>@(string.IsNullOrWhiteSpace(item.PhoneNumber) ? "—" : item.PhoneNumber)</td>
+                            <td>@item.JoinedAt.ToString("dd/MM/yyyy")</td>
+                            <td class="text-center">
+                                <span class="badge-status badge-status-success">@item.EnrollmentStatus</span>
+                            </td>
+                        </tr>
+                        index++;
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

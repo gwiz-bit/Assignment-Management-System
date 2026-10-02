@@ -6,6 +6,7 @@ public interface ITeacherRepository
 {
     Task<IEnumerable<Teacher>> GetAllAsync(string? searchTerm = null, string? specialization = null, string? status = null);
     Task<Teacher?> GetByIdAsync(int id);
+    Task<Teacher?> GetByUserIdAsync(int userId);
     Task<Teacher?> GetByIdWithDetailsAsync(int id);
     Task<Teacher?> GetByCodeAsync(string teacherCode);
     Task<bool> ExistsByCodeAsync(string teacherCode, int? excludeId = null);
