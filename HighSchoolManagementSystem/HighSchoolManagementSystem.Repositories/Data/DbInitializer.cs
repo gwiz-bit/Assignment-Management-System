@@ -163,5 +163,84 @@ public static class DbInitializer
         }
 
         await context.SaveChangesAsync();
+
+        // 4. Seed năm học mẫu (để Staff xem danh sách)
+        await SeedAcademicYearsAsync(context);
+    }
+
+    private static async Task SeedAcademicYearsAsync(AppDbContext context)
+    {
+        var sampleYears = new List<AcademicYear>
+        {
+            new AcademicYear
+            {
+                YearCode = "2024-2025",
+                StartDate = new DateTime(2024, 9, 5),
+                EndDate = new DateTime(2025, 5, 31)
+            },
+            new AcademicYear
+            {
+                YearCode = "2025-2026",
+                StartDate = new DateTime(2025, 9, 5),
+                EndDate = new DateTime(2026, 5, 31)
+            },
+            new AcademicYear
+            {
+                YearCode = "2026-2027",
+                StartDate = new DateTime(2026, 9, 5),
+                EndDate = new DateTime(2027, 5, 31)
+            }
+        };
+
+        foreach (var year in sampleYears)
+        {
+            if (!await context.AcademicYears.AnyAsync(y => y.YearCode == year.YearCode))
+            {
+                await context.AcademicYears.AddAsync(year);
+            }
+        }
+
+        await context.SaveChangesAsync();
+
+        var year2025 = await context.AcademicYears.FirstAsync(y => y.YearCode == "2025-2026");
+        var year2026 = await context.AcademicYears.FirstAsync(y => y.YearCode == "2026-2027");
+
+        var sampleSemesters = new List<Semester>
+        {
+            new Semester
+            {
+                SemesterCode = "HK1-2526",
+                SemesterName = "Học kỳ 1",
+                StartDate = new DateTime(2025, 9, 5),
+                EndDate = new DateTime(2026, 1, 15),
+                AcademicYearId = year2025.Id
+            },
+            new Semester
+            {
+                SemesterCode = "HK2-2526",
+                SemesterName = "Học kỳ 2",
+                StartDate = new DateTime(2026, 1, 20),
+                EndDate = new DateTime(2026, 5, 31),
+                AcademicYearId = year2025.Id
+            },
+            new Semester
+            {
+                SemesterCode = "HK1-2627",
+                SemesterName = "Học kỳ 1",
+                StartDate = new DateTime(2026, 9, 5),
+                EndDate = new DateTime(2027, 1, 15),
+                AcademicYearId = year2026.Id
+            }
+        };
+
+        foreach (var semester in sampleSemesters)
+        {
+            if (!await context.Semesters.AnyAsync(s => s.SemesterCode == semester.SemesterCode))
+            {
+                await context.Semesters.AddAsync(semester);
+            }
+        }
+
+        await context.SaveChangesAsync();
     }
 }
