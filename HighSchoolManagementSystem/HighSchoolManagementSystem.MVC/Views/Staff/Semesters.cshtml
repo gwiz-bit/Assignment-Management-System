@@ -1,0 +1,162 @@
+@model HighSchoolManagementSystem.MVC.Models.ViewModels.SemesterListPageViewModel
+@{
+    ViewData["Title"] = $"Học kỳ - {Model.AcademicYearCode}";
+    var activeSemester = Model.Semesters.FirstOrDefault(s => s.IsActive);
+}
+
+<div class="greeting-banner">
+    <div class="greeting-text-wrap">
+        <span class="greeting-kicker">
+            <i class="bi bi-circle-fill" style="font-size: 7px;"></i> QUẢN LÝ ĐÀO TẠO
+        </span>
+        <h1 class="greeting-title">Học kỳ năm @Model.AcademicYearCode</h1>
+        <p class="greeting-subtitle">
+            Quản lý danh sách học kỳ thuộc năm học
+            @Model.AcademicYearStartDate.ToString("dd/MM/yyyy") – @Model.AcademicYearEndDate.ToString("dd/MM/yyyy").
+            @if (Model.IsCurrentAcademicYear)
+            {
+                <span class="badge-status badge-status-success ms-1">Năm hiện hành</span>
+            }
+        </p>
+    </div>
+</div>
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger d-flex align-items-center mb-3" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <div>@TempData["ErrorMessage"]</div>
+    </div>
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success d-flex align-items-center mb-3" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        <div>@TempData["SuccessMessage"]</div>
+    </div>
+}
+
+<div class="card-table-wrap">
+    <div class="card-table-header">
+        <div>
+            <h2 class="table-card-title">Danh sách học kỳ</h2>
+            <p class="table-card-subtitle">Chỉ một học kỳ đang mở trên toàn hệ thống tại một thời điểm.</p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            @if (activeSemester != null)
+            {
+                <span class="table-counter-badge" style="background: var(--status-success-bg); color: var(--status-success-text); border-color: var(--status-success-border);">
+                    Đang mở: @activeSemester.SemesterCode
+                </span>
+            }
+            else
+            {
+                <span class="table-counter-badge" style="background: var(--status-warning-bg); color: var(--status-warning-text); border-color: var(--status-warning-border);">
+                    Chưa có học kỳ đang mở trong năm này
+                </span>
+            }
+            <span class="table-counter-badge">Tổng: @Model.Semesters.Count học kỳ</span>
+            <a asp-action="AcademicYears" class="btn btn-secondary btn-sm">
+                <i class="bi bi-arrow-left me-1"></i>Năm học
+            </a>
+            <a asp-action="CreateSemester" asp-route-academicYearId="@Model.AcademicYearId" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-lg me-1"></i>Tạo học kỳ
+            </a>
+        </div>
+    </div>
+
+    @if (Model.Semesters.Count == 0)
+    {
+        <div class="p-4 text-center text-muted">
+            <i class="bi bi-journal-x" style="font-size: 2rem;"></i>
+            <p class="mt-2 mb-3">Năm học này chưa có học kỳ nào.</p>
+            <a asp-action="CreateSemester" asp-route-academicYearId="@Model.AcademicYearId" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-lg me-1"></i>Tạo học kỳ đầu tiên
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table-edu mb-0">
+                <thead>
+                    <tr>
+                        <th style="width: 70px;">#</th>
+                        <th>Mã học kỳ</th>
+                        <th>Tên học kỳ</th>
+                        <th>Ngày bắt đầu</th>
+                        <th>Ngày kết thúc</th>
+                        <th class="text-center">Thời gian</th>
+                        <th class="text-center">Trạng thái</th>
+                        <th class="text-center" style="width: 240px;">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        var index = 1;
+                    }
+                    @foreach (var item in Model.Semesters)
+                    {
+                        <tr>
+                            <td>@index</td>
+                            <td><strong>@item.SemesterCode</strong></td>
+                            <td>@item.SemesterName</td>
+                            <td>@item.StartDate.ToString("dd/MM/yyyy")</td>
+                            <td>@item.EndDate.ToString("dd/MM/yyyy")</td>
+                            <td class="text-center">
+                                <span class="badge-status @item.PeriodStatusCssClass">@item.PeriodStatus</span>
+                            </td>
+                            <td class="text-center">
+                                @if (item.IsActive)
+                                {
+                                    <span class="badge-status badge-status-success">Đang mở</span>
+                                }
+                                else
+                                {
+                                    <span class="badge-status badge-status-danger">Đã đóng</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                <div class="d-inline-flex gap-1 flex-wrap justify-content-center">
+                                    <a asp-action="EditSemester" asp-route-id="@item.Id"
+                                       class="btn btn-secondary btn-sm px-2 py-1" style="font-size: 12px;"
+                                       title="Cập nhật">
+                                        <i class="bi bi-pencil-square me-1"></i>Sửa
+                                    </a>
+                                    @if (item.IsActive)
+                                    {
+                                        <form asp-action="CloseSemester" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@item.Id" />
+                                            <input type="hidden" name="academicYearId" value="@Model.AcademicYearId" />
+                                            <button type="submit" class="btn btn-secondary btn-sm px-2 py-1" style="font-size: 12px;"
+                                                    title="Đóng học kỳ"
+                                                    onclick="return confirm('Đóng học kỳ @item.SemesterCode?');">
+                                                <i class="bi bi-lock me-1"></i>Đóng
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <form asp-action="ActivateSemester" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@item.Id" />
+                                            <input type="hidden" name="academicYearId" value="@Model.AcademicYearId" />
+                                            <button type="submit" class="btn btn-primary btn-sm px-2 py-1" style="font-size: 12px;"
+                                                    title="Kích hoạt học kỳ"
+                                                    onclick="return confirm('Kích hoạt học kỳ @item.SemesterCode?\nHọc kỳ đang mở khác (nếu có) sẽ bị đóng.');">
+                                                <i class="bi bi-unlock me-1"></i>Kích hoạt
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                        index++;
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

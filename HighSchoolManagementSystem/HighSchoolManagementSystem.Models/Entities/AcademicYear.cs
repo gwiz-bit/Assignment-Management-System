@@ -21,6 +21,9 @@ public class AcademicYear
     [Column("end_date")]
     public DateTime EndDate { get; set; }
 
+    [Column("is_current")]
+    public bool IsCurrent { get; set; }
+
     // Navigation properties
     public virtual ICollection<Semester> Semesters { get; set; } = new List<Semester>();
     public virtual ICollection<Class> Classes { get; set; } = new List<Class>();

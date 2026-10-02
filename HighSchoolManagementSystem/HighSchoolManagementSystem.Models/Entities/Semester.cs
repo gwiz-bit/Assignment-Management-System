@@ -26,6 +26,12 @@ public class Semester
     [Column("end_date")]
     public DateTime EndDate { get; set; }
 
+    /// <summary>
+    /// Học kỳ đang mở (active) để vận hành. Tối đa 1 học kỳ active toàn hệ thống.
+    /// </summary>
+    [Column("is_active")]
+    public bool IsActive { get; set; }
+
     [Column("academic_year_id")]
     public int AcademicYearId { get; set; }
 

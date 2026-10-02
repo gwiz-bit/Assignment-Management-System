@@ -22,16 +22,20 @@ builder.Services.AddSingleton(emailSettings);
 
 // Repositories & Services DI
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IAcademicYearRepository, AcademicYearRepository>();
+builder.Services.AddScoped<ISemesterRepository, SemesterRepository>();
 builder.Services.AddScoped<ISubjectRepository, SubjectRepository>();
 builder.Services.AddScoped<ITeacherRepository, TeacherRepository>();
 builder.Services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IFileStorageService>(sp => 
+builder.Services.AddScoped<IFileStorageService>(sp =>
     new FileStorageService(builder.Environment.WebRootPath));
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<ISubjectService, SubjectService>();
 builder.Services.AddScoped<ITeacherService, TeacherService>();
+builder.Services.AddScoped<IAcademicYearService, AcademicYearService>();
+builder.Services.AddScoped<ISemesterService, SemesterService>();
 
 // Cookie Authentication (No Identity)
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
