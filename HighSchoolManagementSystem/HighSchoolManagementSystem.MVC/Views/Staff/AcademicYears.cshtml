@@ -83,7 +83,7 @@
                         <th class="text-center">Số học kỳ</th>
                         <th class="text-center">Số lớp</th>
                         <th class="text-center">Trạng thái</th>
-                        <th class="text-center" style="width: 220px;">Thao tác</th>
+                        <th class="text-center" style="width: 280px;">Thao tác</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -103,13 +103,22 @@
                             </td>
                             <td>@item.StartDate.ToString("dd/MM/yyyy")</td>
                             <td>@item.EndDate.ToString("dd/MM/yyyy")</td>
-                            <td class="text-center">@item.SemesterCount</td>
+                            <td class="text-center">
+                                <a asp-action="Semesters" asp-route-academicYearId="@item.Id" class="text-decoration-none">
+                                    @item.SemesterCount
+                                </a>
+                            </td>
                             <td class="text-center">@item.ClassCount</td>
                             <td class="text-center">
                                 <span class="badge-status @item.StatusCssClass">@item.Status</span>
                             </td>
                             <td class="text-center">
                                 <div class="d-inline-flex gap-1 flex-wrap justify-content-center">
+                                    <a asp-action="Semesters" asp-route-academicYearId="@item.Id"
+                                       class="btn btn-secondary btn-sm px-2 py-1" style="font-size: 12px;"
+                                       title="Quản lý học kỳ">
+                                        <i class="bi bi-journal-text me-1"></i>Học kỳ
+                                    </a>
                                     <a asp-action="EditAcademicYear" asp-route-id="@item.Id"
                                        class="btn btn-secondary btn-sm px-2 py-1" style="font-size: 12px;"
                                        title="Cập nhật">

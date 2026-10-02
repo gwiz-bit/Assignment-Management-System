@@ -10,10 +10,14 @@ namespace HighSchoolManagementSystem.MVC.Controllers;
 public class StaffController : Controller
 {
     private readonly IAcademicYearService _academicYearService;
+    private readonly ISemesterService _semesterService;
 
-    public StaffController(IAcademicYearService academicYearService)
+    public StaffController(
+        IAcademicYearService academicYearService,
+        ISemesterService semesterService)
     {
         _academicYearService = academicYearService;
+        _semesterService = semesterService;
     }
 
     public IActionResult Dashboard()
@@ -57,8 +61,6 @@ public class StaffController : Controller
     public IActionResult CreateAcademicYear()
     {
         var currentYear = DateTime.Today.Year;
-        // Nếu đang từ tháng 1-5: năm học đang chạy là (currentYear-1)-currentYear
-        // Từ tháng 6 trở đi: gợi ý năm học mới currentYear-(currentYear+1)
         var startYear = DateTime.Today.Month >= 6 ? currentYear : currentYear - 1;
 
         var model = new CreateAcademicYearViewModel
@@ -165,6 +167,239 @@ public class StaffController : Controller
         }
 
         return RedirectToAction(nameof(AcademicYears));
+    }
+
+    // =========================================================================
+    // HỌC KỲ
+    // =========================================================================
+
+    [HttpGet]
+    public async Task<IActionResult> Semesters(int academicYearId)
+    {
+        var yearResult = await _academicYearService.GetByIdAsync(academicYearId);
+        if (!yearResult.Success || yearResult.Data == null)
+        {
+            TempData["ErrorMessage"] = yearResult.Message ?? "Không tìm thấy năm học.";
+            return RedirectToAction(nameof(AcademicYears));
+        }
+
+        var semesterResult = await _semesterService.GetByAcademicYearIdAsync(academicYearId);
+        if (!semesterResult.Success)
+        {
+            TempData["ErrorMessage"] = semesterResult.Message;
+            return RedirectToAction(nameof(AcademicYears));
+        }
+
+        var today = DateTime.Today;
+        var year = yearResult.Data;
+        var page = new SemesterListPageViewModel
+        {
+            AcademicYearId = year.Id,
+            AcademicYearCode = year.YearCode,
+            AcademicYearStartDate = year.StartDate,
+            AcademicYearEndDate = year.EndDate,
+            IsCurrentAcademicYear = year.IsCurrent,
+            Semesters = semesterResult.Data!
+                .Select(s =>
+                {
+                    var (status, css) = ResolveStatus(s.StartDate, s.EndDate, today);
+                    return new SemesterListItemViewModel
+                    {
+                        Id = s.Id,
+                        SemesterCode = s.SemesterCode,
+                        SemesterName = s.SemesterName,
+                        StartDate = s.StartDate,
+                        EndDate = s.EndDate,
+                        Status = status,
+                        StatusCssClass = css
+                    };
+                })
+                .ToList()
+        };
+
+        return View(page);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> CreateSemester(int academicYearId)
+    {
+        var yearResult = await _academicYearService.GetByIdAsync(academicYearId);
+        if (!yearResult.Success || yearResult.Data == null)
+        {
+            TempData["ErrorMessage"] = yearResult.Message ?? "Không tìm thấy năm học.";
+            return RedirectToAction(nameof(AcademicYears));
+        }
+
+        var year = yearResult.Data;
+        var existing = await _semesterService.GetByAcademicYearIdAsync(academicYearId);
+        var nextIndex = (existing.Data?.Count ?? 0) + 1;
+
+        var yearParts = year.YearCode.Split('-', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        var yearSuffix = yearParts.Length == 2
+                         && yearParts[0].Length >= 2
+                         && yearParts[1].Length >= 2
+            ? $"{yearParts[0][^2..]}{yearParts[1][^2..]}"
+            : year.Id.ToString();
+
+        // Gợi ý HK1: nửa đầu năm học, HK2: nửa sau
+        var midPoint = year.StartDate.AddDays((year.EndDate - year.StartDate).TotalDays / 2);
+        DateTime suggestStart;
+        DateTime suggestEnd;
+        if (nextIndex == 1)
+        {
+            suggestStart = year.StartDate;
+            suggestEnd = midPoint;
+        }
+        else
+        {
+            suggestStart = midPoint.AddDays(1);
+            suggestEnd = year.EndDate;
+        }
+
+        var model = new CreateSemesterViewModel
+        {
+            AcademicYearId = year.Id,
+            AcademicYearCode = year.YearCode,
+            AcademicYearStartDate = year.StartDate,
+            AcademicYearEndDate = year.EndDate,
+            SemesterCode = $"HK{nextIndex}-{yearSuffix}",
+            SemesterName = $"Học kỳ {nextIndex}",
+            StartDate = suggestStart.Date,
+            EndDate = suggestEnd.Date
+        };
+
+        return View(model);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CreateSemester(CreateSemesterViewModel model)
+    {
+        await PopulateAcademicYearInfoAsync(model);
+
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        if (model.StartDate.Date >= model.EndDate.Date)
+        {
+            ModelState.AddModelError(nameof(model.EndDate), "Ngày kết thúc phải sau ngày bắt đầu.");
+            return View(model);
+        }
+
+        var result = await _semesterService.CreateAsync(
+            model.AcademicYearId,
+            model.SemesterCode,
+            model.SemesterName,
+            model.StartDate,
+            model.EndDate);
+
+        if (!result.Success)
+        {
+            if (result.ErrorCode == ErrorCodes.ResourceNotFound)
+            {
+                TempData["ErrorMessage"] = result.Message;
+                return RedirectToAction(nameof(AcademicYears));
+            }
+
+            ModelState.AddModelError(string.Empty, result.Message ?? "Không thể tạo học kỳ.");
+            return View(model);
+        }
+
+        TempData["SuccessMessage"] = $"Đã tạo học kỳ \"{result.Data!.SemesterName}\" thành công.";
+        return RedirectToAction(nameof(Semesters), new { academicYearId = model.AcademicYearId });
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> EditSemester(int id)
+    {
+        var result = await _semesterService.GetByIdAsync(id);
+        if (!result.Success || result.Data == null)
+        {
+            TempData["ErrorMessage"] = result.Message ?? "Không tìm thấy học kỳ.";
+            return RedirectToAction(nameof(AcademicYears));
+        }
+
+        var semester = result.Data;
+        var year = semester.AcademicYear;
+
+        var model = new EditSemesterViewModel
+        {
+            Id = semester.Id,
+            AcademicYearId = semester.AcademicYearId,
+            AcademicYearCode = year.YearCode,
+            AcademicYearStartDate = year.StartDate,
+            AcademicYearEndDate = year.EndDate,
+            SemesterCode = semester.SemesterCode,
+            SemesterName = semester.SemesterName,
+            StartDate = semester.StartDate,
+            EndDate = semester.EndDate
+        };
+
+        return View(model);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditSemester(EditSemesterViewModel model)
+    {
+        await PopulateAcademicYearInfoAsync(model);
+
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        if (model.StartDate.Date >= model.EndDate.Date)
+        {
+            ModelState.AddModelError(nameof(model.EndDate), "Ngày kết thúc phải sau ngày bắt đầu.");
+            return View(model);
+        }
+
+        var result = await _semesterService.UpdateAsync(
+            model.Id,
+            model.SemesterCode,
+            model.SemesterName,
+            model.StartDate,
+            model.EndDate);
+
+        if (!result.Success)
+        {
+            if (result.ErrorCode is ErrorCodes.SemesterNotFound or ErrorCodes.ResourceNotFound)
+            {
+                TempData["ErrorMessage"] = result.Message;
+                return RedirectToAction(nameof(AcademicYears));
+            }
+
+            ModelState.AddModelError(string.Empty, result.Message ?? "Không thể cập nhật học kỳ.");
+            return View(model);
+        }
+
+        TempData["SuccessMessage"] = $"Đã cập nhật học kỳ \"{result.Data!.SemesterName}\" thành công.";
+        return RedirectToAction(nameof(Semesters), new { academicYearId = model.AcademicYearId });
+    }
+
+    private async Task PopulateAcademicYearInfoAsync(CreateSemesterViewModel model)
+    {
+        var yearResult = await _academicYearService.GetByIdAsync(model.AcademicYearId);
+        if (yearResult.Success && yearResult.Data != null)
+        {
+            model.AcademicYearCode = yearResult.Data.YearCode;
+            model.AcademicYearStartDate = yearResult.Data.StartDate;
+            model.AcademicYearEndDate = yearResult.Data.EndDate;
+        }
+    }
+
+    private async Task PopulateAcademicYearInfoAsync(EditSemesterViewModel model)
+    {
+        var yearResult = await _academicYearService.GetByIdAsync(model.AcademicYearId);
+        if (yearResult.Success && yearResult.Data != null)
+        {
+            model.AcademicYearCode = yearResult.Data.YearCode;
+            model.AcademicYearStartDate = yearResult.Data.StartDate;
+            model.AcademicYearEndDate = yearResult.Data.EndDate;
+        }
     }
 
     private static (string Status, string CssClass) ResolveStatus(DateTime start, DateTime end, DateTime today)
