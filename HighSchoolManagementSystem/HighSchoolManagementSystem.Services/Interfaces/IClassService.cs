@@ -12,4 +12,10 @@ public interface IClassService
         int academicYearId,
         int gradeLevelId,
         int? homeroomTeacherId);
+    Task<ServiceResult<Class>> UpdateAsync(
+        int id,
+        string className,
+        int academicYearId,
+        int gradeLevelId,
+        int? homeroomTeacherId);
 }

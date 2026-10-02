@@ -94,7 +94,7 @@
                         <th>Năm học</th>
                         <th>GVCN</th>
                         <th class="text-center">Sĩ số</th>
-                        <th class="text-center" style="width: 110px;">Thao tác</th>
+                        <th class="text-center" style="width: 180px;">Thao tác</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -128,11 +128,18 @@
                             </td>
                             <td class="text-center">@item.StudentCount</td>
                             <td class="text-center">
-                                <a asp-action="ClassDetails" asp-route-id="@item.Id"
-                                   class="btn btn-secondary btn-sm px-2 py-1" style="font-size: 12px;"
-                                   title="Xem chi tiết">
-                                    <i class="bi bi-eye me-1"></i>Chi tiết
-                                </a>
+                                <div class="d-inline-flex gap-1 flex-wrap justify-content-center">
+                                    <a asp-action="ClassDetails" asp-route-id="@item.Id"
+                                       class="btn btn-secondary btn-sm px-2 py-1" style="font-size: 12px;"
+                                       title="Xem chi tiết">
+                                        <i class="bi bi-eye me-1"></i>Chi tiết
+                                    </a>
+                                    <a asp-action="EditClass" asp-route-id="@item.Id"
+                                       class="btn btn-secondary btn-sm px-2 py-1" style="font-size: 12px;"
+                                       title="Cập nhật">
+                                        <i class="bi bi-pencil-square me-1"></i>Sửa
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                         index++;

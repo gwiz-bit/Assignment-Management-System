@@ -14,11 +14,30 @@
         </p>
     </div>
     <div class="d-flex align-items-center gap-2">
+        <a asp-action="EditClass" asp-route-id="@Model.Id" class="btn btn-primary btn-sm">
+            <i class="bi bi-pencil-square me-1"></i>Sửa lớp
+        </a>
         <a asp-action="Classes" asp-route-academicYearId="@Model.AcademicYearId" class="btn btn-secondary btn-sm">
             <i class="bi bi-arrow-left me-1"></i>Danh sách lớp
         </a>
     </div>
 </div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success d-flex align-items-center mb-3" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        <div>@TempData["SuccessMessage"]</div>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger d-flex align-items-center mb-3" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <div>@TempData["ErrorMessage"]</div>
+    </div>
+}
 
 <div class="card-table-wrap mb-3">
     <div class="card-table-header">

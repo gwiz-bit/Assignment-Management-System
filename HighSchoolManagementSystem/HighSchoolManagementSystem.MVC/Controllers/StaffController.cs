@@ -600,6 +600,64 @@ public class StaffController : Controller
         return RedirectToAction(nameof(ClassDetails), new { id = result.Data.Id });
     }
 
+    [HttpGet]
+    public async Task<IActionResult> EditClass(int id)
+    {
+        var result = await _classService.GetByIdWithDetailsAsync(id);
+        if (!result.Success || result.Data == null)
+        {
+            TempData["ErrorMessage"] = result.Message ?? "Không tìm thấy lớp học.";
+            return RedirectToAction(nameof(Classes));
+        }
+
+        var c = result.Data;
+        var model = new EditClassViewModel
+        {
+            Id = c.Id,
+            ClassName = c.ClassName,
+            AcademicYearId = c.AcademicYearId,
+            GradeLevelId = c.GradeLevelId,
+            HomeroomTeacherId = c.HomeroomTeacherId
+        };
+
+        await PopulateCreateClassDropdownsAsync(model);
+        return View(model);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditClass(EditClassViewModel model)
+    {
+        await PopulateCreateClassDropdownsAsync(model);
+
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        var result = await _classService.UpdateAsync(
+            model.Id,
+            model.ClassName,
+            model.AcademicYearId,
+            model.GradeLevelId,
+            model.HomeroomTeacherId);
+
+        if (!result.Success)
+        {
+            if (result.ErrorCode == ErrorCodes.ClassNotFound)
+            {
+                TempData["ErrorMessage"] = result.Message;
+                return RedirectToAction(nameof(Classes));
+            }
+
+            ModelState.AddModelError(string.Empty, result.Message ?? "Không thể cập nhật lớp học.");
+            return View(model);
+        }
+
+        TempData["SuccessMessage"] = $"Đã cập nhật lớp \"{result.Data!.ClassName}\" thành công.";
+        return RedirectToAction(nameof(ClassDetails), new { id = result.Data.Id });
+    }
+
     private async Task PopulateCreateClassDropdownsAsync(CreateClassViewModel model)
     {
         var yearsResult = await _academicYearService.GetAllAsync();
@@ -630,8 +688,27 @@ public class StaffController : Controller
                 Value = t.Id.ToString(),
                 Text = $"{t.TeacherCode} - {t.User.FullName}",
                 Selected = model.HomeroomTeacherId == t.Id
-            })
-            : Enumerable.Empty<SelectListItem>();
+            }).ToList()
+            : new List<SelectListItem>();
+
+        // Giữ GVCN hiện tại trên form edit dù giáo viên không còn Active
+        if (model.HomeroomTeacherId.HasValue &&
+            model.Teachers.All(t => t.Value != model.HomeroomTeacherId.Value.ToString()))
+        {
+            var currentTeacher = await _teacherService.GetAllTeachersAsync();
+            var teacher = currentTeacher.Data?.FirstOrDefault(t => t.Id == model.HomeroomTeacherId.Value);
+            if (teacher != null)
+            {
+                var list = model.Teachers.ToList();
+                list.Insert(0, new SelectListItem
+                {
+                    Value = teacher.Id.ToString(),
+                    Text = $"{teacher.TeacherCode} - {teacher.User.FullName}",
+                    Selected = true
+                });
+                model.Teachers = list;
+            }
+        }
     }
 
     private async Task PopulateAcademicYearInfoAsync(CreateSemesterViewModel model)

@@ -62,6 +62,12 @@ public class ClassRepository : IClassRepository
             .FirstOrDefaultAsync(c => c.Id == id);
     }
 
+    public async Task<Class?> GetTrackedByIdAsync(int id)
+    {
+        return await _context.Classes
+            .FirstOrDefaultAsync(c => c.Id == id);
+    }
+
     public async Task<bool> ExistsByNameInYearAsync(string className, int academicYearId, int? excludeId = null)
     {
         var normalized = className.Trim().ToLower();
