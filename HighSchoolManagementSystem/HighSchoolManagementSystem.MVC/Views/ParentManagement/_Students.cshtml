@@ -1,0 +1,16 @@
+@model List<HighSchoolManagementSystem.MVC.Models.ViewModels.Parent.ParentStudentViewModel>
+<div class="table-responsive">
+    <table class="table-edu mb-0">
+        <thead><tr><th>Mã học sinh</th><th>Họ và tên</th><th>Trạng thái học sinh</th></tr></thead>
+        <tbody>
+        @if (Model.Count == 0)
+        {
+            <tr><td colspan="3" class="text-center py-4">Chưa liên kết học sinh nào.</td></tr>
+        }
+        @foreach (var student in Model)
+        {
+            <tr><td>@student.StudentCode</td><td>@student.FullName</td><td>@student.Status</td></tr>
+        }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,22 @@
+@model HighSchoolManagementSystem.MVC.Models.ViewModels.Parent.CreateParentViewModel
+@{ ViewData["Title"] = "Thêm phụ huynh"; }
+<div class="greeting-banner mb-4">
+    <div><h1 class="greeting-title">Thêm phụ huynh</h1><p class="greeting-subtitle">Tạo hồ sơ cùng tài khoản Parent đang hoạt động. Có thể liên kết học sinh sau khi tạo.</p></div>
+    <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
+</div>
+<div class="edu-card">
+    <form asp-action="Create" method="post">
+        <div asp-validation-summary="All" class="text-danger mb-3" role="alert"></div>
+        <h2 class="edu-card-title mb-3">Thông tin tài khoản</h2>
+        <div class="row g-3 mb-4">
+            <div class="col-md-4"><label asp-for="Username" class="form-label"></label><input asp-for="Username" class="form-control" autocomplete="off" maxlength="50" /><span asp-validation-for="Username" class="text-danger small"></span></div>
+            <div class="col-md-4"><label asp-for="Password" class="form-label"></label><input asp-for="Password" class="form-control" autocomplete="new-password" /><span asp-validation-for="Password" class="text-danger small"></span><div class="form-text">Từ 6–64 ký tự, tối đa 72 byte UTF-8.</div></div>
+            <div class="col-md-4"><label asp-for="ConfirmPassword" class="form-label"></label><input asp-for="ConfirmPassword" class="form-control" autocomplete="new-password" /><span asp-validation-for="ConfirmPassword" class="text-danger small"></span></div>
+        </div>
+        <h2 class="edu-card-title mb-3">Thông tin phụ huynh</h2>
+        <partial name="_Fields" model="Model" />
+        <button type="submit" class="btn btn-primary">Tạo phụ huynh</button>
+        <a asp-action="Index" class="btn btn-secondary">Hủy</a>
+    </form>
+</div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

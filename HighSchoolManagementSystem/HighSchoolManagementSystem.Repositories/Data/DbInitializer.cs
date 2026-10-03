@@ -155,6 +155,32 @@ public static class DbInitializer
                 ParentId = parentEntity?.ParentId
             };
             await context.Students.AddAsync(studentProfile);
+
+            var studentUser1 = new User
+            {
+                Username = "student1",
+                Email = "student1@highschool.edu.vn",
+                FullName = "Học sinh Quang MInh",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("Student@123", 11),
+                PhoneNumber = "0934567890",
+                Gender = "Nam",
+                IsActive = true,
+                CreateAt = DateTime.UtcNow,
+                RoleId = studentRole.RoleId
+            };
+            await context.Users.AddAsync(studentUser1);
+            await context.SaveChangesAsync();
+
+            var studentProfile1 = new Student
+            {
+                UserId = studentUser.Id,
+                StudentCode = "HS002",
+                Status = "Active",
+                AdmissionDate = DateTime.UtcNow,
+                Address = "Số 123 Đường Giải Phóng, Hà Nội",
+                ParentId = parentEntity?.ParentId
+            };
+            await context.Students.AddAsync(studentProfile1);
         }
 
         if (!await context.Users.AnyAsync(u => u.Email == "phuongw98yb@gmail.com" || u.Username == "phuongw98yb"))

@@ -1,0 +1,42 @@
+@model HighSchoolManagementSystem.Services.DTOs.UpdateParentDto
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <label asp-for="FullName" class="form-label"></label>
+        <input asp-for="FullName" class="form-control" autocomplete="name" maxlength="100" />
+        <span asp-validation-for="FullName" class="text-danger small"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Email" class="form-label"></label>
+        <input asp-for="Email" class="form-control" autocomplete="email" maxlength="100" />
+        <span asp-validation-for="Email" class="text-danger small"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="PhoneNumber" class="form-label"></label>
+        <input asp-for="PhoneNumber" class="form-control" autocomplete="tel" placeholder="0912345678" maxlength="20" />
+        <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="Gender" class="form-label"></label>
+        <select asp-for="Gender" class="form-select"><option value="">Chưa cung cấp</option><option>Nam</option><option>Nữ</option><option>Khác</option></select>
+        <span asp-validation-for="Gender" class="text-danger small"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="DateOfBirth" class="form-label"></label>
+        <input asp-for="DateOfBirth" class="form-control" type="date" min="1920-01-01" max="@DateTime.UtcNow.AddDays(-1).ToString("yyyy-MM-dd")"
+               data-val-date="Ngày sinh không hợp lệ."
+               data-msg-date="Ngày sinh không hợp lệ."
+               data-msg-min="Ngày sinh phải từ năm 1920."
+               data-msg-max="Ngày sinh phải trước ngày hiện tại." />
+        <span asp-validation-for="DateOfBirth" class="text-danger small"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Occupation" class="form-label"></label>
+        <input asp-for="Occupation" class="form-control" maxlength="100" />
+        <span asp-validation-for="Occupation" class="text-danger small"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="EmergencyContact" class="form-label"></label>
+        <input asp-for="EmergencyContact" class="form-control" maxlength="50" placeholder="Tên hoặc số điện thoại liên hệ khẩn cấp" />
+        <span asp-validation-for="EmergencyContact" class="text-danger small"></span>
+    </div>
+</div>

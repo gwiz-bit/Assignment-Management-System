@@ -1,0 +1,32 @@
+@model HighSchoolManagementSystem.MVC.Models.ViewModels.Student.AssignStudentClassViewModel
+@{ ViewData["Title"] = "Phân lớp học sinh"; }
+<div class="greeting-banner mb-4"><div><h1 class="greeting-title">Phân lớp học sinh</h1><p class="greeting-subtitle">@Model.Student.StudentCode — @Model.Student.FullName</p></div><a asp-action="Details" asp-route-id="@Model.Student.Id" class="btn btn-secondary">Quay lại hồ sơ</a></div>
+<div class="edu-card">
+    <div asp-validation-summary="All" class="text-danger mb-3" role="alert"></div>
+    @if (Model.Student.HasAssignment)
+    {
+        <div class="alert alert-info">Học sinh đã có phân lớp trong năm học hiện hành@(Model.Student.CurrentClassName != null ? $": {Model.Student.CurrentClassName}." : ".") Không thể phân thêm lớp trong năm học này.</div>
+    }
+    else if (Model.Student.Status != "Active")
+    {
+        <div class="alert alert-warning">Chỉ phân lớp cho học sinh có trạng thái đang học.</div>
+    }
+    else if (Model.CurrentYear == null)
+    {
+        <div class="alert alert-warning">Chưa thiết lập năm học hiện hành. Vui lòng chọn năm học hiện hành trước khi phân lớp.</div><a asp-controller="Staff" asp-action="AcademicYears" class="btn btn-outline-primary">Quản lý năm học</a>
+    }
+    else if (Model.Classes.Count == 0)
+    {
+        <div class="alert alert-warning">Năm học @Model.CurrentYear chưa có lớp. Vui lòng tạo lớp trước khi phân học sinh.</div><a asp-controller="Staff" asp-action="Classes" class="btn btn-outline-primary">Quản lý lớp học</a>
+    }
+    @if (Model.CanAssign)
+    {
+        <form asp-action="AssignClass" asp-route-id="@Model.Student.Id" method="post">
+            <h2 class="edu-card-title mb-3">Năm học @Model.CurrentYear</h2>
+            <p>Chọn lớp tiếp nhận học sinh. Mỗi học sinh được phân một lớp trong năm học hiện hành.</p>
+            <div class="mb-4"><label asp-for="ClassId" class="form-label"></label><select asp-for="ClassId" asp-items="Model.Classes" class="form-select"><option value="0">— Chọn lớp —</option></select><span asp-validation-for="ClassId" class="text-danger small"></span></div>
+            <button type="submit" class="btn btn-primary">Xác nhận phân lớp</button><a asp-action="Details" asp-route-id="@Model.Student.Id" class="btn btn-secondary">Hủy</a>
+        </form>
+    }
+</div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

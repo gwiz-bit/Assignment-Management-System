@@ -1,0 +1,58 @@
+@model HighSchoolManagementSystem.MVC.Models.ViewModels.Parent.ParentListViewModel
+@{ ViewData["Title"] = "Quản lý phụ huynh"; }
+<div class="greeting-banner mb-4">
+    <div class="greeting-text-wrap">
+        <span class="greeting-kicker">GIÁO VỤ • HỒ SƠ PHỤ HUYNH</span>
+        <h1 class="greeting-title">Quản lý phụ huynh</h1>
+        <p class="greeting-subtitle">Tra cứu thông tin, tạo tài khoản và liên kết học sinh với phụ huynh.</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary"><i class="bi bi-person-plus me-1"></i>Thêm phụ huynh</a>
+</div>
+<partial name="_Messages" />
+<div class="edu-card mb-4">
+    <form method="get" asp-action="Index" class="row g-3 align-items-end">
+        <div class="col-md-6">
+            <label asp-for="Search" class="form-label">Tìm phụ huynh</label>
+            <input asp-for="Search" name="search" class="form-control" placeholder="Họ tên, tên đăng nhập, email hoặc số điện thoại" />
+        </div>
+        <div class="col-md-3">
+            <label asp-for="IsActive" class="form-label">Trạng thái tài khoản</label>
+            <select asp-for="IsActive" name="isActive" class="form-select">
+                <option value="">Tất cả</option><option value="true">Đang hoạt động</option><option value="false">Đã khóa</option>
+            </select>
+        </div>
+        <div class="col-md-3 d-flex gap-2">
+            <button class="btn btn-primary" type="submit">Tìm kiếm</button>
+            <a asp-action="Index" class="btn btn-secondary">Đặt lại</a>
+        </div>
+    </form>
+</div>
+<div class="card-table-wrap">
+    <div class="card-table-header"><h2 class="table-card-title">Danh sách phụ huynh</h2><span class="table-counter-badge">@Model.Parents.Count kết quả</span></div>
+    <div class="table-responsive">
+        <table class="table-edu mb-0">
+            <thead><tr><th>Phụ huynh</th><th>Liên hệ</th><th>Nghề nghiệp</th><th>Tài khoản</th><th>Số học sinh</th><th>Thao tác</th></tr></thead>
+            <tbody>
+            @if (Model.Parents.Count == 0)
+            {
+                <tr><td colspan="6" class="text-center py-4">Không có phụ huynh phù hợp.</td></tr>
+            }
+            @foreach (var parent in Model.Parents)
+            {
+                <tr>
+                    <td><a asp-action="Details" asp-route-id="@parent.Id" class="fw-bold">@parent.FullName</a><div class="small text-muted">@parent.Username</div></td>
+                    <td>@parent.Email<div class="small text-muted">@(parent.PhoneNumber ?? "Chưa có số điện thoại")</div></td>
+                    <td>@(parent.Occupation ?? "—")</td>
+                    <td><span class="badge @(parent.IsActive ? "bg-success" : "bg-secondary")">@(parent.IsActive ? "Hoạt động" : "Đã khóa")</span></td>
+                    <td>@parent.Students.Count</td>
+                    <td><div class="d-flex gap-2 flex-wrap">
+                        <a asp-action="Details" asp-route-id="@parent.Id" class="btn btn-sm btn-outline-primary">Chi tiết</a>
+                        <a asp-action="Edit" asp-route-id="@parent.Id" class="btn btn-sm btn-outline-secondary">Sửa</a>
+                        <a asp-action="LinkStudents" asp-route-id="@parent.Id" class="btn btn-sm btn-outline-primary">Liên kết học sinh</a>
+                    </div></td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>

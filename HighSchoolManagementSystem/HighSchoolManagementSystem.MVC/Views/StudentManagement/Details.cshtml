@@ -1,0 +1,51 @@
+@model HighSchoolManagementSystem.MVC.Models.ViewModels.Student.StudentDetailsViewModel
+@using HighSchoolManagementSystem.MVC.Models.ViewModels.Student
+@{ ViewData["Title"] = "Chi tiết học sinh"; }
+<div class="greeting-banner mb-4">
+    <div><span class="greeting-kicker">HỒ SƠ HỌC SINH • @Model.StudentCode</span><h1 class="greeting-title">@Model.FullName</h1><p class="greeting-subtitle">@StudentDetailsViewModel.StatusText(Model.Status)</p></div>
+    <div class="d-flex gap-2 flex-wrap"><a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Cập nhật</a><a asp-action="Index" class="btn btn-secondary">Danh sách</a></div>
+</div>
+<partial name="_Messages" />
+<div class="row g-4">
+    <div class="col-lg-7"><div class="edu-card h-100">
+        <h2 class="edu-card-title mb-3">Thông tin học sinh</h2>
+        <dl class="row mb-0">
+            <dt class="col-sm-4">Mã học sinh</dt><dd class="col-sm-8">@Model.StudentCode</dd>
+            <dt class="col-sm-4">Ngày sinh</dt><dd class="col-sm-8">@(Model.DateOfBirth?.ToString("dd/MM/yyyy") ?? "Chưa cung cấp")</dd>
+            <dt class="col-sm-4">Giới tính</dt><dd class="col-sm-8">@(Model.Gender ?? "Chưa cung cấp")</dd>
+            <dt class="col-sm-4">Email</dt><dd class="col-sm-8">@Model.Email</dd>
+            <dt class="col-sm-4">Số điện thoại</dt><dd class="col-sm-8">@(Model.PhoneNumber ?? "Chưa cung cấp")</dd>
+            <dt class="col-sm-4">Địa chỉ</dt><dd class="col-sm-8">@(Model.Address ?? "Chưa cung cấp")</dd>
+            <dt class="col-sm-4">Ngày nhập học</dt><dd class="col-sm-8">@(Model.AdmissionDate?.ToString("dd/MM/yyyy") ?? "Chưa cung cấp")</dd>
+            <dt class="col-sm-4">Tên đăng nhập</dt><dd class="col-sm-8">@Model.Username</dd>
+            <dt class="col-sm-4">Tài khoản</dt><dd class="col-sm-8">@(Model.IsAccountActive ? "Đang hoạt động" : "Đã khóa")</dd>
+        </dl>
+    </div></div>
+    <div class="col-lg-5">
+        <div class="edu-card mb-4">
+            <h2 class="edu-card-title mb-3">Lớp trong năm học hiện hành</h2>
+            @if (Model.CurrentClassId.HasValue)
+            {
+                <p class="fw-bold">@Model.CurrentClassName • @Model.CurrentGrade • @Model.CurrentYear</p>
+                <a asp-controller="Staff" asp-action="ClassStudents" asp-route-id="@Model.CurrentClassId" class="btn btn-outline-primary">Xem danh sách lớp</a>
+            }
+            else
+            {
+                <p>@(Model.HasAssignment ? "Phân lớp trong năm học này đã kết thúc." : "Chưa có lớp trong năm học hiện hành.")</p>
+                <a asp-action="AssignClass" asp-route-id="@Model.Id" class="btn btn-primary">Phân lớp</a>
+            }
+        </div>
+        <div class="edu-card">
+            <h2 class="edu-card-title mb-3">Phụ huynh</h2>
+            @if (Model.ParentId.HasValue)
+            {
+                <p class="fw-bold">@Model.ParentName</p><p>@(Model.ParentPhone ?? "Chưa có số điện thoại")<br />@Model.ParentEmail</p>
+                <a asp-controller="ParentManagement" asp-action="Details" asp-route-id="@Model.ParentId" class="btn btn-outline-primary">Xem hồ sơ phụ huynh</a>
+            }
+            else
+            {
+                <p>Chưa liên kết phụ huynh. Chọn hồ sơ phụ huynh để liên kết học sinh này.</p><a asp-controller="ParentManagement" asp-action="Index" class="btn btn-outline-primary">Danh sách phụ huynh</a>
+            }
+        </div>
+    </div>
+</div>

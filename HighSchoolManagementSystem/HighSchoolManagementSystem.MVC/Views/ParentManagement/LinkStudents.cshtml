@@ -1,0 +1,55 @@
+@model HighSchoolManagementSystem.MVC.Models.ViewModels.Parent.ParentLinkViewModel
+@{ ViewData["Title"] = "Liên kết học sinh"; }
+<div class="greeting-banner mb-4">
+    <div><h1 class="greeting-title">Liên kết học sinh</h1><p class="greeting-subtitle">Phụ huynh: @Model.Parent.FullName (@Model.Parent.Username)</p></div>
+    <a asp-action="Details" asp-route-id="@Model.Parent.Id" class="btn btn-secondary">Quay lại hồ sơ</a>
+</div>
+<div asp-validation-summary="All" class="text-danger mb-3" role="alert"></div>
+<div class="card-table-wrap mb-4">
+    <div class="card-table-header"><h2 class="table-card-title">Học sinh đã liên kết (@Model.Parent.Students.Count)</h2></div>
+    <partial name="_Students" model="Model.Parent.Students" />
+</div>
+@if (!Model.Parent.CanLink)
+{
+    <div class="alert alert-warning" role="alert">Tài khoản phụ huynh phải đang hoạt động và có vai trò Parent để liên kết học sinh. Vui lòng liên hệ người quản lý tài khoản.</div>
+}
+else
+{
+    <div class="edu-card mb-4">
+        <p>Mỗi học sinh có một phụ huynh quản lý. Danh sách dưới đây chỉ gồm học sinh chưa có liên kết. Vui lòng xác minh quan hệ phụ huynh – học sinh trước khi lưu.</p>
+        <form asp-action="LinkStudents" asp-route-id="@Model.Parent.Id" method="get" class="d-flex gap-2 align-items-end flex-wrap">
+            <div class="flex-grow-1"><label asp-for="Search" class="form-label">Tìm học sinh</label><input asp-for="Search" name="search" class="form-control" placeholder="Mã hoặc họ tên học sinh" /></div>
+            <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+            <a asp-action="LinkStudents" asp-route-id="@Model.Parent.Id" class="btn btn-secondary">Đặt lại</a>
+        </form>
+        <div class="form-text">Hãy lưu các học sinh đã chọn trước khi đổi từ khóa tìm kiếm.</div>
+    </div>
+    <form asp-action="LinkStudents" asp-route-id="@Model.Parent.Id" method="post">
+        <input type="hidden" asp-for="Search" />
+        <div class="card-table-wrap">
+            <div class="card-table-header"><h2 class="table-card-title">Học sinh chưa liên kết (@Model.AvailableStudents.Count)</h2></div>
+            <div class="table-responsive">
+                <table class="table-edu mb-0">
+                    <thead><tr><th>Chọn</th><th>Mã học sinh</th><th>Họ và tên</th><th>Trạng thái</th></tr></thead>
+                    <tbody>
+                    @if (Model.AvailableStudents.Count == 0)
+                    {
+                        <tr><td colspan="4" class="text-center py-4">Không có học sinh phù hợp chưa được liên kết.</td></tr>
+                    }
+                    @foreach (var student in Model.AvailableStudents)
+                    {
+                        <tr>
+                            <td><input type="checkbox" class="form-check-input" name="selectedStudentIds" value="@student.Id" id="student-@student.Id" checked="@Model.SelectedStudentIds.Contains(student.Id)" aria-label="Chọn @student.FullName (@student.StudentCode)" /></td>
+                            <td><label for="student-@student.Id">@student.StudentCode</label></td><td>@student.FullName</td><td>@student.Status</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        @if (Model.AvailableStudents.Count > 0)
+        {
+            <button type="submit" class="btn btn-primary mt-3">Liên kết học sinh đã chọn</button>
+        }
+    </form>
+}

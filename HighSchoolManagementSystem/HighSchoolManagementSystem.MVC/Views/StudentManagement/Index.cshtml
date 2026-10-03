@@ -1,0 +1,48 @@
+@model HighSchoolManagementSystem.MVC.Models.ViewModels.Student.StudentListViewModel
+@using HighSchoolManagementSystem.MVC.Models.ViewModels.Student
+@{ ViewData["Title"] = "Quản lý học sinh"; }
+<div class="greeting-banner mb-4">
+    <div class="greeting-text-wrap"><span class="greeting-kicker">GIÁO VỤ • HỒ SƠ HỌC SINH</span><h1 class="greeting-title">Quản lý học sinh</h1><p class="greeting-subtitle">Tra cứu hồ sơ, tiếp nhận học sinh và phân lớp cho năm học hiện hành.</p></div>
+    <a asp-action="Create" class="btn btn-primary"><i class="bi bi-person-plus me-1"></i>Thêm học sinh</a>
+</div>
+<partial name="_Messages" />
+@if (Model.CurrentYear == null)
+{
+    <div class="alert alert-warning">Chưa có năm học hiện hành. Vui lòng cấu hình năm học trước khi phân lớp.</div>
+}
+<div class="edu-card mb-4">
+    <form asp-action="Index" method="get" class="row g-3 align-items-end">
+        <div class="col-lg-5"><label asp-for="Search" class="form-label">Tìm học sinh</label><input asp-for="Search" class="form-control" placeholder="Mã học sinh, họ tên, tài khoản, email, số điện thoại" /></div>
+        <div class="col-lg-3"><label asp-for="Status" class="form-label">Trạng thái học sinh</label><select asp-for="Status" class="form-select"><option value="">Tất cả</option><option value="Active">Đang học</option><option value="Inactive">Ngừng học</option><option value="Graduated">Đã tốt nghiệp</option></select></div>
+        <div class="col-lg-4"><label asp-for="ClassId" class="form-label">Lớp năm học @(Model.CurrentYear ?? "hiện hành")</label><select asp-for="ClassId" asp-items="Model.Classes" class="form-select"><option value="">Tất cả lớp</option></select></div>
+        <div class="col-md-6"><div class="form-check"><input asp-for="UnassignedOnly" class="form-check-input" /><label asp-for="UnassignedOnly" class="form-check-label">Chỉ học sinh chưa được phân lớp trong năm hiện hành</label></div></div>
+        <div class="col-md-6 d-flex justify-content-md-end gap-2"><button type="submit" class="btn btn-primary">Tìm kiếm</button><a asp-action="Index" class="btn btn-secondary">Đặt lại</a></div>
+    </form>
+</div>
+<div class="card-table-wrap">
+    <div class="card-table-header"><h2 class="table-card-title">Danh sách học sinh</h2><span class="table-counter-badge">@Model.Students.Count kết quả</span></div>
+    <div class="table-responsive"><table class="table-edu mb-0">
+        <thead><tr><th>Mã học sinh</th><th>Họ và tên</th><th>Liên hệ</th><th>Lớp hiện hành</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+        <tbody>
+        @if (Model.Students.Count == 0)
+        {
+            <tr><td colspan="6" class="text-center py-4">Không có học sinh phù hợp.</td></tr>
+        }
+        @foreach (var student in Model.Students)
+        {
+            <tr>
+                <td>@student.StudentCode</td><td><a asp-action="Details" asp-route-id="@student.Id" class="fw-bold">@student.FullName</a><div class="text-muted small">@student.Username</div></td>
+                <td>@student.Email<div class="small text-muted">@(student.PhoneNumber ?? "Chưa có số điện thoại")</div></td>
+                <td>@(student.CurrentClassName ?? (student.HasAssignment ? "Đã kết thúc phân lớp" : "Chưa phân lớp"))</td>
+                <td><span class="badge @(student.Status == "Active" ? "bg-success" : "bg-secondary")">@StudentDetailsViewModel.StatusText(student.Status)</span></td>
+                <td><div class="d-flex flex-wrap gap-2"><a asp-action="Details" asp-route-id="@student.Id" class="btn btn-sm btn-outline-primary">Chi tiết</a><a asp-action="Edit" asp-route-id="@student.Id" class="btn btn-sm btn-outline-secondary">Sửa</a>
+                    @if (student.Status == "Active" && !student.HasAssignment)
+                    {
+                        <a asp-action="AssignClass" asp-route-id="@student.Id" class="btn btn-sm btn-outline-primary">Phân lớp</a>
+                    }
+                </div></td>
+            </tr>
+        }
+        </tbody>
+    </table></div>
+</div>

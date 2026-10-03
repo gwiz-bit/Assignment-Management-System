@@ -1,0 +1,15 @@
+@model HighSchoolManagementSystem.Services.DTOs.UpdateParentDto
+@{ ViewData["Title"] = "Cập nhật phụ huynh"; }
+<div class="greeting-banner mb-4">
+    <div><h1 class="greeting-title">Cập nhật phụ huynh</h1><p class="greeting-subtitle">Chỉnh sửa thông tin cá nhân và liên hệ.</p></div>
+    <a asp-action="Details" asp-route-id="@ViewData["ParentId"]" class="btn btn-secondary">Quay lại hồ sơ</a>
+</div>
+<div class="edu-card">
+    <form asp-action="Edit" asp-route-id="@ViewData["ParentId"]" method="post">
+        <div asp-validation-summary="All" class="text-danger mb-3" role="alert"></div>
+        <partial name="_Fields" model="Model" />
+        <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+        <a asp-action="Details" asp-route-id="@ViewData["ParentId"]" class="btn btn-secondary">Hủy</a>
+    </form>
+</div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

@@ -115,9 +115,17 @@
                     </a>
                 </li>
                 <li class="sidebar-menu-item">
-                    <a href="javascript:void(0)" class="sidebar-link">
+                    <a asp-controller="StudentManagement" asp-action="Index"
+                       class="sidebar-link @(currentController == "StudentManagement" ? "active" : "")">
                         <i class="bi bi-person-vcard"></i>
                         <span>Hồ sơ học sinh</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a asp-controller="ParentManagement" asp-action="Index"
+                       class="sidebar-link @(currentController == "ParentManagement" ? "active" : "")">
+                        <i class="bi bi-people-fill"></i>
+                        <span>Danh sách phụ huynh</span>
                     </a>
                 </li>
                 <li class="sidebar-menu-item">

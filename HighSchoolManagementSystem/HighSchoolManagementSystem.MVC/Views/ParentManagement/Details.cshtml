@@ -1,0 +1,24 @@
+@model HighSchoolManagementSystem.MVC.Models.ViewModels.Parent.ParentDetailsViewModel
+@{ ViewData["Title"] = "Chi tiết phụ huynh"; }
+<div class="greeting-banner mb-4">
+    <div><span class="greeting-kicker">HỒ SƠ PHỤ HUYNH</span><h1 class="greeting-title">@Model.FullName</h1><p class="greeting-subtitle">Tài khoản: @Model.Username</p></div>
+    <div class="d-flex flex-wrap gap-2"><a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Cập nhật</a><a asp-action="Index" class="btn btn-secondary">Danh sách</a></div>
+</div>
+<partial name="_Messages" />
+<div class="edu-card mb-4">
+    <h2 class="edu-card-title mb-3">Thông tin cá nhân và liên hệ</h2>
+    <dl class="row mb-0">
+        <dt class="col-sm-3">Email</dt><dd class="col-sm-9">@Model.Email</dd>
+        <dt class="col-sm-3">Số điện thoại</dt><dd class="col-sm-9">@(Model.PhoneNumber ?? "Chưa cung cấp")</dd>
+        <dt class="col-sm-3">Giới tính</dt><dd class="col-sm-9">@(Model.Gender ?? "Chưa cung cấp")</dd>
+        <dt class="col-sm-3">Ngày sinh</dt><dd class="col-sm-9">@(Model.DateOfBirth?.ToString("dd/MM/yyyy") ?? "Chưa cung cấp")</dd>
+        <dt class="col-sm-3">Nghề nghiệp</dt><dd class="col-sm-9">@(Model.Occupation ?? "Chưa cung cấp")</dd>
+        <dt class="col-sm-3">Liên hệ khẩn cấp</dt><dd class="col-sm-9">@(Model.EmergencyContact ?? "Chưa cung cấp")</dd>
+        <dt class="col-sm-3">Trạng thái tài khoản</dt><dd class="col-sm-9">@(Model.IsActive ? "Đang hoạt động" : "Đã khóa")</dd>
+        <dt class="col-sm-3">Vai trò tài khoản</dt><dd class="col-sm-9">@Model.RoleName</dd>
+    </dl>
+</div>
+<div class="card-table-wrap">
+    <div class="card-table-header"><h2 class="table-card-title">Học sinh đã liên kết (@Model.Students.Count)</h2><a asp-action="LinkStudents" asp-route-id="@Model.Id" class="btn btn-primary">Liên kết học sinh</a></div>
+    <partial name="_Students" model="Model.Students" />
+</div>

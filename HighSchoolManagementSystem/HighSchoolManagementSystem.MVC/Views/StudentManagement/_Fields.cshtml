@@ -1,0 +1,24 @@
+@model HighSchoolManagementSystem.Services.DTOs.UpdateStudentDto
+<div class="row g-3 mb-4">
+    <div class="col-md-4"><label asp-for="StudentCode" class="form-label"></label><input asp-for="StudentCode" class="form-control" maxlength="20" placeholder="VD: HS002" /><span asp-validation-for="StudentCode" class="text-danger small"></span></div>
+    <div class="col-md-8"><label asp-for="FullName" class="form-label"></label><input asp-for="FullName" class="form-control" maxlength="100" /><span asp-validation-for="FullName" class="text-danger small"></span></div>
+    <div class="col-md-6"><label asp-for="Email" class="form-label"></label><input asp-for="Email" class="form-control" maxlength="100" /><span asp-validation-for="Email" class="text-danger small"></span></div>
+    <div class="col-md-6"><label asp-for="PhoneNumber" class="form-label"></label><input asp-for="PhoneNumber" class="form-control" maxlength="20" placeholder="0912345678" /><span asp-validation-for="PhoneNumber" class="text-danger small"></span></div>
+    <div class="col-md-4"><label asp-for="Gender" class="form-label"></label><select asp-for="Gender" class="form-select"><option value="">Chưa cung cấp</option><option>Nam</option><option>Nữ</option><option>Khác</option></select><span asp-validation-for="Gender" class="text-danger small"></span></div>
+    <div class="col-md-4">
+        <label asp-for="DateOfBirth" class="form-label"></label>
+        <input asp-for="DateOfBirth" class="form-control" type="date" min="1920-01-01" max="@DateTime.UtcNow.AddDays(-1).ToString("yyyy-MM-dd")"
+               data-val-date="Ngày sinh không hợp lệ." data-msg-date="Ngày sinh không hợp lệ."
+               data-msg-min="Ngày sinh phải từ năm 1920." data-msg-max="Ngày sinh phải trước ngày hiện tại." />
+        <span asp-validation-for="DateOfBirth" class="text-danger small"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="AdmissionDate" class="form-label"></label>
+        <input asp-for="AdmissionDate" class="form-control" type="date" min="1920-01-01" max="@DateTime.UtcNow.ToString("yyyy-MM-dd")"
+               data-val-date="Ngày nhập học không hợp lệ." data-msg-date="Ngày nhập học không hợp lệ."
+               data-msg-min="Ngày nhập học phải từ năm 1920." data-msg-max="Ngày nhập học không được sau ngày hiện tại." />
+        <span asp-validation-for="AdmissionDate" class="text-danger small"></span>
+    </div>
+    <div class="col-md-8"><label asp-for="Address" class="form-label"></label><input asp-for="Address" class="form-control" maxlength="255" /><span asp-validation-for="Address" class="text-danger small"></span></div>
+    <div class="col-md-4"><label asp-for="Status" class="form-label"></label><select asp-for="Status" class="form-select"><option value="Active">Đang học</option><option value="Inactive">Ngừng học</option><option value="Graduated">Đã tốt nghiệp</option></select><span asp-validation-for="Status" class="text-danger small"></span></div>
+</div>
