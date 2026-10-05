@@ -591,6 +591,60 @@ public class StaffController : Controller
     }
 
     [HttpGet]
+    public async Task<IActionResult> AssignHomeroomTeacher(int id)
+    {
+        var result = await _classService.GetByIdWithDetailsAsync(id);
+        if (!result.Success || result.Data == null)
+        {
+            TempData["ErrorMessage"] = result.Message ?? "Không tìm thấy lớp học.";
+            return RedirectToAction(nameof(Classes));
+        }
+
+        var c = result.Data;
+        var model = new AssignHomeroomTeacherViewModel
+        {
+            ClassId = c.Id,
+            ClassName = c.ClassName,
+            AcademicYearCode = c.AcademicYear.YearCode,
+            GradeLevelName = c.GradeLevel.LevelName,
+            CurrentHomeroomTeacherName = c.HomeroomTeacher?.User?.FullName,
+            CurrentHomeroomTeacherCode = c.HomeroomTeacher?.TeacherCode,
+            HomeroomTeacherId = c.HomeroomTeacherId
+        };
+
+        await PopulateAssignHomeroomTeacherDropdownAsync(model);
+        return View(model);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AssignHomeroomTeacher(AssignHomeroomTeacherViewModel model)
+    {
+        await PopulateAssignHomeroomTeacherDropdownAsync(model);
+
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        var result = await _classService.AssignHomeroomTeacherAsync(model.ClassId, model.HomeroomTeacherId);
+        if (!result.Success)
+        {
+            if (result.ErrorCode == ErrorCodes.ClassNotFound)
+            {
+                TempData["ErrorMessage"] = result.Message;
+                return RedirectToAction(nameof(Classes));
+            }
+
+            ModelState.AddModelError(string.Empty, result.Message ?? "Không thể phân công giáo viên chủ nhiệm.");
+            return View(model);
+        }
+
+        TempData["SuccessMessage"] = result.Message ?? "Đã cập nhật giáo viên chủ nhiệm.";
+        return RedirectToAction(nameof(ClassDetails), new { id = model.ClassId });
+    }
+
+    [HttpGet]
     public async Task<IActionResult> CreateClass(int? academicYearId)
     {
         var model = new CreateClassViewModel();
@@ -694,6 +748,39 @@ public class StaffController : Controller
 
         TempData["SuccessMessage"] = $"Đã cập nhật lớp \"{result.Data!.ClassName}\" thành công.";
         return RedirectToAction(nameof(ClassDetails), new { id = result.Data.Id });
+    }
+
+    private async Task PopulateAssignHomeroomTeacherDropdownAsync(AssignHomeroomTeacherViewModel model)
+    {
+        var teachersResult = await _teacherService.GetAllTeachersAsync(status: "Active");
+
+        model.Teachers = teachersResult.Success && teachersResult.Data != null
+            ? teachersResult.Data.Select(t => new SelectListItem
+            {
+                Value = t.Id.ToString(),
+                Text = $"{t.TeacherCode} - {t.User.FullName}",
+                Selected = model.HomeroomTeacherId == t.Id
+            }).ToList()
+            : new List<SelectListItem>();
+
+        // Giữ GVCN hiện tại trên form dù giáo viên không còn Active
+        if (model.HomeroomTeacherId.HasValue &&
+            model.Teachers.All(t => t.Value != model.HomeroomTeacherId.Value.ToString()))
+        {
+            var currentTeacher = await _teacherService.GetAllTeachersAsync();
+            var teacher = currentTeacher.Data?.FirstOrDefault(t => t.Id == model.HomeroomTeacherId.Value);
+            if (teacher != null)
+            {
+                var list = model.Teachers.ToList();
+                list.Insert(0, new SelectListItem
+                {
+                    Value = teacher.Id.ToString(),
+                    Text = $"{teacher.TeacherCode} - {teacher.User.FullName} (Không hoạt động)",
+                    Selected = true
+                });
+                model.Teachers = list;
+            }
+        }
     }
 
     private async Task PopulateCreateClassDropdownsAsync(CreateClassViewModel model)

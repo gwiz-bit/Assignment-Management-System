@@ -244,6 +244,54 @@ public class ClassService : IClassService
         }
     }
 
+    public async Task<ServiceResult<Class>> AssignHomeroomTeacherAsync(int classId, int? homeroomTeacherId)
+    {
+        try
+        {
+            var classEntity = await _classRepository.GetTrackedByIdAsync(classId);
+            if (classEntity == null)
+            {
+                return ServiceResult<Class>.Fail(
+                    ErrorCodes.ClassNotFound,
+                    "Không tìm thấy lớp học cần phân công giáo viên chủ nhiệm.");
+            }
+
+            if (homeroomTeacherId.HasValue)
+            {
+                var teacher = await _teacherRepository.GetByIdAsync(homeroomTeacherId.Value);
+                if (teacher == null)
+                {
+                    return ServiceResult<Class>.Fail(
+                        ErrorCodes.TeacherNotFound,
+                        "Không tìm thấy giáo viên đã chọn.");
+                }
+
+                if (!string.Equals(teacher.Status, "Active", StringComparison.OrdinalIgnoreCase)
+                    && classEntity.HomeroomTeacherId != teacher.Id)
+                {
+                    return ServiceResult<Class>.Fail(
+                        ErrorCodes.ValidationFailed,
+                        "Chỉ có thể phân công giáo viên đang hoạt động làm chủ nhiệm.");
+                }
+            }
+
+            classEntity.HomeroomTeacherId = homeroomTeacherId;
+            await _classRepository.SaveChangesAsync();
+
+            var message = homeroomTeacherId.HasValue
+                ? "Đã phân công giáo viên chủ nhiệm thành công."
+                : "Đã hủy phân công giáo viên chủ nhiệm.";
+
+            return ServiceResult<Class>.Ok(classEntity, message);
+        }
+        catch
+        {
+            return ServiceResult<Class>.Fail(
+                ErrorCodes.DatabaseError,
+                "Không thể phân công giáo viên chủ nhiệm. Vui lòng thử lại sau.");
+        }
+    }
+
     public async Task<ServiceResult<IReadOnlyList<Class>>> GetAccessibleClassesForTeacherAsync(int teacherId)
     {
         try

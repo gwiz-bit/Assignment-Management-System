@@ -1,0 +1,96 @@
+@model HighSchoolManagementSystem.MVC.Models.ViewModels.AssignHomeroomTeacherViewModel
+@{
+    ViewData["Title"] = $"Phân công GVCN lớp {Model.ClassName}";
+}
+
+<div class="greeting-banner">
+    <div class="greeting-text-wrap">
+        <span class="greeting-kicker">
+            <i class="bi bi-circle-fill" style="font-size: 7px;"></i> QUẢN LÝ ĐÀO TẠO
+        </span>
+        <h1 class="greeting-title">Phân công giáo viên chủ nhiệm</h1>
+        <p class="greeting-subtitle">
+            Lớp @Model.ClassName · @Model.GradeLevelName · Năm học @Model.AcademicYearCode
+        </p>
+    </div>
+    <div>
+        <a asp-action="ClassDetails" asp-route-id="@Model.ClassId" class="btn btn-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i>Quay lại chi tiết
+        </a>
+    </div>
+</div>
+
+<div class="card-table-wrap">
+    <div class="card-table-header">
+        <div>
+            <h2 class="table-card-title">Chọn giáo viên chủ nhiệm</h2>
+            <p class="table-card-subtitle">Chỉ hiển thị giáo viên đang hoạt động. Có thể bỏ trống để hủy phân công.</p>
+        </div>
+    </div>
+
+    <div class="p-4">
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-md-4">
+                <div class="form-label text-muted mb-1">GVCN hiện tại</div>
+                <div>
+                    @if (!string.IsNullOrWhiteSpace(Model.CurrentHomeroomTeacherName))
+                    {
+                        <strong>@Model.CurrentHomeroomTeacherName</strong>
+                        @if (!string.IsNullOrWhiteSpace(Model.CurrentHomeroomTeacherCode))
+                        {
+                            <span class="text-muted">(@Model.CurrentHomeroomTeacherCode)</span>
+                        }
+                    }
+                    else
+                    {
+                        <span class="text-muted">Chưa phân công</span>
+                    }
+                </div>
+            </div>
+        </div>
+
+        @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty]?.Errors.Count > 0)
+        {
+            <div class="alert alert-danger d-flex align-items-center gap-2 mb-3" role="alert">
+                <i class="bi bi-exclamation-triangle-fill flex-shrink-0"></i>
+                <div>
+                    @foreach (var error in ViewData.ModelState[string.Empty]!.Errors)
+                    {
+                        <div>@error.ErrorMessage</div>
+                    }
+                </div>
+            </div>
+        }
+
+        <form asp-action="AssignHomeroomTeacher" method="post" novalidate>
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="ClassId" />
+            <input type="hidden" asp-for="ClassName" />
+            <input type="hidden" asp-for="AcademicYearCode" />
+            <input type="hidden" asp-for="GradeLevelName" />
+            <input type="hidden" asp-for="CurrentHomeroomTeacherName" />
+            <input type="hidden" asp-for="CurrentHomeroomTeacherCode" />
+
+            <div class="row g-3">
+                <div class="col-12 col-md-6">
+                    <label asp-for="HomeroomTeacherId" class="form-label"></label>
+                    <select asp-for="HomeroomTeacherId" class="form-select" asp-items="Model.Teachers">
+                        <option value="">-- Chưa phân công --</option>
+                    </select>
+                    <span asp-validation-for="HomeroomTeacherId" class="text-danger small mt-1 d-block"></span>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-person-check me-1"></i>Lưu phân công
+                </button>
+                <a asp-action="ClassDetails" asp-route-id="@Model.ClassId" class="btn btn-secondary">Hủy</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
