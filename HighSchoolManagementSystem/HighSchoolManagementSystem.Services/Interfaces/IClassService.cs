@@ -20,5 +20,7 @@ public interface IClassService
         int? homeroomTeacherId);
     Task<ServiceResult<Class>> AssignHomeroomTeacherAsync(int classId, int? homeroomTeacherId);
     Task<ServiceResult<IReadOnlyList<Class>>> GetAccessibleClassesForTeacherAsync(int teacherId);
+    Task<ServiceResult<IReadOnlyList<Class>>> GetHomeroomClassesForTeacherAsync(int teacherId);
+    Task<ServiceResult<Class>> GetHomeroomClassForTeacherAsync(int classId, int teacherId);
     Task<ServiceResult<Class>> GetClassStudentsForViewerAsync(int classId, int? teacherId = null);
 }

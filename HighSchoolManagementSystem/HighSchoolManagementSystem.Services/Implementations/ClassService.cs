@@ -315,6 +315,66 @@ public class ClassService : IClassService
         }
     }
 
+    public async Task<ServiceResult<IReadOnlyList<Class>>> GetHomeroomClassesForTeacherAsync(int teacherId)
+    {
+        try
+        {
+            var teacher = await _teacherRepository.GetByIdAsync(teacherId);
+            if (teacher == null)
+            {
+                return ServiceResult<IReadOnlyList<Class>>.Fail(
+                    ErrorCodes.TeacherNotFound,
+                    "Không tìm thấy hồ sơ giáo viên.");
+            }
+
+            var classes = await _classRepository.GetHomeroomClassesByTeacherIdAsync(teacherId);
+            return ServiceResult<IReadOnlyList<Class>>.Ok(classes);
+        }
+        catch
+        {
+            return ServiceResult<IReadOnlyList<Class>>.Fail(
+                ErrorCodes.DatabaseError,
+                "Không thể tải danh sách lớp chủ nhiệm.");
+        }
+    }
+
+    public async Task<ServiceResult<Class>> GetHomeroomClassForTeacherAsync(int classId, int teacherId)
+    {
+        try
+        {
+            var teacher = await _teacherRepository.GetByIdAsync(teacherId);
+            if (teacher == null)
+            {
+                return ServiceResult<Class>.Fail(
+                    ErrorCodes.TeacherNotFound,
+                    "Không tìm thấy hồ sơ giáo viên.");
+            }
+
+            var classEntity = await _classRepository.GetByIdWithDetailsAsync(classId);
+            if (classEntity == null)
+            {
+                return ServiceResult<Class>.Fail(
+                    ErrorCodes.ClassNotFound,
+                    "Không tìm thấy lớp học.");
+            }
+
+            if (classEntity.HomeroomTeacherId != teacherId)
+            {
+                return ServiceResult<Class>.Fail(
+                    ErrorCodes.AuthForbidden,
+                    "Bạn không phải giáo viên chủ nhiệm của lớp này.");
+            }
+
+            return ServiceResult<Class>.Ok(classEntity);
+        }
+        catch
+        {
+            return ServiceResult<Class>.Fail(
+                ErrorCodes.DatabaseError,
+                "Không thể tải thông tin lớp chủ nhiệm.");
+        }
+    }
+
     public async Task<ServiceResult<Class>> GetClassStudentsForViewerAsync(int classId, int? teacherId = null)
     {
         try

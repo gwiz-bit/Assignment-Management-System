@@ -96,6 +96,30 @@ public class ClassRepository : IClassRepository
             .ToListAsync();
     }
 
+    public async Task<IReadOnlyList<Class>> GetHomeroomClassesByTeacherIdAsync(int teacherId)
+    {
+        return await _context.Classes
+            .AsNoTracking()
+            .Include(c => c.AcademicYear)
+            .Include(c => c.GradeLevel)
+            .Include(c => c.HomeroomTeacher)!
+                .ThenInclude(t => t!.User)
+            .Include(c => c.StudentClasses)
+            .Include(c => c.TeachingAssignments)
+                .ThenInclude(ta => ta.Teacher)
+                    .ThenInclude(t => t.User)
+            .Include(c => c.TeachingAssignments)
+                .ThenInclude(ta => ta.Subject)
+            .Include(c => c.TeachingAssignments)
+                .ThenInclude(ta => ta.Semester)
+            .Where(c => c.HomeroomTeacherId == teacherId)
+            .OrderByDescending(c => c.AcademicYear.IsCurrent)
+            .ThenByDescending(c => c.AcademicYear.StartDate)
+            .ThenBy(c => c.GradeLevel.LevelCode)
+            .ThenBy(c => c.ClassName)
+            .ToListAsync();
+    }
+
     public async Task<bool> ExistsByNameInYearAsync(string className, int academicYearId, int? excludeId = null)
     {
         var normalized = className.Trim().ToLower();

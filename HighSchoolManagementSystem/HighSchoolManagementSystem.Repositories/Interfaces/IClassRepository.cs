@@ -9,6 +9,7 @@ public interface IClassRepository
     Task<Class?> GetTrackedByIdAsync(int id);
     Task<bool> IsTeacherAuthorizedAsync(int teacherId, int classId);
     Task<IReadOnlyList<Class>> GetAccessibleByTeacherIdAsync(int teacherId);
+    Task<IReadOnlyList<Class>> GetHomeroomClassesByTeacherIdAsync(int teacherId);
     Task<bool> ExistsByNameInYearAsync(string className, int academicYearId, int? excludeId = null);
     Task AddAsync(Class classEntity);
     Task SaveChangesAsync();
