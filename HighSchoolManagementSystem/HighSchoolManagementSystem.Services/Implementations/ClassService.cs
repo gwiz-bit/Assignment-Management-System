@@ -244,6 +244,54 @@ public class ClassService : IClassService
         }
     }
 
+    public async Task<ServiceResult<Class>> AssignHomeroomTeacherAsync(int classId, int? homeroomTeacherId)
+    {
+        try
+        {
+            var classEntity = await _classRepository.GetTrackedByIdAsync(classId);
+            if (classEntity == null)
+            {
+                return ServiceResult<Class>.Fail(
+                    ErrorCodes.ClassNotFound,
+                    "Không tìm thấy lớp học cần phân công giáo viên chủ nhiệm.");
+            }
+
+            if (homeroomTeacherId.HasValue)
+            {
+                var teacher = await _teacherRepository.GetByIdAsync(homeroomTeacherId.Value);
+                if (teacher == null)
+                {
+                    return ServiceResult<Class>.Fail(
+                        ErrorCodes.TeacherNotFound,
+                        "Không tìm thấy giáo viên đã chọn.");
+                }
+
+                if (!string.Equals(teacher.Status, "Active", StringComparison.OrdinalIgnoreCase)
+                    && classEntity.HomeroomTeacherId != teacher.Id)
+                {
+                    return ServiceResult<Class>.Fail(
+                        ErrorCodes.ValidationFailed,
+                        "Chỉ có thể phân công giáo viên đang hoạt động làm chủ nhiệm.");
+                }
+            }
+
+            classEntity.HomeroomTeacherId = homeroomTeacherId;
+            await _classRepository.SaveChangesAsync();
+
+            var message = homeroomTeacherId.HasValue
+                ? "Đã phân công giáo viên chủ nhiệm thành công."
+                : "Đã hủy phân công giáo viên chủ nhiệm.";
+
+            return ServiceResult<Class>.Ok(classEntity, message);
+        }
+        catch
+        {
+            return ServiceResult<Class>.Fail(
+                ErrorCodes.DatabaseError,
+                "Không thể phân công giáo viên chủ nhiệm. Vui lòng thử lại sau.");
+        }
+    }
+
     public async Task<ServiceResult<IReadOnlyList<Class>>> GetAccessibleClassesForTeacherAsync(int teacherId)
     {
         try
@@ -264,6 +312,66 @@ public class ClassService : IClassService
             return ServiceResult<IReadOnlyList<Class>>.Fail(
                 ErrorCodes.DatabaseError,
                 "Không thể tải danh sách lớp của giáo viên.");
+        }
+    }
+
+    public async Task<ServiceResult<IReadOnlyList<Class>>> GetHomeroomClassesForTeacherAsync(int teacherId)
+    {
+        try
+        {
+            var teacher = await _teacherRepository.GetByIdAsync(teacherId);
+            if (teacher == null)
+            {
+                return ServiceResult<IReadOnlyList<Class>>.Fail(
+                    ErrorCodes.TeacherNotFound,
+                    "Không tìm thấy hồ sơ giáo viên.");
+            }
+
+            var classes = await _classRepository.GetHomeroomClassesByTeacherIdAsync(teacherId);
+            return ServiceResult<IReadOnlyList<Class>>.Ok(classes);
+        }
+        catch
+        {
+            return ServiceResult<IReadOnlyList<Class>>.Fail(
+                ErrorCodes.DatabaseError,
+                "Không thể tải danh sách lớp chủ nhiệm.");
+        }
+    }
+
+    public async Task<ServiceResult<Class>> GetHomeroomClassForTeacherAsync(int classId, int teacherId)
+    {
+        try
+        {
+            var teacher = await _teacherRepository.GetByIdAsync(teacherId);
+            if (teacher == null)
+            {
+                return ServiceResult<Class>.Fail(
+                    ErrorCodes.TeacherNotFound,
+                    "Không tìm thấy hồ sơ giáo viên.");
+            }
+
+            var classEntity = await _classRepository.GetByIdWithDetailsAsync(classId);
+            if (classEntity == null)
+            {
+                return ServiceResult<Class>.Fail(
+                    ErrorCodes.ClassNotFound,
+                    "Không tìm thấy lớp học.");
+            }
+
+            if (classEntity.HomeroomTeacherId != teacherId)
+            {
+                return ServiceResult<Class>.Fail(
+                    ErrorCodes.AuthForbidden,
+                    "Bạn không phải giáo viên chủ nhiệm của lớp này.");
+            }
+
+            return ServiceResult<Class>.Ok(classEntity);
+        }
+        catch
+        {
+            return ServiceResult<Class>.Fail(
+                ErrorCodes.DatabaseError,
+                "Không thể tải thông tin lớp chủ nhiệm.");
         }
     }
 

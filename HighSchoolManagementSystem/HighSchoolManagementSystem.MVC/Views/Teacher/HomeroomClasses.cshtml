@@ -1,0 +1,93 @@
+@model IReadOnlyList<HighSchoolManagementSystem.MVC.Models.ViewModels.TeacherAccessibleClassItemViewModel>
+@{
+    ViewData["Title"] = "Lớp chủ nhiệm";
+}
+
+<div class="greeting-banner">
+    <div class="greeting-text-wrap">
+        <span class="greeting-kicker">
+            <i class="bi bi-circle-fill" style="font-size: 7px;"></i> LỚP CHỦ NHIỆM
+        </span>
+        <h1 class="greeting-title">Lớp dưới trách nhiệm của tôi</h1>
+        <p class="greeting-subtitle">
+            Chỉ hiển thị các lớp bạn đang được phân công làm giáo viên chủ nhiệm.
+        </p>
+    </div>
+</div>
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger d-flex align-items-center mb-3" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <div>@TempData["ErrorMessage"]</div>
+    </div>
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success d-flex align-items-center mb-3" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        <div>@TempData["SuccessMessage"]</div>
+    </div>
+}
+
+<div class="card-table-wrap">
+    <div class="card-table-header">
+        <div>
+            <h2 class="table-card-title">Danh sách lớp chủ nhiệm</h2>
+            <p class="table-card-subtitle">Chọn lớp để xem thông tin chi tiết, giáo viên bộ môn và học sinh.</p>
+        </div>
+        <span class="table-counter-badge">Tổng: @Model.Count lớp</span>
+    </div>
+
+    @if (Model.Count == 0)
+    {
+        <div class="p-4 text-center text-muted">
+            <i class="bi bi-person-badge" style="font-size: 2rem;"></i>
+            <p class="mt-2 mb-0">Bạn chưa được phân công chủ nhiệm lớp nào.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table-edu mb-0">
+                <thead>
+                    <tr>
+                        <th style="width: 70px;">#</th>
+                        <th>Tên lớp</th>
+                        <th>Khối</th>
+                        <th>Năm học</th>
+                        <th class="text-center">Sĩ số</th>
+                        <th class="text-center" style="width: 160px;">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        var index = 1;
+                    }
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@index</td>
+                            <td>
+                                <a asp-action="HomeroomClassDetails" asp-route-id="@item.Id" class="text-decoration-none">
+                                    <strong>@item.ClassName</strong>
+                                </a>
+                            </td>
+                            <td>@item.GradeLevelName</td>
+                            <td>@item.AcademicYearCode</td>
+                            <td class="text-center">@item.StudentCount</td>
+                            <td class="text-center">
+                                <a asp-action="HomeroomClassDetails" asp-route-id="@item.Id"
+                                   class="btn btn-primary btn-sm px-2 py-1" style="font-size: 12px;">
+                                    <i class="bi bi-eye me-1"></i>Xem lớp
+                                </a>
+                            </td>
+                        </tr>
+                        index++;
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
