@@ -142,7 +142,8 @@
                     </a>
                 </li>
                 <li class="sidebar-menu-item">
-                    <a href="javascript:void(0)" class="sidebar-link">
+                    <a asp-controller="Staff" asp-action="Rooms"
+                       class="sidebar-link @(currentController == "Staff" && currentAction == "Rooms" ? "active" : "")">
                         <i class="bi bi-door-open"></i>
                         <span>Quản lý phòng học</span>
                     </a>

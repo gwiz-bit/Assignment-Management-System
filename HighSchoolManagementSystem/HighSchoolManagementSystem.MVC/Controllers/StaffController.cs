@@ -15,19 +15,22 @@ public class StaffController : Controller
     private readonly IClassService _classService;
     private readonly IGradeLevelService _gradeLevelService;
     private readonly ITeacherService _teacherService;
+    private readonly IRoomService _roomService;
 
     public StaffController(
         IAcademicYearService academicYearService,
         ISemesterService semesterService,
         IClassService classService,
         IGradeLevelService gradeLevelService,
-        ITeacherService teacherService)
+        ITeacherService teacherService,
+        IRoomService roomService)
     {
         _academicYearService = academicYearService;
         _semesterService = semesterService;
         _classService = classService;
         _gradeLevelService = gradeLevelService;
         _teacherService = teacherService;
+        _roomService = roomService;
     }
 
     public IActionResult Dashboard()
@@ -427,6 +430,77 @@ public class StaffController : Controller
 
     // =========================================================================
     // LỚP HỌC
+    // =========================================================================
+    // PHÒNG HỌC
+    // =========================================================================
+
+    [HttpGet]
+    public async Task<IActionResult> Rooms(string? status, string? roomType)
+    {
+        // Lần đầu vào trang (không có query): mặc định chỉ hiện phòng Available.
+        // Nếu user chọn "-- Tất cả trạng thái --" thì query có status rỗng → không gán mặc định.
+        if (!Request.Query.ContainsKey("status") && string.IsNullOrWhiteSpace(status))
+        {
+            status = "Available";
+        }
+
+        var roomsResult = await _roomService.GetByFiltersAsync(status, roomType);
+        var typesResult = await _roomService.GetRoomTypesAsync();
+
+        if (!roomsResult.Success)
+        {
+            TempData["ErrorMessage"] = roomsResult.Message;
+        }
+
+        var knownTypes = new[] { "Classroom", "Lab", "ComputerLab", "Library", "Meeting", "Gym" };
+        var roomTypes = typesResult.Success && typesResult.Data != null && typesResult.Data.Count > 0
+            ? typesResult.Data
+            : knownTypes;
+
+        static string TypeLabel(string type) => type switch
+        {
+            "Classroom" => "Phòng học",
+            "Lab" => "Phòng thí nghiệm",
+            "ComputerLab" => "Phòng máy",
+            "Library" => "Thư viện",
+            "Meeting" => "Phòng họp",
+            "Gym" => "Nhà thể dục",
+            _ => type
+        };
+
+        var page = new RoomListPageViewModel
+        {
+            SelectedStatus = status,
+            SelectedRoomType = roomType,
+            Statuses = new[]
+            {
+                new SelectListItem { Value = "Available", Text = "Sẵn sàng", Selected = status == "Available" },
+                new SelectListItem { Value = "Occupied", Text = "Đang sử dụng", Selected = status == "Occupied" },
+                new SelectListItem { Value = "Maintenance", Text = "Bảo trì", Selected = status == "Maintenance" }
+            },
+            RoomTypes = roomTypes.Select(t => new SelectListItem
+            {
+                Value = t,
+                Text = TypeLabel(t),
+                Selected = roomType == t
+            }),
+            Rooms = roomsResult.Success && roomsResult.Data != null
+                ? roomsResult.Data.Select(r => new RoomListItemViewModel
+                {
+                    Id = r.Id,
+                    RoomCode = r.RoomCode,
+                    RoomName = r.RoomName,
+                    Building = r.Building,
+                    RoomType = r.RoomType,
+                    Capacity = r.Capacity,
+                    Status = r.Status
+                }).ToList()
+                : Array.Empty<RoomListItemViewModel>()
+        };
+
+        return View(page);
+    }
+
     // =========================================================================
 
     [HttpGet]

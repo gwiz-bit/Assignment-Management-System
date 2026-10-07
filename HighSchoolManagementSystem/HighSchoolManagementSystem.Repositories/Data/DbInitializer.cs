@@ -341,6 +341,23 @@ public static class DbInitializer
         }
         await context.SaveChangesAsync();
 
+        if (!await context.Rooms.AnyAsync())
+        {
+            await context.Rooms.AddRangeAsync(
+                new Room { RoomCode = "A101", RoomName = "Phòng học A101", Building = "Tòa A", RoomType = "Classroom", Capacity = 45, Status = "Available" },
+                new Room { RoomCode = "A102", RoomName = "Phòng học A102", Building = "Tòa A", RoomType = "Classroom", Capacity = 45, Status = "Available" },
+                new Room { RoomCode = "A201", RoomName = "Phòng học A201", Building = "Tòa A", RoomType = "Classroom", Capacity = 40, Status = "Occupied" },
+                new Room { RoomCode = "B101", RoomName = "Phòng thí nghiệm Hóa", Building = "Tòa B", RoomType = "Lab", Capacity = 30, Status = "Available" },
+                new Room { RoomCode = "B102", RoomName = "Phòng thí nghiệm Lý", Building = "Tòa B", RoomType = "Lab", Capacity = 30, Status = "Maintenance" },
+                new Room { RoomCode = "C101", RoomName = "Phòng máy tính 1", Building = "Tòa C", RoomType = "ComputerLab", Capacity = 40, Status = "Available" },
+                new Room { RoomCode = "C102", RoomName = "Phòng máy tính 2", Building = "Tòa C", RoomType = "ComputerLab", Capacity = 40, Status = "Available" },
+                new Room { RoomCode = "TV01", RoomName = "Thư viện tầng 1", Building = "Tòa thư viện", RoomType = "Library", Capacity = 80, Status = "Available" },
+                new Room { RoomCode = "H01", RoomName = "Phòng họp hội đồng", Building = "Tòa hành chính", RoomType = "Meeting", Capacity = 20, Status = "Available" },
+                new Room { RoomCode = "TD01", RoomName = "Nhà thể dục đa năng", Building = "Khu thể thao", RoomType = "Gym", Capacity = 200, Status = "Available" }
+            );
+            await context.SaveChangesAsync();
+        }
+
         var math10 = await context.Subjects.FirstOrDefaultAsync(s => s.SubjectCode == "MATH10");
         var tin10 = await context.Subjects.FirstOrDefaultAsync(s => s.SubjectCode == "TIN10");
 
