@@ -16,6 +16,7 @@ public class StaffController : Controller
     private readonly IGradeLevelService _gradeLevelService;
     private readonly ITeacherService _teacherService;
     private readonly IRoomService _roomService;
+    private readonly ITimeSlotService _timeSlotService;
 
     public StaffController(
         IAcademicYearService academicYearService,
@@ -23,7 +24,8 @@ public class StaffController : Controller
         IClassService classService,
         IGradeLevelService gradeLevelService,
         ITeacherService teacherService,
-        IRoomService roomService)
+        IRoomService roomService,
+        ITimeSlotService timeSlotService)
     {
         _academicYearService = academicYearService;
         _semesterService = semesterService;
@@ -31,6 +33,7 @@ public class StaffController : Controller
         _gradeLevelService = gradeLevelService;
         _teacherService = teacherService;
         _roomService = roomService;
+        _timeSlotService = timeSlotService;
     }
 
     public IActionResult Dashboard()
@@ -618,6 +621,43 @@ public class StaffController : Controller
             new SelectListItem { Value = "Occupied", Text = "Đang sử dụng", Selected = model.Status == "Occupied" },
             new SelectListItem { Value = "Maintenance", Text = "Bảo trì", Selected = model.Status == "Maintenance" }
         };
+    }
+
+    // =========================================================================
+    // TIẾT HỌC / KHUNG GIỜ
+    // =========================================================================
+
+    [HttpGet]
+    public async Task<IActionResult> TimeSlots(string? session)
+    {
+        var result = await _timeSlotService.GetByFiltersAsync(session);
+        if (!result.Success)
+        {
+            TempData["ErrorMessage"] = result.Message;
+        }
+
+        var page = new TimeSlotListPageViewModel
+        {
+            SelectedSession = session,
+            Sessions = new[]
+            {
+                new SelectListItem { Value = "Morning", Text = "Buổi sáng", Selected = session == "Morning" },
+                new SelectListItem { Value = "Afternoon", Text = "Buổi chiều", Selected = session == "Afternoon" }
+            },
+            TimeSlots = result.Success && result.Data != null
+                ? result.Data.Select(t => new TimeSlotListItemViewModel
+                {
+                    Id = t.Id,
+                    SlotCode = t.SlotCode,
+                    PeriodNo = t.PeriodNo,
+                    StartTime = t.StartTime,
+                    EndTime = t.EndTime,
+                    Session = t.Session
+                }).ToList()
+                : Array.Empty<TimeSlotListItemViewModel>()
+        };
+
+        return View(page);
     }
 
     // =========================================================================

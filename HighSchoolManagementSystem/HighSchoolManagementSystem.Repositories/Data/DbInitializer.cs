@@ -358,6 +358,23 @@ public static class DbInitializer
             await context.SaveChangesAsync();
         }
 
+        if (!await context.TimeSlots.AnyAsync())
+        {
+            await context.TimeSlots.AddRangeAsync(
+                new TimeSlot { SlotCode = "T1", PeriodNo = 1, StartTime = new TimeSpan(7, 0, 0), EndTime = new TimeSpan(7, 45, 0), Session = "Morning" },
+                new TimeSlot { SlotCode = "T2", PeriodNo = 2, StartTime = new TimeSpan(7, 50, 0), EndTime = new TimeSpan(8, 35, 0), Session = "Morning" },
+                new TimeSlot { SlotCode = "T3", PeriodNo = 3, StartTime = new TimeSpan(8, 40, 0), EndTime = new TimeSpan(9, 25, 0), Session = "Morning" },
+                new TimeSlot { SlotCode = "T4", PeriodNo = 4, StartTime = new TimeSpan(9, 40, 0), EndTime = new TimeSpan(10, 25, 0), Session = "Morning" },
+                new TimeSlot { SlotCode = "T5", PeriodNo = 5, StartTime = new TimeSpan(10, 30, 0), EndTime = new TimeSpan(11, 15, 0), Session = "Morning" },
+                new TimeSlot { SlotCode = "T6", PeriodNo = 6, StartTime = new TimeSpan(13, 0, 0), EndTime = new TimeSpan(13, 45, 0), Session = "Afternoon" },
+                new TimeSlot { SlotCode = "T7", PeriodNo = 7, StartTime = new TimeSpan(13, 50, 0), EndTime = new TimeSpan(14, 35, 0), Session = "Afternoon" },
+                new TimeSlot { SlotCode = "T8", PeriodNo = 8, StartTime = new TimeSpan(14, 40, 0), EndTime = new TimeSpan(15, 25, 0), Session = "Afternoon" },
+                new TimeSlot { SlotCode = "T9", PeriodNo = 9, StartTime = new TimeSpan(15, 40, 0), EndTime = new TimeSpan(16, 25, 0), Session = "Afternoon" },
+                new TimeSlot { SlotCode = "T10", PeriodNo = 10, StartTime = new TimeSpan(16, 30, 0), EndTime = new TimeSpan(17, 15, 0), Session = "Afternoon" }
+            );
+            await context.SaveChangesAsync();
+        }
+
         var math10 = await context.Subjects.FirstOrDefaultAsync(s => s.SubjectCode == "MATH10");
         var tin10 = await context.Subjects.FirstOrDefaultAsync(s => s.SubjectCode == "TIN10");
 

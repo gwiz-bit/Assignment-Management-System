@@ -148,6 +148,13 @@
                         <span>Quản lý phòng học</span>
                     </a>
                 </li>
+                <li class="sidebar-menu-item">
+                    <a asp-controller="Staff" asp-action="TimeSlots"
+                       class="sidebar-link @(currentController == "Staff" && currentAction == "TimeSlots" ? "active" : "")">
+                        <i class="bi bi-clock-history"></i>
+                        <span>Khung giờ tiết học</span>
+                    </a>
+                </li>
             </ul>
 
             <div class="sidebar-section-title">HÀNH CHÍNH & TIẾP NHẬN</div>
