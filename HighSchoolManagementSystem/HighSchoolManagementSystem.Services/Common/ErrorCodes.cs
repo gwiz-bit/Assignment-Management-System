@@ -58,6 +58,11 @@ public static class ErrorCodes
     public const string ClassCapacityExceeded  = "CLS_002"; // Lớp đã đủ sĩ số tối đa
     public const string AcademicYearClosed     = "CLS_003"; // Năm học đã kết thúc, không thể chỉnh sửa
     public const string SemesterNotFound       = "CLS_004"; // Không tìm thấy học kỳ
+    public const string RoomNotFound           = "CLS_005"; // Không tìm thấy phòng học
+    public const string RoomCodeDuplicate      = "CLS_006"; // Mã phòng học đã tồn tại
+    public const string TimeSlotNotFound       = "CLS_007"; // Không tìm thấy tiết học
+    public const string TimeSlotCodeDuplicate  = "CLS_008"; // Mã tiết học đã tồn tại
+    public const string TimeSlotPeriodDuplicate = "CLS_009"; // Số tiết đã tồn tại trong cùng buổi
 
     // =========================================================================
     // 6. ĐIỂM SỐ & ĐÁNH GIÁ (SCR_*)

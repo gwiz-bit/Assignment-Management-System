@@ -341,6 +341,40 @@ public static class DbInitializer
         }
         await context.SaveChangesAsync();
 
+        if (!await context.Rooms.AnyAsync())
+        {
+            await context.Rooms.AddRangeAsync(
+                new Room { RoomCode = "A101", RoomName = "Phòng học A101", Building = "Tòa A", RoomType = "Classroom", Capacity = 45, Status = "Available" },
+                new Room { RoomCode = "A102", RoomName = "Phòng học A102", Building = "Tòa A", RoomType = "Classroom", Capacity = 45, Status = "Available" },
+                new Room { RoomCode = "A201", RoomName = "Phòng học A201", Building = "Tòa A", RoomType = "Classroom", Capacity = 40, Status = "Occupied" },
+                new Room { RoomCode = "B101", RoomName = "Phòng thí nghiệm Hóa", Building = "Tòa B", RoomType = "Lab", Capacity = 30, Status = "Available" },
+                new Room { RoomCode = "B102", RoomName = "Phòng thí nghiệm Lý", Building = "Tòa B", RoomType = "Lab", Capacity = 30, Status = "Maintenance" },
+                new Room { RoomCode = "C101", RoomName = "Phòng máy tính 1", Building = "Tòa C", RoomType = "ComputerLab", Capacity = 40, Status = "Available" },
+                new Room { RoomCode = "C102", RoomName = "Phòng máy tính 2", Building = "Tòa C", RoomType = "ComputerLab", Capacity = 40, Status = "Available" },
+                new Room { RoomCode = "TV01", RoomName = "Thư viện tầng 1", Building = "Tòa thư viện", RoomType = "Library", Capacity = 80, Status = "Available" },
+                new Room { RoomCode = "H01", RoomName = "Phòng họp hội đồng", Building = "Tòa hành chính", RoomType = "Meeting", Capacity = 20, Status = "Available" },
+                new Room { RoomCode = "TD01", RoomName = "Nhà thể dục đa năng", Building = "Khu thể thao", RoomType = "Gym", Capacity = 200, Status = "Available" }
+            );
+            await context.SaveChangesAsync();
+        }
+
+        if (!await context.TimeSlots.AnyAsync())
+        {
+            await context.TimeSlots.AddRangeAsync(
+                new TimeSlot { SlotCode = "T1", PeriodNo = 1, StartTime = new TimeSpan(7, 0, 0), EndTime = new TimeSpan(7, 45, 0), Session = "Morning" },
+                new TimeSlot { SlotCode = "T2", PeriodNo = 2, StartTime = new TimeSpan(7, 50, 0), EndTime = new TimeSpan(8, 35, 0), Session = "Morning" },
+                new TimeSlot { SlotCode = "T3", PeriodNo = 3, StartTime = new TimeSpan(8, 40, 0), EndTime = new TimeSpan(9, 25, 0), Session = "Morning" },
+                new TimeSlot { SlotCode = "T4", PeriodNo = 4, StartTime = new TimeSpan(9, 40, 0), EndTime = new TimeSpan(10, 25, 0), Session = "Morning" },
+                new TimeSlot { SlotCode = "T5", PeriodNo = 5, StartTime = new TimeSpan(10, 30, 0), EndTime = new TimeSpan(11, 15, 0), Session = "Morning" },
+                new TimeSlot { SlotCode = "T6", PeriodNo = 6, StartTime = new TimeSpan(13, 0, 0), EndTime = new TimeSpan(13, 45, 0), Session = "Afternoon" },
+                new TimeSlot { SlotCode = "T7", PeriodNo = 7, StartTime = new TimeSpan(13, 50, 0), EndTime = new TimeSpan(14, 35, 0), Session = "Afternoon" },
+                new TimeSlot { SlotCode = "T8", PeriodNo = 8, StartTime = new TimeSpan(14, 40, 0), EndTime = new TimeSpan(15, 25, 0), Session = "Afternoon" },
+                new TimeSlot { SlotCode = "T9", PeriodNo = 9, StartTime = new TimeSpan(15, 40, 0), EndTime = new TimeSpan(16, 25, 0), Session = "Afternoon" },
+                new TimeSlot { SlotCode = "T10", PeriodNo = 10, StartTime = new TimeSpan(16, 30, 0), EndTime = new TimeSpan(17, 15, 0), Session = "Afternoon" }
+            );
+            await context.SaveChangesAsync();
+        }
+
         var math10 = await context.Subjects.FirstOrDefaultAsync(s => s.SubjectCode == "MATH10");
         var tin10 = await context.Subjects.FirstOrDefaultAsync(s => s.SubjectCode == "TIN10");
 
