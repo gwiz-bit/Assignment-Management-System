@@ -15,6 +15,14 @@
     </div>
 </div>
 
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success d-flex align-items-center mb-3" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        <div>@TempData["SuccessMessage"]</div>
+    </div>
+}
+
 @if (TempData["ErrorMessage"] != null)
 {
     <div class="alert alert-danger d-flex align-items-center mb-3" role="alert">
@@ -60,14 +68,22 @@
             <h2 class="table-card-title">Kết quả</h2>
             <p class="table-card-subtitle">Sắp xếp theo tòa nhà rồi theo mã phòng.</p>
         </div>
-        <span class="table-counter-badge">Tổng: @Model.Rooms.Count phòng</span>
+        <div class="d-flex align-items-center gap-2">
+            <span class="table-counter-badge">Tổng: @Model.Rooms.Count phòng</span>
+            <a asp-action="CreateRoom" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-lg me-1"></i>Tạo phòng học
+            </a>
+        </div>
     </div>
 
     @if (Model.Rooms.Count == 0)
     {
         <div class="p-4 text-center text-muted">
             <i class="bi bi-door-open" style="font-size: 2rem;"></i>
-            <p class="mt-2 mb-0">Không có phòng học nào khớp với bộ lọc hiện tại.</p>
+            <p class="mt-2 mb-3">Không có phòng học nào khớp với bộ lọc hiện tại.</p>
+            <a asp-action="CreateRoom" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-lg me-1"></i>Tạo phòng học
+            </a>
         </div>
     }
     else
@@ -83,6 +99,7 @@
                         <th>Loại phòng</th>
                         <th class="text-center">Sức chứa</th>
                         <th class="text-center">Trạng thái</th>
+                        <th class="text-center" style="width: 120px;">Thao tác</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -112,7 +129,7 @@
                             "ComputerLab" => "Phòng máy",
                             "Library" => "Thư viện",
                             "Meeting" => "Phòng họp",
-                            "Gym" => "Nhà thể dục",
+                            "Gym" => "Nhà đa năng",
                             _ => item.RoomType
                         };
                         <tr>
@@ -124,6 +141,13 @@
                             <td class="text-center">@item.Capacity</td>
                             <td class="text-center">
                                 <span class="badge-status @statusClass">@statusLabel</span>
+                            </td>
+                            <td class="text-center">
+                                <a asp-action="EditRoom" asp-route-id="@item.Id"
+                                   class="btn btn-secondary btn-sm px-2 py-1" style="font-size: 12px;"
+                                   title="Cập nhật">
+                                    <i class="bi bi-pencil-square me-1"></i>Sửa
+                                </a>
                             </td>
                         </tr>
                         index++;

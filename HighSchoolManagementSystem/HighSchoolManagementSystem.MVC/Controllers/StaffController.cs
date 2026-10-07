@@ -464,7 +464,7 @@ public class StaffController : Controller
             "ComputerLab" => "Phòng máy",
             "Library" => "Thư viện",
             "Meeting" => "Phòng họp",
-            "Gym" => "Nhà thể dục",
+            "Gym" => "Nhà đa năng",
             _ => type
         };
 
@@ -499,6 +499,125 @@ public class StaffController : Controller
         };
 
         return View(page);
+    }
+
+    [HttpGet]
+    public IActionResult CreateRoom()
+    {
+        var model = new CreateRoomViewModel();
+        PopulateRoomFormDropdowns(model);
+        return View(model);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CreateRoom(CreateRoomViewModel model)
+    {
+        PopulateRoomFormDropdowns(model);
+
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        var result = await _roomService.CreateAsync(
+            model.RoomCode,
+            model.RoomName,
+            model.Building,
+            model.RoomType,
+            model.Capacity,
+            model.Status);
+
+        if (!result.Success)
+        {
+            ModelState.AddModelError(string.Empty, result.Message ?? "Không thể tạo phòng học.");
+            return View(model);
+        }
+
+        TempData["SuccessMessage"] = $"Đã tạo phòng \"{result.Data!.RoomCode}\" thành công.";
+        return RedirectToAction(nameof(Rooms), new { status = result.Data.Status });
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> EditRoom(int id)
+    {
+        var result = await _roomService.GetByIdAsync(id);
+        if (!result.Success || result.Data == null)
+        {
+            TempData["ErrorMessage"] = result.Message ?? "Không tìm thấy phòng học.";
+            return RedirectToAction(nameof(Rooms));
+        }
+
+        var room = result.Data;
+        var model = new EditRoomViewModel
+        {
+            Id = room.Id,
+            RoomCode = room.RoomCode,
+            RoomName = room.RoomName,
+            Building = room.Building,
+            RoomType = room.RoomType,
+            Capacity = room.Capacity,
+            Status = room.Status
+        };
+
+        PopulateRoomFormDropdowns(model);
+        return View(model);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditRoom(EditRoomViewModel model)
+    {
+        PopulateRoomFormDropdowns(model);
+
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        var result = await _roomService.UpdateAsync(
+            model.Id,
+            model.RoomCode,
+            model.RoomName,
+            model.Building,
+            model.RoomType,
+            model.Capacity,
+            model.Status);
+
+        if (!result.Success)
+        {
+            if (result.ErrorCode == ErrorCodes.RoomNotFound)
+            {
+                TempData["ErrorMessage"] = result.Message;
+                return RedirectToAction(nameof(Rooms));
+            }
+
+            ModelState.AddModelError(string.Empty, result.Message ?? "Không thể cập nhật phòng học.");
+            return View(model);
+        }
+
+        TempData["SuccessMessage"] = $"Đã cập nhật phòng \"{result.Data!.RoomCode}\" thành công.";
+        return RedirectToAction(nameof(Rooms), new { status = result.Data.Status });
+    }
+
+    private static void PopulateRoomFormDropdowns(CreateRoomViewModel model)
+    {
+        model.RoomTypes = new[]
+        {
+            new SelectListItem { Value = "Classroom", Text = "Phòng học", Selected = model.RoomType == "Classroom" },
+            new SelectListItem { Value = "Lab", Text = "Phòng thí nghiệm", Selected = model.RoomType == "Lab" },
+            new SelectListItem { Value = "ComputerLab", Text = "Phòng máy", Selected = model.RoomType == "ComputerLab" },
+            new SelectListItem { Value = "Library", Text = "Thư viện", Selected = model.RoomType == "Library" },
+            new SelectListItem { Value = "Meeting", Text = "Phòng họp", Selected = model.RoomType == "Meeting" },
+            new SelectListItem { Value = "Gym", Text = "Nhà đa năng", Selected = model.RoomType == "Gym" }
+        };
+
+        model.Statuses = new[]
+        {
+            new SelectListItem { Value = "Available", Text = "Sẵn sàng", Selected = model.Status == "Available" },
+            new SelectListItem { Value = "Occupied", Text = "Đang sử dụng", Selected = model.Status == "Occupied" },
+            new SelectListItem { Value = "Maintenance", Text = "Bảo trì", Selected = model.Status == "Maintenance" }
+        };
     }
 
     // =========================================================================

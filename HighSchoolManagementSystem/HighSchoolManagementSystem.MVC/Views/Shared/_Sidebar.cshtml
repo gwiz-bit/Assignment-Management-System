@@ -143,7 +143,7 @@
                 </li>
                 <li class="sidebar-menu-item">
                     <a asp-controller="Staff" asp-action="Rooms"
-                       class="sidebar-link @(currentController == "Staff" && currentAction == "Rooms" ? "active" : "")">
+                       class="sidebar-link @(currentController == "Staff" && (currentAction == "Rooms" || currentAction == "CreateRoom" || currentAction == "EditRoom") ? "active" : "")">
                         <i class="bi bi-door-open"></i>
                         <span>Quản lý phòng học</span>
                     </a>

@@ -43,4 +43,41 @@ public class RoomRepository : IRoomRepository
             .OrderBy(t => t)
             .ToListAsync();
     }
+
+    public async Task<Room?> GetByIdAsync(int id)
+    {
+        return await _context.Rooms
+            .AsNoTracking()
+            .FirstOrDefaultAsync(r => r.Id == id);
+    }
+
+    public async Task<Room?> GetTrackedByIdAsync(int id)
+    {
+        return await _context.Rooms
+            .FirstOrDefaultAsync(r => r.Id == id);
+    }
+
+    public async Task<bool> ExistsByCodeAsync(string roomCode, int? excludeId = null)
+    {
+        var normalized = roomCode.Trim().ToLower();
+        var query = _context.Rooms
+            .Where(r => r.RoomCode.ToLower() == normalized);
+
+        if (excludeId.HasValue)
+        {
+            query = query.Where(r => r.Id != excludeId.Value);
+        }
+
+        return await query.AnyAsync();
+    }
+
+    public async Task AddAsync(Room room)
+    {
+        await _context.Rooms.AddAsync(room);
+    }
+
+    public async Task SaveChangesAsync()
+    {
+        await _context.SaveChangesAsync();
+    }
 }
