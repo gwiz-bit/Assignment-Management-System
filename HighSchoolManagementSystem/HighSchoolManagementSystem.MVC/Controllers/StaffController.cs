@@ -660,6 +660,111 @@ public class StaffController : Controller
         return View(page);
     }
 
+    [HttpGet]
+    public IActionResult CreateTimeSlot()
+    {
+        var model = new CreateTimeSlotViewModel();
+        PopulateTimeSlotFormDropdowns(model);
+        return View(model);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CreateTimeSlot(CreateTimeSlotViewModel model)
+    {
+        PopulateTimeSlotFormDropdowns(model);
+
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        var result = await _timeSlotService.CreateAsync(
+            model.SlotCode,
+            model.PeriodNo,
+            model.StartTime,
+            model.EndTime,
+            model.Session);
+
+        if (!result.Success)
+        {
+            ModelState.AddModelError(string.Empty, result.Message ?? "Không thể tạo tiết học.");
+            return View(model);
+        }
+
+        TempData["SuccessMessage"] = $"Đã tạo tiết \"{result.Data!.SlotCode}\" thành công.";
+        return RedirectToAction(nameof(TimeSlots), new { session = result.Data.Session });
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> EditTimeSlot(int id)
+    {
+        var result = await _timeSlotService.GetByIdAsync(id);
+        if (!result.Success || result.Data == null)
+        {
+            TempData["ErrorMessage"] = result.Message ?? "Không tìm thấy tiết học.";
+            return RedirectToAction(nameof(TimeSlots));
+        }
+
+        var slot = result.Data;
+        var model = new EditTimeSlotViewModel
+        {
+            Id = slot.Id,
+            SlotCode = slot.SlotCode,
+            PeriodNo = slot.PeriodNo,
+            StartTime = slot.StartTime,
+            EndTime = slot.EndTime,
+            Session = slot.Session
+        };
+
+        PopulateTimeSlotFormDropdowns(model);
+        return View(model);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditTimeSlot(EditTimeSlotViewModel model)
+    {
+        PopulateTimeSlotFormDropdowns(model);
+
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        var result = await _timeSlotService.UpdateAsync(
+            model.Id,
+            model.SlotCode,
+            model.PeriodNo,
+            model.StartTime,
+            model.EndTime,
+            model.Session);
+
+        if (!result.Success)
+        {
+            if (result.ErrorCode == ErrorCodes.TimeSlotNotFound)
+            {
+                TempData["ErrorMessage"] = result.Message;
+                return RedirectToAction(nameof(TimeSlots));
+            }
+
+            ModelState.AddModelError(string.Empty, result.Message ?? "Không thể cập nhật tiết học.");
+            return View(model);
+        }
+
+        TempData["SuccessMessage"] = $"Đã cập nhật tiết \"{result.Data!.SlotCode}\" thành công.";
+        return RedirectToAction(nameof(TimeSlots), new { session = result.Data.Session });
+    }
+
+    private static void PopulateTimeSlotFormDropdowns(CreateTimeSlotViewModel model)
+    {
+        model.Sessions = new[]
+        {
+            new SelectListItem { Value = "Morning", Text = "Buổi sáng", Selected = model.Session == "Morning" },
+            new SelectListItem { Value = "Afternoon", Text = "Buổi chiều", Selected = model.Session == "Afternoon" }
+        };
+    }
+
     // =========================================================================
 
     [HttpGet]
