@@ -18,6 +18,18 @@ public class SemesterService : ISemesterService
         _academicYearRepository = academicYearRepository;
     }
 
+    public async Task<ServiceResult<IReadOnlyList<Semester>>> GetAllAsync()
+    {
+        try
+        {
+            return ServiceResult<IReadOnlyList<Semester>>.Ok(await _semesterRepository.GetAllAsync());
+        }
+        catch
+        {
+            return ServiceResult<IReadOnlyList<Semester>>.Fail(ErrorCodes.DatabaseError, "Không thể tải danh sách học kỳ.");
+        }
+    }
+
     public async Task<ServiceResult<IReadOnlyList<Semester>>> GetByAcademicYearIdAsync(int academicYearId)
     {
         try

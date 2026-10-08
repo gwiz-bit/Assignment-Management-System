@@ -108,11 +108,13 @@ public class ScoreService : IScoreService
                     "Bạn không có quyền nhập điểm cho bài kiểm tra này.");
             }
 
-            if (dto.Score.HasValue && (dto.Score.Value < 0 || dto.Score.Value > 10))
+            var minScore = assessment.AssessmentType?.MinScore ?? 0;
+            var maxScore = assessment.AssessmentType?.MaxScore ?? 10;
+            if (dto.Score.HasValue && (dto.Score.Value < minScore || dto.Score.Value > maxScore))
             {
                 return ServiceResult<StudentScoreItemDto>.Fail(
                     ErrorCodes.ScoreOutOfRange,
-                    "Điểm số phải nằm trong thang điểm từ 0.0 đến 10.0.");
+                    $"Điểm số phải nằm trong khoảng từ {minScore:0.##} đến {maxScore:0.##}.");
             }
 
             var isStudentInClass = assessment.TeachingAssignment?.Class?.StudentClasses
@@ -261,13 +263,15 @@ public class ScoreService : IScoreService
             if (dto.Scores.Any(s => !enrolledIds.Contains(s.StudentId)))
                 return ServiceResult<int>.Fail(ErrorCodes.ScoreStudentNotInClass, "Danh sách gửi lên có học sinh không thuộc lớp của bài kiểm tra.");
 
+            var minScore = assessment.AssessmentType?.MinScore ?? 0;
+            var maxScore = assessment.AssessmentType?.MaxScore ?? 10;
             foreach (var item in dto.Scores)
             {
-                if (item.Score.HasValue && (item.Score.Value < 0 || item.Score.Value > 10))
+                if (item.Score.HasValue && (item.Score.Value < minScore || item.Score.Value > maxScore))
                 {
                     return ServiceResult<int>.Fail(
                         ErrorCodes.ScoreOutOfRange,
-                        $"Điểm số {item.Score.Value} của học sinh Id {item.StudentId} không hợp lệ (phải nằm trong thang điểm từ 0.0 đến 10.0).");
+                        $"Điểm số {item.Score.Value} của học sinh Id {item.StudentId} không hợp lệ (phải nằm trong khoảng từ {minScore:0.##} đến {maxScore:0.##}).");
                 }
             }
 

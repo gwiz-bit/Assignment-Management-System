@@ -29,6 +29,12 @@ public class AssessmentType
     [Column("max_entries")]
     public int MaxEntries { get; set; } = 5;
 
+    [Column("min_score", TypeName = "decimal(5,2)")]
+    public decimal MinScore { get; set; } = 0;
+
+    [Column("max_score", TypeName = "decimal(5,2)")]
+    public decimal MaxScore { get; set; } = 10;
+
     // Navigation properties
     public virtual ICollection<Assessment> Assessments { get; set; } = new List<Assessment>();
 }

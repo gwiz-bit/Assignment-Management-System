@@ -340,6 +340,8 @@ public class AssessmentService : IAssessmentService
             Weight = a.AssessmentType?.Weight ?? 1.0m,
             MinEntries = a.AssessmentType?.MinEntries ?? 1,
             MaxEntries = a.AssessmentType?.MaxEntries ?? 5,
+            MinScore = a.AssessmentType?.MinScore ?? 0,
+            MaxScore = a.AssessmentType?.MaxScore ?? 10,
             AssessmentName = a.AssessmentName,
             ConductedAt = a.ConductedAt,
 
@@ -370,7 +372,9 @@ public class AssessmentService : IAssessmentService
             TypeName = t.TypeName,
             Weight = t.Weight,
             MinEntries = t.MinEntries,
-            MaxEntries = t.MaxEntries
+            MaxEntries = t.MaxEntries,
+            MinScore = t.MinScore,
+            MaxScore = t.MaxScore
         };
     }
 

@@ -85,9 +85,17 @@
                     </a>
                 </li>
                 <li class="sidebar-menu-item">
-                    <a href="javascript:void(0)" class="sidebar-link">
+                    <a asp-controller="Timetable" asp-action="Index"
+                       class="sidebar-link @(currentController == "Timetable" ? "active" : "")">
                         <i class="bi bi-calendar3"></i>
-                        <span>Lịch công tác</span>
+                        <span>Thời khóa biểu</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a asp-controller="AssessmentConfiguration" asp-action="Index"
+                       class="sidebar-link @(currentController == "AssessmentConfiguration" ? "active" : "")">
+                        <i class="bi bi-sliders"></i>
+                        <span>Cấu hình đánh giá</span>
                     </a>
                 </li>
             </ul>
@@ -207,7 +215,8 @@
                     </a>
                 </li>
                 <li class="sidebar-menu-item">
-                    <a href="javascript:void(0)" class="sidebar-link">
+                    <a asp-controller="Timetable" asp-action="MySchedule"
+                       class="sidebar-link @(currentController == "Timetable" ? "active" : "")">
                         <i class="bi bi-calendar-week"></i>
                         <span>Lịch dạy (TKB)</span>
                     </a>
@@ -288,7 +297,8 @@
                     </a>
                 </li>
                 <li class="sidebar-menu-item">
-                    <a href="javascript:void(0)" class="sidebar-link">
+                    <a asp-controller="Timetable" asp-action="MySchedule"
+                       class="sidebar-link @(currentController == "Timetable" ? "active" : "")">
                         <i class="bi bi-calendar-week"></i>
                         <span>Thời khóa biểu tuần</span>
                     </a>
@@ -343,7 +353,8 @@
                     </a>
                 </li>
                 <li class="sidebar-menu-item">
-                    <a href="javascript:void(0)" class="sidebar-link">
+                    <a asp-controller="Timetable" asp-action="MySchedule"
+                       class="sidebar-link @(currentController == "Timetable" ? "active" : "")">
                         <i class="bi bi-calendar-week"></i>
                         <span>Thời khóa biểu của con</span>
                     </a>

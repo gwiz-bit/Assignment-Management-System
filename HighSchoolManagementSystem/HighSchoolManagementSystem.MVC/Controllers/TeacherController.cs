@@ -14,13 +14,16 @@ public class TeacherController : Controller
 {
     private readonly IClassService _classService;
     private readonly ITeacherRepository _teacherRepository;
+    private readonly ITimetableService _timetableService;
 
     public TeacherController(
         IClassService classService,
-        ITeacherRepository teacherRepository)
+        ITeacherRepository teacherRepository,
+        ITimetableService timetableService)
     {
         _classService = classService;
         _teacherRepository = teacherRepository;
+        _timetableService = timetableService;
     }
 
     public IActionResult Dashboard()
@@ -63,7 +66,7 @@ public class TeacherController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> HomeroomClassDetails(int id)
+    public async Task<IActionResult> HomeroomClassDetails(int id, DateTime? weekStart)
     {
         var teacher = await ResolveCurrentTeacherAsync();
         if (teacher == null)
@@ -85,6 +88,9 @@ public class TeacherController : Controller
         }
 
         var c = result.Data;
+        var semesterId = await _timetableService.GetActiveSemesterIdAsync();
+        var timetable = await _timetableService.GetForClassAsync(c.Id, semesterId);
+        var slots = await _timetableService.GetTimeSlotsAsync();
         var enrolledStudents = c.StudentClasses
             .Where(sc => sc.Status == "Enrolled" && sc.LeftAt == null)
             .OrderBy(sc => sc.Student.StudentCode)
@@ -128,7 +134,8 @@ public class TeacherController : Controller
                     JoinedAt = sc.JoinedAt,
                     EnrollmentStatus = sc.Status
                 })
-                .ToList()
+                .ToList(),
+            Timetable = TimetableController.MapList(timetable.Data, weekStart, slots.Data)
         };
 
         return View(model);

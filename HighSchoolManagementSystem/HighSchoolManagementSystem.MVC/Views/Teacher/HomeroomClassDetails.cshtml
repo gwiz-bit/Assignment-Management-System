@@ -90,6 +90,11 @@
     </div>
 </div>
 
+@if (Model.Timetable != null)
+{
+    @await Html.PartialAsync("~/Views/Timetable/_WeeklyGrid.cshtml", Model.Timetable)
+}
+
 <div class="card-table-wrap mb-3">
     <div class="card-table-header">
         <div>

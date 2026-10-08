@@ -1126,3 +1126,26 @@ a:hover {
     font-size: 26px;
   }
 }
+
+.timetable-filter-card { padding: 22px 24px; }
+.timetable-filter-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.timetable-filter-icon { color: var(--tufts-blue-600); font-size: 28px; }
+.timetable-week-header { align-items: center; }
+.timetable-grid { width: 100%; min-width: 980px; border-collapse: separate; border-spacing: 0; table-layout: fixed; background: #fff; font-size: 13px; }
+.timetable-grid th, .timetable-grid td { border-right: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); vertical-align: top; }
+.timetable-grid thead th { background: #f1f5f9; color: var(--tufts-blue-900); font-weight: 700; padding: 11px 8px; text-align: center; }
+.timetable-grid thead small, .timetable-period-cell small { color: var(--color-text-muted); font-weight: 500; white-space: nowrap; }
+.timetable-grid tbody td { min-width: 145px; height: 94px; padding: 5px; text-align: left; }
+.timetable-period-col, .timetable-period-cell { width: 120px; text-align: center; }
+.timetable-period-cell { background: #f8fafc; color: var(--tufts-blue-900); font-weight: 700; padding: 10px 6px; }
+.timetable-cell { display: flex; min-height: 82px; flex-direction: column; gap: 3px; padding: 8px; margin-bottom: 4px; border-left: 3px solid var(--tufts-blue-600); border-radius: var(--radius-sm); background: var(--tufts-blue-50); color: var(--color-text-main); }
+.timetable-cell strong { color: var(--tufts-blue-900); line-height: 1.25; }
+.timetable-cell span { color: var(--color-text-muted); font-size: 12px; }
+.timetable-cell-actions { display: flex; gap: 12px; }
+.timetable-empty-add { display: flex; min-height: 82px; align-items: center; justify-content: center; flex-direction: column; gap: 4px; border: 1px dashed var(--tufts-blue-300); border-radius: var(--radius-sm); color: var(--tufts-blue-700); text-decoration: none; }
+.timetable-empty-add:hover { background: var(--tufts-blue-50); color: var(--tufts-blue-900); }
+.timetable-empty-add i { font-size: 18px; }
+.timetable-empty-add span { font-size: 11px; }
+.timetable-cell-actions form { margin: 0; }
+.timetable-cell-actions a, .timetable-cell-actions button { border: 0; padding: 0; background: transparent; color: var(--tufts-blue-700); }
+.timetable-cell-actions button { color: var(--status-danger-text); }

@@ -35,4 +35,5 @@ public class ClassDetailsViewModel
     public int TeacherAssignmentCount { get; set; }
     public IReadOnlyList<ClassTeacherItemViewModel> Teachers { get; set; } = Array.Empty<ClassTeacherItemViewModel>();
     public IReadOnlyList<ClassStudentItemViewModel> Students { get; set; } = Array.Empty<ClassStudentItemViewModel>();
+    public TimetableListViewModel? Timetable { get; set; }
 }

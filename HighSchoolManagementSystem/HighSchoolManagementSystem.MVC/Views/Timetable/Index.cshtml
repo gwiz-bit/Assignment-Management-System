@@ -1,0 +1,34 @@
+@model HighSchoolManagementSystem.MVC.Models.ViewModels.TimetableListViewModel
+@{ ViewData["Title"] = "Quản lý thời khóa biểu"; }
+
+<div class="greeting-banner mb-4"><div class="greeting-text-wrap"><span class="greeting-kicker">QUẢN LÝ ĐÀO TẠO</span><h1 class="greeting-title">Quản lý thời khóa biểu</h1></div></div>
+@if (TempData["SuccessMessage"] != null) { <div class="alert alert-success">@TempData["SuccessMessage"]</div> }
+@if (TempData["ErrorMessage"] != null) { <div class="alert alert-danger">@TempData["ErrorMessage"]</div> }
+
+<div class="edu-card timetable-filter-card mb-4">
+    <div class="timetable-filter-heading"><div><span class="section-kicker">TRA CỨU LỊCH DẠY</span><h2 class="table-card-title mb-1">Lịch theo giáo viên</h2></div><i class="bi bi-person-workspace timetable-filter-icon"></i></div>
+    <form asp-action="Index" method="get" class="row g-3 align-items-end mt-1">
+        <input type="hidden" name="editMode" value="@Model.EditMode.ToString().ToLowerInvariant()" />
+        <div class="col-xl-4 col-md-6"><label for="semesterId" class="form-label">Học kỳ</label><select id="semesterId" name="semesterId" class="form-select"><option value="">-- Chọn học kỳ --</option>@foreach(var semester in Model.SemesterOptions){<option value="@semester.Value" selected="@(semester.Selected ? "selected" : null)">@semester.Text</option>}</select></div>
+        <div class="col-xl-3 col-md-6"><label for="teacherId" class="form-label">Giáo viên</label><select id="teacherId" name="teacherId" class="form-select"><option value="">-- Tất cả giáo viên --</option>@foreach(var teacher in Model.TeacherOptions){<option value="@teacher.Value" selected="@(teacher.Selected ? "selected" : null)">@teacher.Text</option>}</select></div>
+        <div class="col-xl-3 col-md-6"><label for="weekStart" class="form-label">Chọn tuần bất kỳ</label><input id="weekStart" name="weekStart" type="date" class="form-control" value="@Model.WeekStart.ToString("yyyy-MM-dd")" /></div>
+        <div class="col-xl-2 col-md-6"><button type="submit" class="btn btn-primary"><i class="bi bi-search me-1"></i>Xem lịch</button></div>
+    </form>
+</div>
+
+<div class="card-table-wrap">
+    <div class="card-table-header timetable-week-header">
+        <div><h2 class="table-card-title">Thời khóa biểu tuần</h2></div>
+        <div class="d-flex gap-3">
+            @if (Model.SelectedTeacherId.HasValue && Model.EditMode)
+            {
+                <a class="btn btn-secondary btn-sm" asp-action="Index" asp-route-teacherId="@Model.SelectedTeacherId" asp-route-semesterId="@Model.SelectedSemesterId" asp-route-weekStart="@Model.WeekStart.ToString("yyyy-MM-dd")"><i class="bi bi-eye me-1"></i>Xem thời khóa biểu</a>
+            }
+            else if (Model.SelectedTeacherId.HasValue)
+            {
+                <a class="btn btn-primary btn-sm" asp-action="Index" asp-route-teacherId="@Model.SelectedTeacherId" asp-route-semesterId="@Model.SelectedSemesterId" asp-route-weekStart="@Model.WeekStart.ToString("yyyy-MM-dd")" asp-route-editMode="true"><i class="bi bi-pencil-square me-1"></i>Sửa thời khóa biểu</a>
+            }
+        </div>
+    </div>
+    @await Html.PartialAsync("_WeeklyGrid", Model)
+</div>

@@ -110,9 +110,17 @@ namespace HighSchoolManagementSystem.Repositories.Migrations
                         .HasColumnType("int")
                         .HasColumnName("max_entries");
 
+                    b.Property<decimal>("MaxScore")
+                        .HasColumnType("decimal(5,2)")
+                        .HasColumnName("max_score");
+
                     b.Property<int>("MinEntries")
                         .HasColumnType("int")
                         .HasColumnName("min_entries");
+
+                    b.Property<decimal>("MinScore")
+                        .HasColumnType("decimal(5,2)")
+                        .HasColumnName("min_score");
 
                     b.Property<string>("TypeCode")
                         .IsRequired()

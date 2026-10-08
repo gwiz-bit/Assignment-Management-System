@@ -120,14 +120,25 @@ public class AssessmentRepository : IAssessmentRepository
     {
         return await _context.AssessmentTypes
             .AsNoTracking()
+            .Include(at => at.Assessments)
             .OrderBy(at => at.Weight)
             .ToListAsync();
     }
 
     public async Task<AssessmentType?> GetAssessmentTypeByIdAsync(int id)
     {
-        return await _context.AssessmentTypes.FirstOrDefaultAsync(at => at.Id == id);
+        return await _context.AssessmentTypes.Include(at => at.Assessments).FirstOrDefaultAsync(at => at.Id == id);
     }
+
+    public Task<bool> AssessmentTypeCodeExistsAsync(string code, int? excludedId = null) =>
+        _context.AssessmentTypes.AnyAsync(at => at.TypeCode.ToLower() == code.Trim().ToLower() && (!excludedId.HasValue || at.Id != excludedId.Value));
+
+    public Task<decimal> GetAssessmentTypeWeightTotalAsync(int? excludedId = null) =>
+        _context.AssessmentTypes.Where(at => !excludedId.HasValue || at.Id != excludedId.Value).SumAsync(at => at.Weight);
+
+    public async Task AddAssessmentTypeAsync(AssessmentType type) => await _context.AssessmentTypes.AddAsync(type);
+    public Task UpdateAssessmentTypeAsync(AssessmentType type) { _context.AssessmentTypes.Update(type); return Task.CompletedTask; }
+    public Task DeleteAssessmentTypeAsync(AssessmentType type) { _context.AssessmentTypes.Remove(type); return Task.CompletedTask; }
 
     public async Task<TeachingAssignment?> GetTeachingAssignmentByIdAsync(int assignmentId)
     {

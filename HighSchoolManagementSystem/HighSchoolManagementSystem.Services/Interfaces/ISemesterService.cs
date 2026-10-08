@@ -5,6 +5,7 @@ namespace HighSchoolManagementSystem.Services.Interfaces;
 
 public interface ISemesterService
 {
+    Task<ServiceResult<IReadOnlyList<Semester>>> GetAllAsync();
     Task<ServiceResult<IReadOnlyList<Semester>>> GetByAcademicYearIdAsync(int academicYearId);
     Task<ServiceResult<Semester>> GetByIdAsync(int id);
     Task<ServiceResult<Semester>> CreateAsync(

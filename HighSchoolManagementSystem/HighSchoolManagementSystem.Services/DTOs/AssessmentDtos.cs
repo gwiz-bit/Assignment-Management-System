@@ -10,6 +10,8 @@ public class AssessmentDto
     public decimal Weight { get; set; }
     public int MinEntries { get; set; }
     public int MaxEntries { get; set; }
+    public decimal MinScore { get; set; }
+    public decimal MaxScore { get; set; }
     public string AssessmentName { get; set; } = string.Empty;
     public DateTime? ConductedAt { get; set; }
 
@@ -42,6 +44,8 @@ public class AssessmentTypeDto
     public decimal Weight { get; set; }
     public int MinEntries { get; set; }
     public int MaxEntries { get; set; }
+    public decimal MinScore { get; set; }
+    public decimal MaxScore { get; set; }
 }
 
 public class CreateAssessmentDto

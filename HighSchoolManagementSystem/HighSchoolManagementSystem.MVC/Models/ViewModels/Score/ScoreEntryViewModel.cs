@@ -9,6 +9,7 @@ public class ScoreEntryViewModel
     public string AssessmentTypeName { get; set; } = string.Empty;
     public decimal Weight { get; set; }
     public decimal MaxScore { get; set; } = 10;
+    public decimal MinScore { get; set; } = 0;
     public string SubjectName { get; set; } = string.Empty;
     public string ClassName { get; set; } = string.Empty;
     public string SemesterName { get; set; } = string.Empty;

@@ -14,6 +14,16 @@ public class SemesterRepository : ISemesterRepository
         _context = context;
     }
 
+    public async Task<IReadOnlyList<Semester>> GetAllAsync()
+    {
+        return await _context.Semesters
+            .AsNoTracking()
+            .Include(s => s.AcademicYear)
+            .OrderByDescending(s => s.IsActive)
+            .ThenByDescending(s => s.StartDate)
+            .ToListAsync();
+    }
+
     public async Task<IReadOnlyList<Semester>> GetByAcademicYearIdAsync(int academicYearId)
     {
         return await _context.Semesters

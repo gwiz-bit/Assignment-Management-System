@@ -4,6 +4,7 @@ namespace HighSchoolManagementSystem.Repositories.Interfaces;
 
 public interface ISemesterRepository
 {
+    Task<IReadOnlyList<Semester>> GetAllAsync();
     Task<IReadOnlyList<Semester>> GetByAcademicYearIdAsync(int academicYearId);
     Task<Semester?> GetByIdAsync(int id);
     Task<Semester?> GetTrackedByIdAsync(int id);
