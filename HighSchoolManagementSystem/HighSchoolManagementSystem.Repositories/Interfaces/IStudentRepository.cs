@@ -8,6 +8,7 @@ public interface IStudentRepository
 {
     Task<List<Student>> GetAllAsync(string? search, string? status, int? classId, bool unassignedOnly);
     Task<Student?> GetByIdAsync(int id);
+    Task<Student?> GetByUserIdAsync(int userId);
     Task<bool> ExistsByCodeAsync(string code, int? excludedId = null);
     Task<Role?> GetStudentRoleAsync();
     Task AddAsync(Student student);

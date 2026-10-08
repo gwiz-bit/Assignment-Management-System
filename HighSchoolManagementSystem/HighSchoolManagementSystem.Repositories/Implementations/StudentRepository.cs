@@ -34,6 +34,7 @@ public class StudentRepository(AppDbContext context) : IStudentRepository
     }
 
     public Task<Student?> GetByIdAsync(int id) => WithDetails().FirstOrDefaultAsync(s => s.Id == id);
+    public Task<Student?> GetByUserIdAsync(int userId) => WithDetails().FirstOrDefaultAsync(s => s.UserId == userId);
     public Task<bool> ExistsByCodeAsync(string code, int? excludedId = null) => context.Students
         .AnyAsync(s => s.StudentCode.ToLower() == code.ToLower() && (!excludedId.HasValue || s.Id != excludedId.Value));
     public Task<Role?> GetStudentRoleAsync() => context.Roles.FirstOrDefaultAsync(r => r.RoleName == "Student");

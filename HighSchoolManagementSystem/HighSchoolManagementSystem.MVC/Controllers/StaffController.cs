@@ -877,6 +877,7 @@ public class StaffController : Controller
             Students = enrolledStudents
                 .Select(sc => new ClassStudentItemViewModel
                 {
+                    StudentId = sc.StudentId,
                     StudentCode = sc.Student.StudentCode,
                     StudentName = sc.Student.User.FullName,
                     Gender = sc.Student.User.Gender,
@@ -915,6 +916,7 @@ public class StaffController : Controller
                 .OrderBy(sc => sc.Student.StudentCode)
                 .Select(sc => new ClassStudentItemViewModel
                 {
+                    StudentId = sc.StudentId,
                     StudentCode = sc.Student.StudentCode,
                     StudentName = sc.Student.User.FullName,
                     Gender = sc.Student.User.Gender,
