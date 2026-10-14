@@ -73,7 +73,7 @@
                 </li>
             </ul>
         }
-        else if (User.IsInRole("Staff"))
+        else if (User.IsInRole("Staff") || User.IsInRole("Admin"))
         {
             <div class="sidebar-section-title">KHÔNG GIAN CỦA TÔI</div>
             <ul class="sidebar-menu-list">
@@ -142,6 +142,11 @@
                        class="sidebar-link @(currentController == "Staff" && (currentAction == "Classes" || currentAction == "ClassDetails" || currentAction == "CreateClass" || currentAction == "EditClass" || currentAction == "ClassStudents" || currentAction == "AssignHomeroomTeacher") ? "active" : "")">
                         <i class="bi bi-collection"></i>
                         <span>Danh sách lớp học</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a asp-controller="Staff" asp-action="RegistrationRequests" class="sidebar-link @(currentController == "Staff" && currentAction == "RegistrationRequests" ? "active" : "")">
+                        <i class="bi bi-person-check"></i><span>Yêu cầu đăng ký lớp</span>
                     </a>
                 </li>
                 <li class="sidebar-menu-item">
@@ -219,6 +224,21 @@
                        class="sidebar-link @(currentController == "Timetable" ? "active" : "")">
                         <i class="bi bi-calendar-week"></i>
                         <span>Lịch dạy (TKB)</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a asp-controller="Assignments" asp-action="Templates" class="sidebar-link @(currentController == "Assignments" && currentAction == "Templates" ? "active" : "")">
+                        <i class="bi bi-journal-text"></i><span>Mẫu bài tập</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a asp-controller="Assignments" asp-action="Submissions" class="sidebar-link @(currentController == "Assignments" && currentAction == "Submissions" ? "active" : "")">
+                        <i class="bi bi-clipboard-check"></i><span>Đánh giá bài nộp</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a asp-controller="Assignments" asp-action="Templates" class="sidebar-link @(currentController == "Assignments" && currentAction == "Templates" ? "active" : "")">
+                        <i class="bi bi-journal-text"></i><span>Mẫu bài tập</span>
                     </a>
                 </li>
             </ul>
@@ -311,6 +331,16 @@
                     </a>
                 </li>
                 <li class="sidebar-menu-item">
+                    <a asp-controller="Assignments" asp-action="MyAssignments" class="sidebar-link @(currentController == "Assignments" ? "active" : "")">
+                        <i class="bi bi-journal-check"></i><span>Bài tập</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a asp-controller="Student" asp-action="Classes" class="sidebar-link @(currentController == "Student" && currentAction == "Classes" ? "active" : "")">
+                        <i class="bi bi-door-open"></i><span>Đăng ký lớp</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
                     <a href="javascript:void(0)" class="sidebar-link">
                         <i class="bi bi-check-circle"></i>
                         <span>Chuyên cần & Điểm danh</span>
@@ -339,6 +369,15 @@
                         <span>Hoạt động ngoại khóa</span>
                     </a>
                 </li>
+            </ul>
+        }
+        else if (User.IsInRole("Expert"))
+        {
+            <div class="sidebar-section-title">CHUYÊN MÔN</div>
+            <ul class="sidebar-menu-list">
+                <li class="sidebar-menu-item"><a asp-controller="Assignments" asp-action="Templates" class="sidebar-link"><i class="bi bi-journal-text"></i><span>Mẫu bài tập</span></a></li>
+                <li class="sidebar-menu-item"><a asp-controller="Assignments" asp-action="CreateTemplate" class="sidebar-link"><i class="bi bi-plus-circle"></i><span>Tạo mẫu bài tập</span></a></li>
+                <li class="sidebar-menu-item"><a asp-controller="Subject" asp-action="Index" class="sidebar-link"><i class="bi bi-book"></i><span>Môn học</span></a></li>
             </ul>
         }
         else if (User.IsInRole("Parent"))

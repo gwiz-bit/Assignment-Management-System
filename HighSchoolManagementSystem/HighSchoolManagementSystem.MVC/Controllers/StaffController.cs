@@ -1,13 +1,15 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using HighSchoolManagementSystem.Repositories.Data;
 using HighSchoolManagementSystem.MVC.Models.ViewModels;
 using HighSchoolManagementSystem.Services.Common;
 using HighSchoolManagementSystem.Services.Interfaces;
 
 namespace HighSchoolManagementSystem.MVC.Controllers;
 
-[Authorize(Roles = "Staff")]
+[Authorize(Roles = "Staff,Admin")]
 public class StaffController : Controller
 {
     private readonly IAcademicYearService _academicYearService;
@@ -17,6 +19,7 @@ public class StaffController : Controller
     private readonly ITeacherService _teacherService;
     private readonly IRoomService _roomService;
     private readonly ITimeSlotService _timeSlotService;
+    private readonly AppDbContext _db;
 
     public StaffController(
         IAcademicYearService academicYearService,
@@ -25,7 +28,8 @@ public class StaffController : Controller
         IGradeLevelService gradeLevelService,
         ITeacherService teacherService,
         IRoomService roomService,
-        ITimeSlotService timeSlotService)
+        ITimeSlotService timeSlotService,
+        AppDbContext db)
     {
         _academicYearService = academicYearService;
         _semesterService = semesterService;
@@ -34,11 +38,44 @@ public class StaffController : Controller
         _teacherService = teacherService;
         _roomService = roomService;
         _timeSlotService = timeSlotService;
+        _db = db;
     }
 
     public IActionResult Dashboard()
     {
         return View();
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> RegistrationRequests()
+    {
+        var requests = await _db.StudentClasses.AsNoTracking()
+            .Where(sc => sc.Status == "PendingApproval")
+            .Include(sc => sc.Student).ThenInclude(s => s.User)
+            .Include(sc => sc.Class).ThenInclude(c => c.AcademicYear)
+            .Include(sc => sc.Class).ThenInclude(c => c.GradeLevel)
+            .OrderBy(sc => sc.JoinedAt).ToListAsync();
+        return View(requests);
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> ReviewRegistration(int id, bool approve)
+    {
+        var request = await _db.StudentClasses.Include(sc => sc.Class).ThenInclude(c => c.AcademicYear)
+            .SingleOrDefaultAsync(sc => sc.Id == id && sc.Status == "PendingApproval");
+        if (request == null) return NotFound();
+        var alreadyEnrolled = await _db.StudentClasses.AnyAsync(sc => sc.Id != id && sc.StudentId == request.StudentId
+            && sc.Class.AcademicYear.IsCurrent && sc.Status == "Enrolled" && sc.LeftAt == null);
+        if (approve && alreadyEnrolled)
+        {
+            TempData["ErrorMessage"] = "Học viên đã có lớp trong năm học hiện tại; yêu cầu không được duyệt.";
+            return RedirectToAction(nameof(RegistrationRequests));
+        }
+        request.Status = approve ? "Enrolled" : "Rejected";
+        if (approve) request.JoinedAt = DateTime.UtcNow;
+        await _db.SaveChangesAsync();
+        TempData["SuccessMessage"] = approve ? "Đã duyệt đăng ký lớp." : "Đã từ chối đăng ký lớp.";
+        return RedirectToAction(nameof(RegistrationRequests));
     }
 
     public async Task<IActionResult> AcademicYears()

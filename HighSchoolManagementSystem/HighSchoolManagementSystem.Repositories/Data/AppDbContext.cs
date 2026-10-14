@@ -35,6 +35,8 @@ public class AppDbContext : DbContext
     public virtual DbSet<SemesterSubjectResult> SemesterSubjectResults => Set<SemesterSubjectResult>();
     public virtual DbSet<SemesterReport> SemesterReports => Set<SemesterReport>();
     public virtual DbSet<TeacherFeedback> TeacherFeedbacks => Set<TeacherFeedback>();
+    public virtual DbSet<AssignmentTemplate> AssignmentTemplates => Set<AssignmentTemplate>();
+    public virtual DbSet<AssignmentSubmission> AssignmentSubmissions => Set<AssignmentSubmission>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -113,6 +115,10 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<TimeSlot>()
             .HasIndex(t => t.SlotCode)
+            .IsUnique();
+
+        modelBuilder.Entity<AssignmentSubmission>()
+            .HasIndex(s => new { s.AssignmentTemplateId, s.StudentId })
             .IsUnique();
 
         // ========================================================

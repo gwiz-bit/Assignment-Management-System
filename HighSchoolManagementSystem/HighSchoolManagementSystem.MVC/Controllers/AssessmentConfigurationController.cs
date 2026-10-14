@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HighSchoolManagementSystem.MVC.Controllers;
 
-[Authorize(Roles = "Staff")]
+[Authorize(Roles = "Staff,Admin,Expert")]
 public class AssessmentConfigurationController(IAssessmentRepository repository) : Controller
 {
     public async Task<IActionResult> Index()

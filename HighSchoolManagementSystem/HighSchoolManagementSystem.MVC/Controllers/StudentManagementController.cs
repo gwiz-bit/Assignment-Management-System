@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace HighSchoolManagementSystem.MVC.Controllers;
 
-[Authorize(Roles = "Staff")]
+[Authorize(Roles = "Staff,Admin")]
 public class StudentManagementController(IStudentService students) : Controller
 {
     [HttpGet]

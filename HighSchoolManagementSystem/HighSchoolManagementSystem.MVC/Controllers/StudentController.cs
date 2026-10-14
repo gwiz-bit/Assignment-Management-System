@@ -1,9 +1,12 @@
 using System.Security.Claims;
+using HighSchoolManagementSystem.Models.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using HighSchoolManagementSystem.MVC.Models.ViewModels.Score;
 using HighSchoolManagementSystem.Repositories.Interfaces;
+using HighSchoolManagementSystem.Repositories.Data;
 using HighSchoolManagementSystem.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace HighSchoolManagementSystem.MVC.Controllers;
 
@@ -11,17 +14,20 @@ namespace HighSchoolManagementSystem.MVC.Controllers;
 public class StudentController : Controller
 {
     private readonly IStudentRepository _studentRepository;
+    private readonly AppDbContext _db;
     private readonly IAcademicYearRepository _academicYearRepository;
     private readonly IScoreService _scoreService;
     private readonly ILogger<StudentController> _logger;
 
     public StudentController(
         IStudentRepository studentRepository,
+        AppDbContext db,
         IAcademicYearRepository academicYearRepository,
         IScoreService scoreService,
         ILogger<StudentController> logger)
     {
         _studentRepository = studentRepository;
+        _db = db;
         _academicYearRepository = academicYearRepository;
         _scoreService = scoreService;
         _logger = logger;
@@ -30,6 +36,50 @@ public class StudentController : Controller
     public IActionResult Dashboard()
     {
         return View();
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Classes()
+    {
+        var student = await ResolveCurrentStudentAsync();
+        if (student == null) return Forbid();
+        var classes = await _db.Classes.AsNoTracking().Where(c => c.AcademicYear.IsCurrent)
+            .Include(c => c.AcademicYear).Include(c => c.GradeLevel)
+            .Include(c => c.TeachingAssignments).ThenInclude(t => t.Subject)
+            .OrderBy(c => c.GradeLevel.LevelName).ThenBy(c => c.ClassName).ToListAsync();
+        ViewBag.RegistrationStatus = await _db.StudentClasses.Where(sc => sc.StudentId == student.Id && sc.Class.AcademicYear.IsCurrent)
+            .ToDictionaryAsync(sc => sc.ClassId, sc => sc.Status);
+        return View(classes);
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> RegisterClass(int classId)
+    {
+        var student = await ResolveCurrentStudentAsync();
+        if (student == null) return Forbid();
+        var targetClass = await _db.Classes.Include(c => c.AcademicYear)
+            .SingleOrDefaultAsync(c => c.Id == classId && c.AcademicYear.IsCurrent);
+        if (targetClass == null) return NotFound();
+        var otherRegistration = await _db.StudentClasses.Include(sc => sc.Class)
+            .AnyAsync(sc => sc.StudentId == student.Id && sc.Class.AcademicYear.IsCurrent && sc.ClassId != classId && sc.Status != "Rejected" && sc.LeftAt == null);
+        if (otherRegistration)
+        {
+            TempData["ErrorMessage"] = "Bạn đã có đăng ký lớp trong năm học hiện tại.";
+            return RedirectToAction(nameof(Classes));
+        }
+        var registration = await _db.StudentClasses.SingleOrDefaultAsync(sc => sc.StudentId == student.Id && sc.ClassId == classId);
+        if (registration == null)
+            _db.StudentClasses.Add(new StudentClass { StudentId = student.Id, ClassId = classId, Status = "PendingApproval", JoinedAt = DateTime.UtcNow });
+        else if (registration.Status == "Rejected")
+            registration.Status = "PendingApproval";
+        else
+        {
+            TempData["ErrorMessage"] = "Đăng ký lớp này đã tồn tại.";
+            return RedirectToAction(nameof(Classes));
+        }
+        await _db.SaveChangesAsync();
+        TempData["SuccessMessage"] = "Đã gửi đăng ký lớp. Nhà trường sẽ duyệt yêu cầu.";
+        return RedirectToAction(nameof(Classes));
     }
 
     [HttpGet]

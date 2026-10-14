@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HighSchoolManagementSystem.MVC.Controllers;
 
-[Authorize(Roles = "Staff")]
+[Authorize(Roles = "Staff,Admin")]
 public class ParentManagementController(IParentService parents) : Controller
 {
     [HttpGet]

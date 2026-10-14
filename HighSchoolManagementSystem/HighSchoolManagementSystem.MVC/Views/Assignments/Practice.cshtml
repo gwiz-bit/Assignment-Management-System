@@ -1,0 +1,16 @@
+@model HighSchoolManagementSystem.MVC.Models.ViewModels.PracticeRequestViewModel
+@using Microsoft.AspNetCore.Mvc.Rendering
+@{
+    ViewData["Title"] = "Luyện tập cùng AI";
+    var subjects = ((IEnumerable<HighSchoolManagementSystem.Models.Entities.Subject>)ViewBag.Subjects).Select(s => new SelectListItem(s.SubjectName, s.Id.ToString()));
+}
+<div class="container py-4"><h1 class="h3">Luyện tập cùng Gemini</h1><p class="text-muted">Tạo bộ câu hỏi theo môn và chủ đề bạn đang học.</p>
+    <form asp-action="Practice" method="post" class="card card-body gap-3 mb-4">
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <div><label asp-for="SubjectId" class="form-label">Môn học</label><select asp-for="SubjectId" asp-items="subjects" class="form-select"><option value="">Chọn môn học</option></select></div>
+        <div><label asp-for="Topic" class="form-label">Chủ đề</label><input asp-for="Topic" class="form-control" placeholder="Ví dụ: Phương trình bậc hai"/><span asp-validation-for="Topic" class="text-danger"></span></div>
+        <button class="btn btn-primary align-self-start" disabled="@(subjects.Any() ? null : "disabled")">Tạo bài luyện tập</button>
+        @if (!subjects.Any()) { <p class="text-muted mb-0">Bạn cần được duyệt vào lớp trước khi tạo bài luyện tập.</p> }
+    </form>
+    @if (!string.IsNullOrWhiteSpace(Model.GeneratedPractice)) { <article class="card card-body"><h2 class="h5">Bài luyện tập được tạo</h2><div style="white-space:pre-wrap">@Model.GeneratedPractice</div></article> }
+</div>

@@ -6,16 +6,63 @@ using HighSchoolManagementSystem.Models.Entities;
 using HighSchoolManagementSystem.MVC.Models.ViewModels;
 using HighSchoolManagementSystem.MVC.Models.ViewModels.Auth;
 using HighSchoolManagementSystem.Services.Interfaces;
+using HighSchoolManagementSystem.Repositories.Data;
+using HighSchoolManagementSystem.Services.Security;
+using Microsoft.EntityFrameworkCore;
 
 namespace HighSchoolManagementSystem.MVC.Controllers;
 
 public class AuthController : Controller
 {
     private readonly IAuthService _authService;
+    private readonly AppDbContext _db;
+    private readonly IPasswordHasher _passwordHasher;
 
-    public AuthController(IAuthService authService)
+    public AuthController(IAuthService authService, AppDbContext db, IPasswordHasher passwordHasher)
     {
         _authService = authService;
+        _db = db;
+        _passwordHasher = passwordHasher;
+    }
+
+    [HttpGet]
+    public IActionResult Register() => User.Identity?.IsAuthenticated == true
+        ? RedirectToDashboardByRole(User.FindFirstValue(ClaimTypes.Role))
+        : View(new RegisterViewModel());
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> Register(RegisterViewModel model)
+    {
+        if (User.Identity?.IsAuthenticated == true)
+            return RedirectToDashboardByRole(User.FindFirstValue(ClaimTypes.Role));
+
+        var username = model.Username.Trim();
+        var email = model.Email.Trim().ToLowerInvariant();
+        if (await _db.Users.AnyAsync(u => u.Username == username))
+            ModelState.AddModelError(nameof(model.Username), "Tên đăng nhập đã được sử dụng.");
+        if (await _db.Users.AnyAsync(u => u.Email == email))
+            ModelState.AddModelError(nameof(model.Email), "Email đã được đăng ký.");
+        if (!ModelState.IsValid) return View(model);
+
+        var studentRole = await _db.Roles.SingleAsync(r => r.RoleName == "Student");
+        var user = new User
+        {
+            Username = username, Email = email, FullName = model.FullName.Trim(),
+            PasswordHash = _passwordHasher.HashPassword(model.Password), RoleId = studentRole.RoleId,
+            IsActive = true, CreateAt = DateTime.UtcNow
+        };
+        _db.Users.Add(user);
+        await _db.SaveChangesAsync();
+        _db.Students.Add(new Student
+        {
+            UserId = user.Id,
+            StudentCode = $"AMS{DateTime.UtcNow:yyMMdd}{Random.Shared.Next(1000, 9999)}",
+            AdmissionDate = DateTime.UtcNow.Date,
+            Status = "Active"
+        });
+        await _db.SaveChangesAsync();
+        TempData["SuccessMessage"] = "Tạo tài khoản học viên thành công. Bạn có thể đăng nhập và đăng ký lớp.";
+        return RedirectToAction(nameof(Login));
     }
 
     [HttpGet]
@@ -204,6 +251,9 @@ public class AuthController : Controller
     {
         return roleName switch
         {
+            "Admin" => RedirectToAction("Dashboard", "Staff"),
+            "Expert" => RedirectToAction("Templates", "Assignments"),
+            "Guest" => RedirectToAction("Index", "Home"),
             "Principal" => RedirectToAction("Dashboard", "Principal"),
             "Staff" => RedirectToAction("Dashboard", "Staff"),
             "Teacher" => RedirectToAction("Dashboard", "Teacher"),

@@ -6,7 +6,7 @@ using HighSchoolManagementSystem.Services.Interfaces;
 
 namespace HighSchoolManagementSystem.MVC.Controllers;
 
-[Authorize(Roles = "Staff,Principal")]
+[Authorize(Roles = "Staff,Principal,Admin")]
 public class TeacherManagementController : Controller
 {
     private readonly ITeacherService _teacherService;

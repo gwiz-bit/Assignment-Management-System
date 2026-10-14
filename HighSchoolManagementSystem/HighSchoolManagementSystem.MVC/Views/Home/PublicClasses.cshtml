@@ -1,0 +1,11 @@
+@model IEnumerable<HighSchoolManagementSystem.Models.Entities.Class>
+@{
+    ViewData["Title"] = "Lớp học công khai";
+}
+<div class="container py-5"><div class="mb-4"><h1 class="h2">Lớp học hiện có</h1><p class="text-muted">Danh sách lớp trong năm học hiện tại.</p></div>
+    <div class="row g-3">@foreach (var item in Model) {
+        <div class="col-md-6 col-xl-4"><article class="card h-100"><div class="card-body"><span class="badge bg-primary">@item.GradeLevel.LevelName</span><h2 class="h5 mt-3">@item.ClassName</h2><p class="text-muted">Năm học @item.AcademicYear.YearCode</p><p class="mb-0">@string.Join(", ", item.TeachingAssignments.Select(t => t.Subject.SubjectName).Distinct())</p></div></article></div>
+    }</div>
+    @if (!Model.Any()) { <div class="alert alert-info">Hiện chưa có lớp công khai.</div> }
+    <div class="mt-4"><a asp-controller="Auth" asp-action="Register" class="btn btn-primary">Tạo tài khoản để đăng ký lớp</a></div>
+</div>

@@ -9,7 +9,7 @@ namespace HighSchoolManagementSystem.MVC.Controllers;
 
 public class TimetableController(ITimetableService timetableService, ISemesterService semesterService) : Controller
 {
-    [Authorize(Roles = "Staff")]
+    [Authorize(Roles = "Staff,Admin")]
     public async Task<IActionResult> Index(int? teacherId, int? semesterId, DateTime? weekStart, bool editMode = false)
     {
         var activeSemesterId = await timetableService.GetActiveSemesterIdAsync();
@@ -39,14 +39,14 @@ public class TimetableController(ITimetableService timetableService, ISemesterSe
         return View(model);
     }
 
-    [Authorize(Roles = "Staff")]
+    [Authorize(Roles = "Staff,Admin")]
     public async Task<IActionResult> Create(int? dayOfWeek, int? timeSlotId, int? teacherId, int? semesterId, DateTime? weekStart)
     {
         if (!teacherId.HasValue) return RedirectToAction(nameof(Index), new { semesterId, weekStart });
         return View("Edit", await BuildEditModel(null, dayOfWeek, timeSlotId, teacherId, semesterId, weekStart));
     }
 
-    [Authorize(Roles = "Staff")]
+    [Authorize(Roles = "Staff,Admin")]
     public async Task<IActionResult> Edit(int id, int? teacherId, int? semesterId, DateTime? weekStart)
     {
         var result = await timetableService.GetByIdAsync(id);

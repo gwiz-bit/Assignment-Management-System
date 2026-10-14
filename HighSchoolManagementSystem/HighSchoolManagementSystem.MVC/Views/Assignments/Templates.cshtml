@@ -1,0 +1,15 @@
+@model IEnumerable<HighSchoolManagementSystem.Models.Entities.AssignmentTemplate>
+@{
+    ViewData["Title"] = "Mẫu bài tập";
+}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div><h1 class="h3 mb-1">Mẫu bài tập</h1><p class="text-muted mb-0">Mẫu bài tập theo môn học</p></div>
+        @if (User.IsInRole("Expert") || User.IsInRole("Admin")) { <a asp-action="CreateTemplate" class="btn btn-primary">Tạo mẫu</a> }
+    </div>
+    @if (TempData["SuccessMessage"] is string success) { <div class="alert alert-success">@success</div> }
+    <div class="table-responsive card"><table class="table table-hover mb-0">
+        <thead><tr><th>Môn học</th><th>Tên bài</th><th>Mô tả</th><th>Trạng thái</th></tr></thead>
+        <tbody>@foreach (var item in Model) { <tr><td>@item.Subject.SubjectName</td><td>@item.Title</td><td>@item.Description</td><td>@(item.IsPublished ? "Công khai" : "Bản nháp")</td></tr> }</tbody>
+    </table></div>
+</div>

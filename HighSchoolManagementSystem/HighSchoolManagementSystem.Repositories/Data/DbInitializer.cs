@@ -11,6 +11,9 @@ public static class DbInitializer
 
         var roles = new List<Role>
         {
+            new Role { RoleName = "Admin", Description = "System administrator" },
+            new Role { RoleName = "Expert", Description = "Subject expert; manages assignment templates" },
+            new Role { RoleName = "Guest", Description = "Public visitor and self-registration account" },
             new Role { RoleName = "Principal", Description = "Hiệu trưởng - Giám sát, thống kê và báo cáo toàn trường" },
             new Role { RoleName = "Staff", Description = "Nhân viên - Hành chính nhân sự, cán bộ đoàn, quản trị nội bộ" },
             new Role { RoleName = "Teacher", Description = "Giáo viên - Quản lý giảng dạy, điểm số, điểm danh học sinh" },

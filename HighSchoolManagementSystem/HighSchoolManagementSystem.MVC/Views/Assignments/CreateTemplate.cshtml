@@ -1,0 +1,15 @@
+@model HighSchoolManagementSystem.MVC.Models.ViewModels.AssignmentTemplateFormViewModel
+@using Microsoft.AspNetCore.Mvc.Rendering
+@{
+    ViewData["Title"] = "Tạo mẫu bài tập";
+    var subjects = ((IEnumerable<HighSchoolManagementSystem.Models.Entities.Subject>)ViewBag.Subjects).Select(s => new SelectListItem(s.SubjectName, s.Id.ToString()));
+}
+<div class="container py-4"><h1 class="h3 mb-3">Tạo mẫu bài tập</h1>
+    <form asp-action="CreateTemplate" method="post" class="card card-body gap-3">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div><label asp-for="SubjectId" class="form-label">Môn học</label><select asp-for="SubjectId" asp-items="subjects" class="form-select"><option value="">Chọn môn học</option></select><span asp-validation-for="SubjectId" class="text-danger"></span></div>
+        <div><label asp-for="Title" class="form-label">Tên bài tập</label><input asp-for="Title" class="form-control"/><span asp-validation-for="Title" class="text-danger"></span></div>
+        <div><label asp-for="Description" class="form-label">Yêu cầu</label><textarea asp-for="Description" rows="6" class="form-control"></textarea><span asp-validation-for="Description" class="text-danger"></span></div>
+        <div class="d-flex gap-2"><button class="btn btn-outline-primary" name="publish" value="false">Lưu nháp</button><button class="btn btn-primary" name="publish" value="true">Công khai</button><a asp-action="Templates" class="btn btn-light">Hủy</a></div>
+    </form>
+</div>
