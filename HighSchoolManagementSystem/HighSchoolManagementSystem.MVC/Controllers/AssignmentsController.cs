@@ -38,23 +38,29 @@ public class AssignmentsController(AppDbContext db, IHttpClientFactory httpClien
         return View(await query.OrderBy(a => a.Subject.SubjectName).ThenBy(a => a.Title).ToListAsync());
     }
 
-    [Authorize(Roles = "Expert,Admin")]
+    [Authorize(Roles = "Expert,Teacher,Admin")]
     [HttpGet]
     public async Task<IActionResult> CreateTemplate()
     {
-        ViewBag.Subjects = await db.Subjects.AsNoTracking().Where(s => s.IsActive).OrderBy(s => s.SubjectName).ToListAsync();
+        await PopulateTemplateSubjectsAsync();
         return View(new AssignmentTemplateFormViewModel());
     }
 
-    [Authorize(Roles = "Expert,Admin")]
+    [Authorize(Roles = "Expert,Teacher,Admin")]
     [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> CreateTemplate(AssignmentTemplateFormViewModel model, bool publish = false)
     {
-        if (!await db.Subjects.AnyAsync(s => s.Id == model.SubjectId && s.IsActive))
+        var subjectIsManaged = await db.Subjects.AnyAsync(s => s.Id == model.SubjectId && s.IsActive);
+        if (User.IsInRole("Teacher"))
+        {
+            var teacherId = await TeacherIdAsync();
+            subjectIsManaged = teacherId != null && await db.TeachingAssignments.AnyAsync(t => t.TeacherId == teacherId && t.SubjectId == model.SubjectId);
+        }
+        if (!subjectIsManaged)
             ModelState.AddModelError(nameof(model.SubjectId), "Môn học không tồn tại hoặc đã ngừng hoạt động.");
         if (!ModelState.IsValid)
         {
-            ViewBag.Subjects = await db.Subjects.AsNoTracking().Where(s => s.IsActive).OrderBy(s => s.SubjectName).ToListAsync();
+            await PopulateTemplateSubjectsAsync();
             return View(model);
         }
         db.AssignmentTemplates.Add(new AssignmentTemplate
@@ -71,12 +77,10 @@ public class AssignmentsController(AppDbContext db, IHttpClientFactory httpClien
     [HttpGet]
     public async Task<IActionResult> MyAssignments()
     {
-        var student = await db.Students.Include(s => s.StudentClasses)
-            .ThenInclude(sc => sc.Class).ThenInclude(c => c.TeachingAssignments)
-            .SingleOrDefaultAsync(s => s.UserId == CurrentUserId());
+        var student = await db.Students.SingleOrDefaultAsync(s => s.UserId == CurrentUserId());
         if (student == null) return Forbid();
-        var subjectIds = student.StudentClasses.Where(sc => sc.Status == "Enrolled" && sc.LeftAt == null)
-            .SelectMany(sc => sc.Class.TeachingAssignments).Select(t => t.SubjectId).Distinct().ToList();
+        var subjectIds = await db.SubjectClassRegistrations.Where(r => r.StudentId == student.Id && r.Status == "Enrolled")
+            .Select(r => r.TeachingAssignment.SubjectId).Distinct().ToListAsync();
         var templates = await db.AssignmentTemplates.AsNoTracking().Include(a => a.Subject)
             .Where(a => a.IsPublished && subjectIds.Contains(a.SubjectId)).OrderBy(a => a.Title).ToListAsync();
         ViewBag.SubmissionsByAssignment = await db.AssignmentSubmissions.AsNoTracking()
@@ -134,13 +138,11 @@ public class AssignmentsController(AppDbContext db, IHttpClientFactory httpClien
     public async Task<IActionResult> Submit(AssignmentSubmissionFormViewModel model)
     {
         var userId = CurrentUserId();
-        var student = await db.Students.Include(s => s.StudentClasses).ThenInclude(sc => sc.Class)
-            .ThenInclude(c => c.TeachingAssignments).SingleOrDefaultAsync(s => s.UserId == userId);
+        var student = await db.Students.SingleOrDefaultAsync(s => s.UserId == userId);
         if (student == null) return Forbid();
         var template = await db.AssignmentTemplates.SingleOrDefaultAsync(a => a.Id == model.AssignmentId && a.IsPublished);
         if (template == null) return NotFound();
-        var eligible = student.StudentClasses.Where(sc => sc.Status == "Enrolled" && sc.LeftAt == null)
-            .SelectMany(sc => sc.Class.TeachingAssignments).Any(t => t.SubjectId == template.SubjectId);
+        var eligible = await db.SubjectClassRegistrations.AnyAsync(r => r.StudentId == student.Id && r.Status == "Enrolled" && r.TeachingAssignment.SubjectId == template.SubjectId);
         if (!eligible) return Forbid();
         if (!ModelState.IsValid) return RedirectToAction(nameof(MyAssignments));
         var submission = await db.AssignmentSubmissions.SingleOrDefaultAsync(s => s.StudentId == student.Id && s.AssignmentTemplateId == template.Id);
@@ -207,9 +209,21 @@ public class AssignmentsController(AppDbContext db, IHttpClientFactory httpClien
     {
         var studentId = await db.Students.Where(s => s.UserId == CurrentUserId()).Select(s => (int?)s.Id).SingleOrDefaultAsync();
         if (studentId == null) return new();
-        return await db.StudentClasses.Where(sc => sc.StudentId == studentId && sc.Status == "Enrolled" && sc.LeftAt == null)
-            .SelectMany(sc => sc.Class.TeachingAssignments).Select(t => t.Subject).Distinct()
+        return await db.SubjectClassRegistrations.Where(r => r.StudentId == studentId && r.Status == "Enrolled")
+            .Select(r => r.TeachingAssignment.Subject).Distinct()
             .OrderBy(s => s.SubjectName).ToListAsync();
+    }
+
+    private async Task PopulateTemplateSubjectsAsync()
+    {
+        var query = db.Subjects.AsNoTracking().Where(s => s.IsActive);
+        if (User.IsInRole("Teacher"))
+        {
+            var teacherId = await TeacherIdAsync();
+            var subjectIds = db.TeachingAssignments.Where(t => t.TeacherId == teacherId).Select(t => t.SubjectId);
+            query = query.Where(s => subjectIds.Contains(s.Id));
+        }
+        ViewBag.Subjects = await query.OrderBy(s => s.SubjectName).ToListAsync();
     }
 
     private sealed record GeminiGenerateResponse(List<GeminiCandidate>? Candidates);

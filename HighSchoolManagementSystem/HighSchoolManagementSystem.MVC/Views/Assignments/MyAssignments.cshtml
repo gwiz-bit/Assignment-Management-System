@@ -10,7 +10,7 @@
         var submission = submissions.GetValueOrDefault(item.Id);
         <section class="card card-body mb-3"><div class="d-flex justify-content-between"><div><span class="badge bg-secondary">@item.Subject.SubjectName</span><h2 class="h5 mt-2">@item.Title</h2><p class="mb-2">@item.Description</p></div><span class="text-muted">@(submission == null ? "Chưa nộp" : "Đã nộp")</span></div>
             @if (submission?.EvaluatedAt != null) { <div class="alert alert-success mb-2">Điểm: <strong>@submission.Score / 100</strong><br />@submission.TeacherFeedback</div> }
-            @if (submission?.EvaluatedAt == null) { <form asp-action="Submit" method="post" class="mt-2"><input type="hidden" name="AssignmentId" value="@item.Id"/><label class="form-label" for="answer-@item.Id">Bài làm</label><textarea id="answer-@item.Id" name="Answer" class="form-control" rows="4" maxlength="8000" required>@submission?.Answer</textarea><button class="btn btn-primary mt-2">@(submission == null ? "Nộp bài" : "Cập nhật bài nộp")</button></form> }
+            @if (submission?.EvaluatedAt == null) { <form asp-action="Submit" method="post" class="mt-2"><input type="hidden" name="AssignmentId" value="@item.Id"/><label class="form-label" for="answer-@item.Id">Bài làm</label><textarea id="answer-@item.Id" name="Answer" class="form-control" rows="4" maxlength="4000" required>@submission?.Answer</textarea><button class="btn btn-primary mt-2">@(submission == null ? "Nộp bài" : "Cập nhật bài nộp")</button></form> }
         </section>
     }
 </div>

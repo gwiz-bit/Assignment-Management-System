@@ -37,6 +37,7 @@ public class AppDbContext : DbContext
     public virtual DbSet<TeacherFeedback> TeacherFeedbacks => Set<TeacherFeedback>();
     public virtual DbSet<AssignmentTemplate> AssignmentTemplates => Set<AssignmentTemplate>();
     public virtual DbSet<AssignmentSubmission> AssignmentSubmissions => Set<AssignmentSubmission>();
+    public virtual DbSet<SubjectClassRegistration> SubjectClassRegistrations => Set<SubjectClassRegistration>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -119,6 +120,14 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<AssignmentSubmission>()
             .HasIndex(s => new { s.AssignmentTemplateId, s.StudentId })
+            .IsUnique();
+
+        modelBuilder.Entity<AssignmentSubmission>()
+            .Property(s => s.Score)
+            .HasPrecision(5, 2);
+
+        modelBuilder.Entity<SubjectClassRegistration>()
+            .HasIndex(r => new { r.StudentId, r.TeachingAssignmentId })
             .IsUnique();
 
         // ========================================================

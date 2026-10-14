@@ -1,18 +1,3 @@
 @model HighSchoolManagementSystem.MVC.Models.ViewModels.Auth.RegisterViewModel
-@{
-    ViewData["Title"] = "Tạo tài khoản học viên";
-    ViewData["HideNav"] = true;
-}
-<div class="portal-landing-wrapper"><div class="portal-card" style="max-width:520px;text-align:left">
-    <div class="text-center mb-4"><h1 class="h3">Tạo tài khoản học viên</h1><p class="text-muted mb-0">Đăng ký để xem lớp và nộp bài tập.</p></div>
-    <form asp-action="Register" method="post" class="d-grid gap-3">
-        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-        <div><label asp-for="FullName" class="form-label">Họ tên</label><input asp-for="FullName" class="form-control"/><span asp-validation-for="FullName" class="text-danger"></span></div>
-        <div><label asp-for="Username" class="form-label">Tên đăng nhập</label><input asp-for="Username" class="form-control"/><span asp-validation-for="Username" class="text-danger"></span></div>
-        <div><label asp-for="Email" class="form-label">Email</label><input asp-for="Email" class="form-control"/><span asp-validation-for="Email" class="text-danger"></span></div>
-        <div><label asp-for="Password" class="form-label">Mật khẩu (ít nhất 8 ký tự)</label><input asp-for="Password" class="form-control"/><span asp-validation-for="Password" class="text-danger"></span></div>
-        <div><label asp-for="ConfirmPassword" class="form-label">Nhập lại mật khẩu</label><input asp-for="ConfirmPassword" class="form-control"/><span asp-validation-for="ConfirmPassword" class="text-danger"></span></div>
-        <button class="btn btn-primary">Tạo tài khoản</button>
-        <a asp-action="Login" class="text-center">Đã có tài khoản? Đăng nhập</a>
-    </form>
-</div></div>
+@{ ViewData["Title"] = "Create student account"; ViewData["HideNav"] = true; }
+<main class="ams-auth-shell"><a asp-controller="Home" asp-action="Index" class="ams-brand"><span class="ams-brand-mark">A</span><span class="ams-brand-copy"><strong>AMS</strong><small>Assignment Management System</small></span></a><section class="ams-auth-card"><span class="ams-eyebrow">START LEARNING</span><h1>Create your account</h1><p>Join subject classes, submit assignments, and track feedback.</p><form asp-action="Register" method="post" class="d-grid gap-3"><div asp-validation-summary="ModelOnly" class="text-danger"></div><div><label asp-for="FullName" class="form-label">Full name</label><input asp-for="FullName" class="form-control"/><span asp-validation-for="FullName" class="text-danger small"></span></div><div><label asp-for="Username" class="form-label">Username</label><input asp-for="Username" class="form-control"/><span asp-validation-for="Username" class="text-danger small"></span></div><div><label asp-for="Email" class="form-label">Email</label><input asp-for="Email" class="form-control"/><span asp-validation-for="Email" class="text-danger small"></span></div><div><label asp-for="Password" class="form-label">Password</label><input asp-for="Password" class="form-control"/><span asp-validation-for="Password" class="text-danger small"></span></div><div><label asp-for="ConfirmPassword" class="form-label">Confirm password</label><input asp-for="ConfirmPassword" class="form-control"/><span asp-validation-for="ConfirmPassword" class="text-danger small"></span></div><button class="ams-button w-100">Create student account <i class="bi bi-arrow-right"></i></button><a asp-action="Login" class="text-center ams-card-link">Already have an account? Sign in</a></form></section><a asp-controller="Home" asp-action="Index" class="ams-auth-back"><i class="bi bi-arrow-left"></i> Back to home</a></main>

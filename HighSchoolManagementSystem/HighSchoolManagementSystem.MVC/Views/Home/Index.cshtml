@@ -1,26 +1,2 @@
-@{
-    ViewData["Title"] = "High School Management System";
-    ViewData["HideNav"] = true;
-}
-
-<div class="portal-landing-wrapper">
-    <div class="portal-card">
-        <div class="portal-logo-container">
-            <img src="~/images/logo.png" alt="Logo Hệ thống Quản lý Trường THPT" class="portal-logo" />
-        </div>
-        <span class="portal-kicker">HỆ THỐNG QUẢN LÝ TRƯỜNG THPT</span>
-        <h1 class="portal-title">High School Management System</h1>
-        <p class="portal-description">
-            Nền tảng quản lý và kết nối thông tin nhà trường trong một không gian thống nhất.
-        </p>
-        <div class="portal-action-container">
-            <a asp-controller="Auth" asp-action="Login" class="btn btn-primary portal-btn">
-                <span>Đăng nhập</span>
-                <span class="portal-btn-arrow">&rarr;</span>
-            </a>
-            <a asp-controller="Home" asp-action="PublicClasses" class="btn btn-outline-secondary portal-btn mt-2">Xem lớp học công khai</a>
-            <a asp-controller="Auth" asp-action="Register" class="btn btn-outline-primary portal-btn mt-2">Tạo tài khoản học viên</a>
-        </div>
-    </div>
-</div>
-
+@{ ViewData["Title"] = "Assignment Management System"; ViewData["HideNav"] = true; }
+<main class="ams-landing"><nav class="ams-landing-nav"><a asp-controller="Home" asp-action="Index" class="ams-brand"><span class="ams-brand-mark">A</span><span class="ams-brand-copy"><strong>AMS</strong><small>Assignment Management System</small></span></a><div><a asp-controller="Home" asp-action="PublicClasses">Explore classes</a><a asp-controller="Assignments" asp-action="PublicTemplates">Assignments</a><a asp-controller="Auth" asp-action="Login" class="ams-button ams-button-outline">Sign in</a><a asp-controller="Auth" asp-action="Register" class="ams-button">Join as student</a></div></nav><section class="ams-hero"><div class="ams-hero-copy"><span class="ams-eyebrow"><i class="bi bi-stars"></i> LEARN · ASSIGN · IMPROVE</span><h1>Every assignment,<br /><em>in one place.</em></h1><p>Discover subject classes, submit your work, and get feedback. Teachers manage assignments and evaluate submissions from one focused workspace.</p><div class="ams-hero-actions"><a asp-controller="Auth" asp-action="Register" class="ams-button ams-button-lg">Start learning <i class="bi bi-arrow-up-right"></i></a><a asp-controller="Home" asp-action="PublicClasses" class="ams-text-link">Browse public classes <i class="bi bi-arrow-right"></i></a></div><div class="ams-hero-meta"><span><i class="bi bi-check-circle-fill"></i> Class registration</span><span><i class="bi bi-check-circle-fill"></i> Assignment feedback</span><span><i class="bi bi-check-circle-fill"></i> AI practice</span></div></div><div class="ams-hero-visual"><div class="ams-visual-glow"></div><article class="ams-preview-card"><div class="ams-preview-top"><span class="ams-preview-icon"><i class="bi bi-journal-bookmark-fill"></i></span><span class="ams-pill ams-pill-green">IN PROGRESS</span></div><small>YOUR WORKSPACE</small><h2>Assignments</h2><p>Keep your class work moving forward.</p><div class="ams-preview-row"><span class="ams-preview-dot"></span><div><b>Problem set 04</b><small>Mathematics · Due this week</small></div><i class="bi bi-arrow-up-right"></i></div><div class="ams-preview-row"><span class="ams-preview-dot ams-dot-violet"></span><div><b>Reading response</b><small>Literature · Feedback available</small></div><i class="bi bi-arrow-up-right"></i></div><div class="ams-preview-progress"><div><span>Weekly progress</span><b>72%</b></div><div class="ams-progress-track"><span></span></div></div></article><div class="ams-float-note"><i class="bi bi-chat-square-text-fill"></i><span><b>Feedback received</b><small>Keep up the great work</small></span></div></div></section><section class="ams-roles"><div class="ams-section-heading"><span class="ams-eyebrow">ONE SYSTEM, CLEAR WORKFLOWS</span><h2>Tools for everyone involved.</h2></div><div class="ams-role-grid"><article><span class="ams-role-icon"><i class="bi bi-person-workspace"></i></span><h3>Teachers</h3><p>Publish assignments, review submissions, and give students useful feedback.</p><a asp-controller="Auth" asp-action="Login">Open teaching workspace <i class="bi bi-arrow-right"></i></a></article><article><span class="ams-role-icon violet"><i class="bi bi-lightbulb"></i></span><h3>Experts</h3><p>Build reusable subject assignment templates and organize subject classes.</p><a asp-controller="Auth" asp-action="Login">Manage learning content <i class="bi bi-arrow-right"></i></a></article><article><span class="ams-role-icon green"><i class="bi bi-mortarboard"></i></span><h3>Students</h3><p>Register for classes, submit work, review results, and practice with AI.</p><a asp-controller="Auth" asp-action="Register">Find your next class <i class="bi bi-arrow-right"></i></a></article><article><span class="ams-role-icon orange"><i class="bi bi-sliders"></i></span><h3>Administrators</h3><p>Manage accounts, subjects, class registrations, and system settings.</p><a asp-controller="Auth" asp-action="Login">Open administration <i class="bi bi-arrow-right"></i></a></article></div></section><footer class="ams-landing-footer"><span>© @DateTime.Now.Year Assignment Management System</span><span>Learning work, organized.</span></footer></main>

@@ -32,9 +32,32 @@ public static class DbInitializer
 
         var principalRole = await context.Roles.FirstAsync(r => r.RoleName == "Principal");
         var staffRole = await context.Roles.FirstAsync(r => r.RoleName == "Staff");
+        var adminRole = await context.Roles.FirstAsync(r => r.RoleName == "Admin");
+        var expertRole = await context.Roles.FirstAsync(r => r.RoleName == "Expert");
         var teacherRole = await context.Roles.FirstAsync(r => r.RoleName == "Teacher");
         var studentRole = await context.Roles.FirstAsync(r => r.RoleName == "Student");
         var parentRole = await context.Roles.FirstAsync(r => r.RoleName == "Parent");
+
+        if (!await context.Users.AnyAsync(u => u.Username == "admin"))
+        {
+            context.Users.Add(new User
+            {
+                Username = "admin", Email = "admin@ams.local", FullName = "AMS Administrator",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin@123", 11), IsActive = true,
+                CreateAt = DateTime.UtcNow, RoleId = adminRole.RoleId
+            });
+        }
+
+        if (!await context.Users.AnyAsync(u => u.Username == "expert"))
+        {
+            context.Users.Add(new User
+            {
+                Username = "expert", Email = "expert@ams.local", FullName = "AMS Subject Expert",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("Expert@123", 11), IsActive = true,
+                CreateAt = DateTime.UtcNow, RoleId = expertRole.RoleId
+            });
+        }
+        await context.SaveChangesAsync();
 
         if (!await context.Users.AnyAsync(u => u.Username == "principal"))
         {

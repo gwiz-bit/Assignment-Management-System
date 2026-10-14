@@ -251,8 +251,8 @@ public class AuthController : Controller
     {
         return roleName switch
         {
-            "Admin" => RedirectToAction("Dashboard", "Staff"),
-            "Expert" => RedirectToAction("Templates", "Assignments"),
+            "Admin" => RedirectToAction("Dashboard", "Admin"),
+            "Expert" => RedirectToAction("Dashboard", "Expert"),
             "Guest" => RedirectToAction("Index", "Home"),
             "Principal" => RedirectToAction("Dashboard", "Principal"),
             "Staff" => RedirectToAction("Dashboard", "Staff"),

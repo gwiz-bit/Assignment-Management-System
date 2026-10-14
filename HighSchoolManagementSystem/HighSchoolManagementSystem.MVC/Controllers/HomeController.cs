@@ -30,11 +30,12 @@ namespace HighSchoolManagementSystem.MVC.Controllers
         [HttpGet]
         public async Task<IActionResult> PublicClasses()
         {
-            var classes = await _db.Classes.AsNoTracking()
-                .Where(c => c.AcademicYear.IsCurrent)
-                .Include(c => c.AcademicYear).Include(c => c.GradeLevel)
-                .Include(c => c.TeachingAssignments).ThenInclude(t => t.Subject)
-                .OrderBy(c => c.GradeLevel.LevelName).ThenBy(c => c.ClassName)
+            var classes = await _db.TeachingAssignments.AsNoTracking()
+                .Where(t => t.Status == "Assigned" && t.Semester.IsActive && t.Semester.AcademicYear.IsCurrent && t.Subject.IsActive)
+                .Include(t => t.Class).ThenInclude(c => c.GradeLevel)
+                .Include(t => t.Subject).Include(t => t.Teacher).ThenInclude(t => t.User)
+                .Include(t => t.Semester)
+                .OrderBy(t => t.Subject.SubjectName).ThenBy(t => t.Class.ClassName)
                 .ToListAsync();
             return View(classes);
         }

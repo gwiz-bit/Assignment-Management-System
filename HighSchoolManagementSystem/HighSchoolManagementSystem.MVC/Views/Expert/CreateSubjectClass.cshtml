@@ -1,0 +1,11 @@
+@model HighSchoolManagementSystem.MVC.Models.ViewModels.CreateSubjectClassViewModel
+@using Microsoft.AspNetCore.Mvc.Rendering
+@{ ViewData["Title"] = "Create subject class"; }
+<section class="ams-page-head"><div><span class="ams-eyebrow">SUBJECT CLASS SETUP</span><h1>Tạo lớp học theo môn</h1><p>Chọn môn học, giáo viên phụ trách và lớp mở trong học kỳ.</p></div></section>
+<form asp-action="CreateSubjectClass" method="post" class="ams-panel ams-form-grid"><div asp-validation-summary="ModelOnly" class="text-danger ams-form-span"></div>
+    <div><label asp-for="SubjectId" class="form-label">Môn học</label><select asp-for="SubjectId" asp-items="Model.Subjects" class="form-select"><option value="">Chọn môn</option></select><span asp-validation-for="SubjectId" class="text-danger"></span></div>
+    <div><label asp-for="TeacherId" class="form-label">Giáo viên</label><select asp-for="TeacherId" asp-items="Model.Teachers" class="form-select"><option value="">Chọn giáo viên</option></select><span asp-validation-for="TeacherId" class="text-danger"></span></div>
+    <div><label asp-for="ClassId" class="form-label">Class group</label><select asp-for="ClassId" asp-items="Model.Classes" class="form-select"><option value="">Chọn lớp</option></select><span asp-validation-for="ClassId" class="text-danger"></span></div>
+    <div><label asp-for="SemesterId" class="form-label">Học kỳ</label><select asp-for="SemesterId" asp-items="Model.Semesters" class="form-select"><option value="">Chọn học kỳ</option></select><span asp-validation-for="SemesterId" class="text-danger"></span></div>
+    <div class="ams-form-span d-flex gap-2"><button class="ams-button ams-button-primary">Tạo subject class</button><a asp-action="SubjectClasses" class="ams-button ams-button-secondary">Hủy</a></div>
+</form>

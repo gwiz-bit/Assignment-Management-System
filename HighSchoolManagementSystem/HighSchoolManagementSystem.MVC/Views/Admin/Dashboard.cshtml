@@ -1,0 +1,20 @@
+@{
+    ViewData["Title"] = "Admin workspace";
+    var name = User.FindFirst(System.Security.Claims.ClaimTypes.GivenName)?.Value ?? "Admin";
+}
+<section class="ams-page-head"><div><span class="ams-eyebrow">SYSTEM OVERVIEW</span><h1>Chào @name</h1><p>Quản trị tài khoản, môn học và hoạt động của Assignment Management System.</p></div><a asp-controller="UserManagement" asp-action="Index" class="ams-button ams-button-primary"><i class="bi bi-person-gear"></i> Quản lý tài khoản</a></section>
+<section class="ams-metric-grid">
+    <article class="ams-metric"><span class="ams-metric-icon indigo"><i class="bi bi-people"></i></span><span class="ams-metric-label">Tài khoản đang hoạt động</span><strong>@ViewBag.ActiveUsers</strong><small>Người dùng hệ thống</small></article>
+    <article class="ams-metric"><span class="ams-metric-icon cyan"><i class="bi bi-collection"></i></span><span class="ams-metric-label">Subject classes</span><strong>@ViewBag.SubjectClasses</strong><small>Đang mở trong học kỳ này</small></article>
+    <article class="ams-metric"><span class="ams-metric-icon violet"><i class="bi bi-journal-text"></i></span><span class="ams-metric-label">Assignment templates</span><strong>@ViewBag.AssignmentTemplates</strong><small>Đang công khai</small></article>
+    <article class="ams-metric"><span class="ams-metric-icon amber"><i class="bi bi-inbox"></i></span><span class="ams-metric-label">Chờ xử lý</span><strong>@(ViewBag.PendingRegistrations + ViewBag.PendingSubmissions)</strong><small>Đăng ký lớp và bài nộp</small></article>
+</section>
+<section class="ams-section-grid">
+    <article class="ams-panel"><div class="ams-panel-head"><div><span class="ams-eyebrow">WORK QUEUE</span><h2>Công việc cần xử lý</h2></div></div>
+        <a class="ams-action-row" asp-action="ClassRegistrations"><span class="ams-action-icon"><i class="bi bi-person-check"></i></span><span><strong>Duyệt đăng ký subject class</strong><small>@ViewBag.PendingRegistrations yêu cầu đang chờ</small></span><i class="bi bi-arrow-up-right"></i></a>
+        <a class="ams-action-row" asp-controller="Assignments" asp-action="Submissions"><span class="ams-action-icon"><i class="bi bi-clipboard-check"></i></span><span><strong>Xem bài nộp</strong><small>@ViewBag.PendingSubmissions bài chờ đánh giá</small></span><i class="bi bi-arrow-up-right"></i></a>
+    </article>
+    <article class="ams-panel"><div class="ams-panel-head"><div><span class="ams-eyebrow">SYSTEM SETUP</span><h2>Thiết lập nhanh</h2></div></div>
+        <div class="ams-quick-grid"><a asp-controller="Subject" asp-action="Index"><i class="bi bi-book"></i><strong>Môn học</strong><small>Danh mục subject</small></a><a asp-controller="UserManagement" asp-action="Index"><i class="bi bi-people"></i><strong>Tài khoản</strong><small>Actor và quyền truy cập</small></a><a asp-controller="Staff" asp-action="Classes"><i class="bi bi-collection"></i><strong>Class groups</strong><small>Quản lý danh sách lớp</small></a><a asp-controller="Expert" asp-action="SubjectClasses"><i class="bi bi-diagram-3"></i><strong>Subject classes</strong><small>Lớp học theo môn</small></a></div>
+    </article>
+</section>

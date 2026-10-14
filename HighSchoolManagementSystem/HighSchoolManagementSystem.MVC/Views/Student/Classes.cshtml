@@ -1,4 +1,4 @@
-@model IEnumerable<HighSchoolManagementSystem.Models.Entities.Class>
+@model IEnumerable<HighSchoolManagementSystem.Models.Entities.TeachingAssignment>
 @{
     ViewData["Title"] = "Đăng ký lớp";
     var statuses = (Dictionary<int, string>)ViewBag.RegistrationStatus;
@@ -8,7 +8,7 @@
     @if (TempData["ErrorMessage"] is string error) { <div class="alert alert-warning">@error</div> }
     <div class="row g-3">@foreach (var item in Model) {
         var status = statuses.GetValueOrDefault(item.Id);
-        <div class="col-md-6 col-xl-4"><article class="card h-100"><div class="card-body"><span class="badge bg-secondary">@item.GradeLevel.LevelName · @item.AcademicYear.YearCode</span><h2 class="h5 mt-3">@item.ClassName</h2><p>@string.Join(", ", item.TeachingAssignments.Select(t => t.Subject.SubjectName).Distinct())</p>
+        <div class="col-md-6 col-xl-4"><article class="card h-100"><div class="card-body"><span class="badge bg-secondary">@item.Subject.SubjectCode</span><h2 class="h5 mt-3">@item.Subject.SubjectName</h2><p class="mb-1">Lớp @item.Class.ClassName · @item.Class.GradeLevel.LevelName</p><p class="text-muted">@item.Semester.SemesterName · GV @item.Teacher.User.FullName</p>
             @if (status == "Enrolled") { <span class="badge bg-success">Đã tham gia</span> }
             else if (status == "PendingApproval") { <span class="badge bg-warning text-dark">Đang chờ duyệt</span> }
             else if (status == "Rejected") { <form asp-action="RegisterClass" method="post"><input type="hidden" name="classId" value="@item.Id"/><button class="btn btn-outline-primary">Đăng ký lại</button></form> }

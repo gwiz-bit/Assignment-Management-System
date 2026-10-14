@@ -43,12 +43,17 @@ public class StudentController : Controller
     {
         var student = await ResolveCurrentStudentAsync();
         if (student == null) return Forbid();
-        var classes = await _db.Classes.AsNoTracking().Where(c => c.AcademicYear.IsCurrent)
-            .Include(c => c.AcademicYear).Include(c => c.GradeLevel)
-            .Include(c => c.TeachingAssignments).ThenInclude(t => t.Subject)
-            .OrderBy(c => c.GradeLevel.LevelName).ThenBy(c => c.ClassName).ToListAsync();
-        ViewBag.RegistrationStatus = await _db.StudentClasses.Where(sc => sc.StudentId == student.Id && sc.Class.AcademicYear.IsCurrent)
-            .ToDictionaryAsync(sc => sc.ClassId, sc => sc.Status);
+        var classes = await _db.TeachingAssignments.AsNoTracking()
+            .Where(t => t.Status == "Assigned" && t.Semester.IsActive && t.Semester.AcademicYear.IsCurrent && t.Subject.IsActive)
+            .Include(t => t.Class).ThenInclude(c => c.GradeLevel)
+            .Include(t => t.Class).ThenInclude(c => c.AcademicYear)
+            .Include(t => t.Subject).Include(t => t.Teacher).ThenInclude(t => t.User)
+            .Include(t => t.Semester)
+            .OrderBy(t => t.Subject.SubjectName).ThenBy(t => t.Class.ClassName).ToListAsync();
+        var assignmentIds = classes.Select(t => t.Id).ToArray();
+        ViewBag.RegistrationStatus = await _db.SubjectClassRegistrations
+            .Where(r => r.StudentId == student.Id && assignmentIds.Contains(r.TeachingAssignmentId))
+            .ToDictionaryAsync(r => r.TeachingAssignmentId, r => r.Status);
         return View(classes);
     }
 
@@ -57,28 +62,20 @@ public class StudentController : Controller
     {
         var student = await ResolveCurrentStudentAsync();
         if (student == null) return Forbid();
-        var targetClass = await _db.Classes.Include(c => c.AcademicYear)
-            .SingleOrDefaultAsync(c => c.Id == classId && c.AcademicYear.IsCurrent);
+        var targetClass = await _db.TeachingAssignments.SingleOrDefaultAsync(t => t.Id == classId && t.Status == "Assigned" && t.Semester.IsActive && t.Semester.AcademicYear.IsCurrent);
         if (targetClass == null) return NotFound();
-        var otherRegistration = await _db.StudentClasses.Include(sc => sc.Class)
-            .AnyAsync(sc => sc.StudentId == student.Id && sc.Class.AcademicYear.IsCurrent && sc.ClassId != classId && sc.Status != "Rejected" && sc.LeftAt == null);
-        if (otherRegistration)
-        {
-            TempData["ErrorMessage"] = "Bạn đã có đăng ký lớp trong năm học hiện tại.";
-            return RedirectToAction(nameof(Classes));
-        }
-        var registration = await _db.StudentClasses.SingleOrDefaultAsync(sc => sc.StudentId == student.Id && sc.ClassId == classId);
+        var registration = await _db.SubjectClassRegistrations.SingleOrDefaultAsync(sc => sc.StudentId == student.Id && sc.TeachingAssignmentId == classId);
         if (registration == null)
-            _db.StudentClasses.Add(new StudentClass { StudentId = student.Id, ClassId = classId, Status = "PendingApproval", JoinedAt = DateTime.UtcNow });
+            _db.SubjectClassRegistrations.Add(new SubjectClassRegistration { StudentId = student.Id, TeachingAssignmentId = classId, Status = "PendingApproval", RegisteredAt = DateTime.UtcNow });
         else if (registration.Status == "Rejected")
             registration.Status = "PendingApproval";
         else
         {
-            TempData["ErrorMessage"] = "Đăng ký lớp này đã tồn tại.";
+            TempData["ErrorMessage"] = "Yêu cầu đăng ký lớp này đã được gửi.";
             return RedirectToAction(nameof(Classes));
         }
         await _db.SaveChangesAsync();
-        TempData["SuccessMessage"] = "Đã gửi đăng ký lớp. Nhà trường sẽ duyệt yêu cầu.";
+        TempData["SuccessMessage"] = "Đã gửi đăng ký subject class để duyệt.";
         return RedirectToAction(nameof(Classes));
     }
 

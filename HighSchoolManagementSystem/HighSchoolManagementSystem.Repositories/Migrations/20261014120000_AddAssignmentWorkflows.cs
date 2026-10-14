@@ -38,9 +38,9 @@ public partial class AddAssignmentWorkflows : Migration
                 id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                 assignment_template_id = table.Column<int>(type: "int", nullable: false),
                 student_id = table.Column<int>(type: "int", nullable: false),
-                answer = table.Column<string>(type: "nvarchar(8000)", maxLength: 8000, nullable: false),
+                answer = table.Column<string>(type: "nvarchar(4000)", maxLength: 4000, nullable: false),
                 submitted_at = table.Column<DateTime>(type: "datetime2", nullable: false),
-                score = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                score = table.Column<decimal>(type: "decimal(5,2)", nullable: true),
                 teacher_feedback = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: true),
                 evaluated_by_user_id = table.Column<int>(type: "int", nullable: true),
                 evaluated_at = table.Column<DateTime>(type: "datetime2", nullable: true)

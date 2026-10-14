@@ -1,0 +1,9 @@
+@model IEnumerable<HighSchoolManagementSystem.Models.Entities.SubjectClassRegistration>
+@{ ViewData["Title"] = "Class registrations"; }
+<section class="ams-page-head"><div><span class="ams-eyebrow">CLASS REGISTRATION</span><h1>Yêu cầu đăng ký</h1><p>Duyệt học viên vào các lớp học theo môn đang mở.</p></div></section>
+@if (TempData["SuccessMessage"] is string message) { <div class="alert alert-success">@message</div> }
+<section class="ams-panel p-0 overflow-hidden"><div class="table-responsive"><table class="table ams-table mb-0"><thead><tr><th>Học viên</th><th>Subject class</th><th>Giáo viên</th><th>Học kỳ</th><th>Ngày gửi</th><th></th></tr></thead><tbody>
+@foreach (var item in Model) { <tr><td><strong>@item.Student.User.FullName</strong><small>@item.Student.StudentCode</small></td><td><strong>@item.TeachingAssignment.Subject.SubjectName</strong><small>@item.TeachingAssignment.Class.ClassName</small></td><td>@item.TeachingAssignment.Teacher.User.FullName</td><td>@item.TeachingAssignment.Semester.SemesterName</td><td>@item.RegisteredAt.ToLocalTime().ToString("dd/MM/yyyy")</td><td><form asp-action="ReviewRegistration" method="post" class="d-flex gap-2"><input type="hidden" name="id" value="@item.Id"/><button name="approve" value="true" class="ams-button ams-button-primary ams-button-sm">Duyệt</button><button name="approve" value="false" class="ams-button ams-button-secondary ams-button-sm">Từ chối</button></form></td></tr> }
+</tbody></table></div>
+@if (!Model.Any()) { <div class="ams-empty"><i class="bi bi-check2-circle"></i><h2>Đã xử lý hết</h2><p>Hiện không có đăng ký nào đang chờ duyệt.</p></div> }
+</section>

@@ -15,7 +15,7 @@ public class AssignmentSubmission
     [Column("student_id")]
     public int StudentId { get; set; }
 
-    [Required, MaxLength(8000), Column("answer")]
+    [Required, MaxLength(4000), Column("answer")]
     public string Answer { get; set; } = null!;
 
     [Column("submitted_at")]
